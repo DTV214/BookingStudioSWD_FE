@@ -124,3 +124,7 @@
     @apply bg-background text-foreground;
   }
 }
+/* ... phần đầu globals.css của bạn giữ nguyên ... */
+
+/* Thêm 1 import duy nhất cho admin styles */
+@import "./style/admin.css";

@@ -1,6 +1,8 @@
 // app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
+// src/app/layout.tsx
+import "./style/admin.css";
 
 export const metadata: Metadata = {
   title: "Booking Studio",
