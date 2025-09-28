@@ -1,0 +1,543 @@
+/* ==== BASE RESET ==== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
+
+body {
+  background: #f9fafb;
+  color: #111827;
+}
+
+/* ==== LAYOUT ==== */
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ==== SIDEBAR ==== */
+.sidebar {
+  width: 240px;
+  background: #f3f4f6;
+  padding: 1.5rem 1rem;
+  border-right: 1px solid #e5e7eb;
+}
+
+.sidebar .logo {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+}
+
+.sidebar nav ul {
+  list-style: none;
+}
+
+.sidebar nav ul li {
+  margin-bottom: 1rem;
+}
+
+.sidebar nav ul li a {
+  text-decoration: none;
+  color: #374151;
+  font-size: 0.95rem;
+  display: block;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  transition: 0.2s;
+}
+
+.sidebar nav ul li.active a,
+.sidebar nav ul li a:hover {
+  background: #2563eb;
+  color: #fff;
+}
+
+/* ==== MAIN CONTENT ==== */
+.dashboard-root {
+  flex: 1;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ==== HEADER ==== */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dashboard-header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.dashboard-search input {
+  padding: 0.6rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  outline: none;
+}
+
+/* ==== METRICS ==== */
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.metric-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.metric-title {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.metric-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-top: 0.3rem;
+}
+
+/* ==== MAIN GRID ==== */
+.main-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+}
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* ==== BOOKINGS TABLE ==== */
+.bookings-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.bookings-table th,
+.bookings-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.bookings-table th {
+  background: #f9fafb;
+  color: #374151;
+  font-weight: 600;
+}
+
+.status-pill {
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.status-confirmed {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status-pending {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.status-checked-in {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-canceled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* ==== NOTIFICATIONS ==== */
+.notifications-card ul {
+  list-style: none;
+  margin-top: 0.5rem;
+}
+
+.notification-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.6rem;
+  font-size: 0.9rem;
+}
+
+.notification-dot {
+  width: 8px;
+  height: 8px;
+  background: #9ca3af;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+}
+
+/* ==== STUDIO STATUS ==== */
+.studio-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+  font-size: 0.9rem;
+}
+
+.studio-pill {
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.studio-occupied {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.studio-vacant {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.studio-needs-cleaning {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.studio-occupied-soon {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+/* ==== CHART ==== */
+.chart-card h3 {
+  margin-bottom: 1rem;
+}
+
+.simple-bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.bar-label {
+  width: 80px;
+  font-size: 0.85rem;
+}
+
+.bar-track {
+  flex: 1;
+  background: #f3f4f6;
+  border-radius: 6px;
+  overflow: hidden;
+  height: 12px;
+}
+
+.bar-fill {
+  height: 100%;
+  background: #2563eb;
+  border-radius: 6px;
+}
+
+.bar-count {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* ==== BOOKING LIST FORM ==== */
+.booking-root {
+  flex: 1;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.booking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.booking-header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.header-controls {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+}
+
+.search-input {
+  padding: 0.5rem 0.8rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.btn.primary {
+  background: #2563eb;
+  color: white;
+  padding: 0.5rem 0.8rem;
+  border-radius: 8px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.btn.primary:hover {
+  background: #1e40af;
+}
+
+/* Main grid for booking list + right column */
+.booking-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+}
+
+.bookings-card h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+}
+
+.bookings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.bookings-table th,
+.bookings-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.bookings-table th {
+  background: #f9fafb;
+  color: #374151;
+  font-weight: 600;
+}
+
+.bookings-table tr:hover td {
+  background: #f3f4f6;
+}
+
+.link {
+  color: #2563eb;
+  text-decoration: none;
+}
+.link:hover {
+  text-decoration: underline;
+}
+
+/* Right column styling */
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.bookings-by-studio-card h3,
+.studio-status-card h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+}
+
+.studio-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.studio-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+/* ==== CUSTOMERS PAGE ==== */
+.customers-root {
+  flex: 1;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.customers-header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.customers-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.customers-card h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.customers-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.customers-table th,
+.customers-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.customers-table th {
+  background: #f9fafb;
+  color: #374151;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.customers-table tr:hover td {
+  background: #f3f4f6;
+}
+
+/* Giúp table có scroll ngang trên mobile */
+@media (max-width: 768px) {
+  .customers-card {
+    overflow-x: auto;
+  }
+  .customers-table {
+    min-width: 500px;
+  }
+}
+
+/* thêm vào admin.css hoặc file css của bạn */
+.studios-table th {
+  text-align: left;
+  padding: 10px;
+  background: #f9fafb;
+}
+.studio-free {
+  background: #e6fffa;
+  color: #0f766e;
+} /* ví dụ */
+
+/* ==== NOTIFICATIONS PAGE (Bổ sung) ==== */
+.notification-root {
+  flex: 1;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background: #f9fafb;
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.notification-header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.search-input {
+  padding: 0.5rem 0.8rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  background: #fff;
+}
+
+/* Card bao quanh bảng notifications */
+.notification-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  overflow-x: auto;
+}
+
+/* Bảng notifications */
+.notification-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.notification-table th,
+.notification-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.notification-table th {
+  background: #f3f4f6;
+  font-weight: 600;
+  color: #374151;
+}
+
+.notification-table tr:hover td {
+  background: #f9fafb;
+}
+
+/* Responsive: scroll ngang trên mobile */
+@media (max-width: 768px) {
+  .notification-card {
+    overflow-x: auto;
+  }
+  .notification-table {
+    min-width: 500px;
+  }
+}

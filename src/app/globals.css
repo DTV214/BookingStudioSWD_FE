@@ -140,3 +140,727 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ================================================= */
+/* 🎨 PROFESSIONAL DASHBOARD ADMIN INTERFACE       */
+/* ================================================= */
+
+@layer components {
+  /* Main Layout - Professional & Clean */
+  .dashboard-layout {
+    @apply flex min-h-screen bg-slate-50 font-sans antialiased;
+    color-scheme: light;
+  }
+
+  /* ===============================
+     SIDEBAR - ELEGANT & MINIMAL
+     =============================== */
+  .sidebar {
+    @apply w-64 bg-white border-r border-gray-200 flex flex-col shadow-sm;
+    background: linear-gradient(to bottom, #ffffff 0%, #fefefe 100%);
+  }
+
+  .logo {
+    @apply text-slate-800 text-xl font-bold p-6 border-b border-gray-100;
+    font-family: var(--font-geist-sans), system-ui, sans-serif;
+    letter-spacing: -0.025em;
+    background: linear-gradient(135deg, #334155 0%, #475569 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .sidebar nav {
+    @apply flex-1 pt-2;
+  }
+
+  .sidebar ul {
+    @apply space-y-1 px-3;
+  }
+
+  .sidebar li {
+    @apply relative;
+  }
+
+  .sidebar li.active::before {
+    content: "";
+    @apply absolute left-0 top-1 bottom-1 w-1 bg-slate-800 rounded-r-sm;
+  }
+
+  .menu-link {
+    @apply block px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-all duration-200 font-medium;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  .sidebar li.active .menu-link {
+    @apply bg-slate-100 text-slate-900 shadow-sm;
+    border-left: 2px solid transparent;
+  }
+
+  .menu-link:hover {
+    @apply bg-slate-50;
+    transform: translateX(1px);
+  }
+
+  /* ===============================
+     MAIN CONTENT - SPACIOUS & CLEAN
+     =============================== */
+  .dashboard-root,
+  .booking-root,
+  .customers-root,
+  .notification-root {
+    @apply flex-1 p-8 bg-slate-50;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  }
+
+  /* Headers - Professional Typography */
+  .dashboard-header,
+  .booking-header,
+  .customers-header,
+  .notification-header {
+    @apply flex justify-between items-center mb-8 p-6 bg-white rounded-xl border border-gray-200 shadow-sm;
+    backdrop-filter: blur(8px);
+  }
+
+  .dashboard-header h1,
+  .booking-header h1,
+  .customers-header h1,
+  .notification-header h1 {
+    @apply text-2xl font-bold text-slate-900 tracking-tight;
+    font-family: var(--font-geist-sans), system-ui, sans-serif;
+  }
+
+  /* Header Controls - Refined */
+  .header-controls {
+    @apply flex items-center space-x-4;
+  }
+
+  .search-input {
+    @apply px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200;
+    font-size: 0.875rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  }
+
+  .dashboard-search input {
+    @apply px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 w-64;
+  }
+
+  /* Buttons - Modern & Professional */
+  .btn {
+    @apply px-5 py-2.5 rounded-lg font-medium transition-all duration-200 border shadow-sm;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  .btn.primary {
+    @apply bg-slate-900 text-white border-slate-900 hover:bg-slate-800 focus:ring-2 focus:ring-slate-500 focus:ring-offset-2;
+  }
+
+  .btn.primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  /* ===============================
+     METRICS - CLEAN CARDS
+     =============================== */
+  .metrics-row {
+    @apply grid grid-cols-1 md:grid-cols-3 gap-6 mb-8;
+  }
+
+  .metric-card {
+    @apply p-6 bg-white rounded-xl border border-gray-200 shadow-sm;
+    transition: all 0.2s ease;
+  }
+
+  .metric-card:hover {
+    @apply shadow-md border-gray-300;
+    transform: translateY(-2px);
+  }
+
+  .metric-title {
+    @apply text-slate-500 text-sm font-medium mb-2 uppercase tracking-wide;
+    letter-spacing: 0.05em;
+  }
+
+  .metric-value {
+    @apply text-3xl font-bold text-slate-900 tabular-nums;
+    font-family: var(--font-geist-mono), monospace;
+  }
+
+  /* ===============================
+     GRIDS & CARDS
+     =============================== */
+  .main-grid,
+  .booking-grid {
+    @apply grid grid-cols-1 xl:grid-cols-3 gap-8;
+  }
+
+  .card {
+    @apply bg-white rounded-xl border border-gray-200 p-6 shadow-sm;
+    transition: all 0.2s ease;
+  }
+
+  .card:hover {
+    @apply shadow-md border-gray-300;
+    transform: translateY(-1px);
+  }
+
+  .bookings-card,
+  .customers-card,
+  .notification-card {
+    @apply xl:col-span-2;
+  }
+
+  .chart-card {
+    @apply xl:col-span-3 mt-6;
+  }
+
+  .card h2,
+  .card h3 {
+    @apply text-lg font-semibold text-slate-900 mb-4 tracking-tight;
+    font-family: var(--font-geist-sans), system-ui, sans-serif;
+  }
+
+  /* ===============================
+     TABLES - PROFESSIONAL LAYOUT
+     =============================== */
+  .bookings-table,
+  .customers-table,
+  .notification-table {
+    @apply w-full border-collapse;
+  }
+
+  .bookings-table thead tr,
+  .customers-table thead tr,
+  .notification-table thead tr {
+    @apply border-b border-gray-200 bg-slate-50;
+  }
+
+  .bookings-table th,
+  .customers-table th,
+  .notification-table th {
+    @apply text-left py-3.5 px-4 font-semibold text-slate-700 text-sm tracking-wide;
+    font-family: var(--font-geist-sans), system-ui, sans-serif;
+  }
+
+  .bookings-table tbody tr,
+  .customers-table tbody tr,
+  .notification-table tbody tr {
+    @apply border-b border-gray-100 hover:bg-slate-50 transition-colors duration-150;
+  }
+
+  .bookings-table td,
+  .customers-table td,
+  .notification-table td {
+    @apply py-4 px-4 text-slate-700 text-sm;
+    font-family: var(--font-geist-sans), system-ui, sans-serif;
+  }
+
+  /* ===============================
+     STATUS INDICATORS - SUBTLE
+     =============================== */
+  .status-pill {
+    @apply px-3 py-1 rounded-full text-xs font-medium border;
+  }
+
+  .status-confirmed {
+    @apply bg-emerald-50 text-emerald-700 border-emerald-200;
+  }
+
+  .status-pending {
+    @apply bg-amber-50 text-amber-700 border-amber-200;
+  }
+
+  .status-checked-in {
+    @apply bg-blue-50 text-blue-700 border-blue-200;
+  }
+
+  .status-cancelled {
+    @apply bg-red-50 text-red-700 border-red-200;
+  }
+
+  /* Studio Status Pills */
+  .studio-pill {
+    @apply px-3 py-1 rounded-full text-xs font-medium border;
+  }
+
+  .studio-occupied {
+    @apply bg-red-50 text-red-700 border-red-200;
+  }
+
+  .studio-vacant,
+  .studio-free {
+    @apply bg-emerald-50 text-emerald-700 border-emerald-200;
+  }
+
+  .studio-needs-cleaning {
+    @apply bg-amber-50 text-amber-700 border-amber-200;
+  }
+
+  .studio-occupied-soon {
+    @apply bg-orange-50 text-orange-700 border-orange-200;
+  }
+
+  /* ===============================
+     RIGHT COLUMN - ORGANIZED
+     =============================== */
+  .right-column {
+    @apply space-y-6;
+  }
+
+  .studio-status-card ul,
+  .studio-list {
+    @apply space-y-3;
+  }
+
+  .studio-item {
+    @apply flex justify-between items-center py-3 px-4 bg-slate-50 rounded-lg border border-slate-200;
+    transition: all 0.15s ease;
+  }
+
+  .studio-item:hover {
+    @apply bg-slate-100 border-slate-300;
+  }
+
+  .studio-name {
+    @apply text-slate-700 font-medium text-sm;
+  }
+
+  /* Notifications */
+  .notifications-card ul {
+    @apply space-y-3;
+  }
+
+  .notification-item {
+    @apply flex items-start space-x-3 p-4 bg-slate-50 rounded-lg border border-slate-200;
+    transition: all 0.15s ease;
+  }
+
+  .notification-item:hover {
+    @apply bg-slate-100 border-slate-300;
+  }
+
+  .notification-dot {
+    @apply w-2 h-2 bg-slate-400 rounded-full flex-shrink-0 mt-2;
+  }
+
+  .notification-item span:last-child {
+    @apply text-slate-600 text-sm leading-relaxed;
+  }
+
+  /* ===============================
+     CHARTS - CLEAN VISUALIZATION
+     =============================== */
+  .simple-bar-chart {
+    @apply space-y-4;
+  }
+
+  .bar-row {
+    @apply flex items-center space-x-4;
+  }
+
+  .bar-label {
+    @apply text-slate-700 font-medium w-24 text-sm;
+  }
+
+  .bar-track {
+    @apply flex-1 bg-slate-100 rounded-full h-2 border border-slate-200;
+  }
+
+  .bar-fill {
+    @apply bg-slate-600 h-full rounded-full transition-all duration-700;
+  }
+
+  .bar-count {
+    @apply text-slate-600 font-semibold text-sm w-8 text-right tabular-nums;
+  }
+
+  /* Links */
+  .link {
+    @apply text-slate-600 hover:text-slate-900 transition-colors duration-200 font-medium;
+  }
+
+  .link:hover {
+    @apply underline decoration-slate-300 underline-offset-2;
+  }
+}
+
+/* ===============================
+   RESPONSIVE & UTILITIES
+   =============================== */
+@layer utilities {
+  /* Mobile Responsive */
+  @media (max-width: 768px) {
+    .dashboard-layout {
+      @apply flex-col;
+    }
+
+    .sidebar {
+      @apply w-full h-auto border-r-0 border-b;
+    }
+
+    .sidebar nav ul {
+      @apply flex overflow-x-auto space-y-0 space-x-1 p-4;
+    }
+
+    .main-grid,
+    .booking-grid {
+      @apply grid-cols-1;
+    }
+
+    .metrics-row {
+      @apply grid-cols-1 gap-4;
+    }
+
+    .dashboard-root,
+    .booking-root,
+    .customers-root,
+    .notification-root {
+      @apply p-4;
+    }
+  }
+
+  /* Focus States */
+  .menu-link:focus,
+  .search-input:focus,
+  .btn:focus {
+    @apply outline-none ring-2 ring-slate-500 ring-offset-2;
+  }
+
+  /* Smooth Animations */
+  .card,
+  .metric-card {
+    animation: fadeIn 0.4s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Typography Improvements */
+  .dashboard-layout {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Subtle Shadows */
+  .card,
+  .metric-card,
+  .dashboard-header,
+  .booking-header,
+  .customers-header,
+  .notification-header {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  }
+
+  .card:hover,
+  .metric-card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  /* Professional Scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f1f5f9;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: #f1f5f9;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+}
+
+/* ========================================= */
+/* 🔧 SIDEBAR LAYOUT FIX - Thêm vào cuối   */
+/* ========================================= */
+
+/* Fix sidebar không hiển thị đúng */
+.sidebar {
+  min-width: 256px !important;
+  max-width: 256px !important;
+  flex-shrink: 0 !important;
+  position: relative !important;
+}
+
+/* Fix navigation list styling */
+.sidebar nav ul {
+  list-style: none !important;
+  padding-left: 0 !important;
+  margin: 0 !important;
+}
+
+/* Fix navigation items */
+.sidebar li {
+  margin-bottom: 0 !important;
+}
+
+/* Fix active state không hiển thị */
+.sidebar li.active {
+  position: relative !important;
+}
+
+.sidebar li.active::before {
+  content: "" !important;
+  position: absolute !important;
+  left: -12px !important;
+  top: 4px !important;
+  bottom: 4px !important;
+  width: 4px !important;
+  background-color: #1e293b !important;
+  border-radius: 0 2px 2px 0 !important;
+  z-index: 1 !important;
+}
+
+/* Fix menu link styling */
+.sidebar a,
+.sidebar .menu-link {
+  text-decoration: none !important;
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Fix hover effects */
+.sidebar li:hover .menu-link {
+  background-color: #f8fafc !important;
+}
+
+.sidebar li.active .menu-link {
+  background-color: #f1f5f9 !important;
+  color: #1e293b !important;
+  font-weight: 600 !important;
+}
+
+/* Ensure proper spacing */
+.sidebar nav {
+  padding-top: 8px !important;
+}
+
+.sidebar ul {
+  padding: 0 12px !important;
+  gap: 2px !important;
+}
+
+/* Fix text alignment */
+.sidebar .menu-link {
+  padding: 12px 16px !important;
+  margin: 0 !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Mobile responsive fix */
+@media (max-width: 768px) {
+  .sidebar {
+    min-width: 100% !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .sidebar nav ul {
+    display: flex !important;
+    overflow-x: auto !important;
+    flex-direction: row !important;
+    padding: 16px !important;
+    gap: 8px !important;
+  }
+
+  .sidebar li {
+    flex-shrink: 0 !important;
+  }
+
+  .sidebar li.active::before {
+    display: none !important;
+  }
+}
+
+/* =============================================== */
+/* 🔧 COMPLETE SIDEBAR FIX - HIGHEST PRIORITY   */
+/* =============================================== */
+
+/* Force sidebar layout with highest specificity */
+.dashboard-layout .sidebar {
+  width: 280px !important;
+  min-width: 280px !important;
+  max-width: 280px !important;
+  flex-shrink: 0 !important;
+  background-color: #ffffff !important;
+  border-right: 1px solid #e2e8f0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.05) !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+/* Logo/Title styling */
+.dashboard-layout .sidebar .logo,
+.dashboard-layout .sidebar h2 {
+  padding: 24px !important;
+  margin: 0 !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  color: #1e293b !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  background-color: #ffffff !important;
+}
+
+/* Navigation container */
+.dashboard-layout .sidebar nav {
+  flex: 1 !important;
+  padding: 16px 0 !important;
+  overflow-y: auto !important;
+}
+
+/* Navigation list */
+.dashboard-layout .sidebar nav ul {
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+
+/* Navigation items */
+.dashboard-layout .sidebar nav li {
+  position: relative !important;
+  margin: 0 !important;
+}
+
+/* Active state indicator - LEFT BORDER */
+.dashboard-layout .sidebar nav li.active::before {
+  content: "" !important;
+  position: absolute !important;
+  left: -16px !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: 4px !important;
+  background-color: #3b82f6 !important;
+  border-radius: 0 4px 4px 0 !important;
+  z-index: 1 !important;
+}
+
+/* Navigation links */
+.dashboard-layout .sidebar nav li a,
+.dashboard-layout .sidebar nav li .menu-link {
+  display: block !important;
+  padding: 12px 16px !important;
+  color: #64748b !important;
+  text-decoration: none !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+  font-weight: 500 !important;
+  font-size: 0.875rem !important;
+  margin: 0 !important;
+}
+
+/* Hover effects */
+.dashboard-layout .sidebar nav li a:hover,
+.dashboard-layout .sidebar nav li .menu-link:hover {
+  background-color: #f8fafc !important;
+  color: #1e293b !important;
+  transform: translateX(2px) !important;
+}
+
+/* Active link styling */
+.dashboard-layout .sidebar nav li.active a,
+.dashboard-layout .sidebar nav li.active .menu-link {
+  background-color: #eff6ff !important;
+  color: #1e40af !important;
+  font-weight: 600 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .dashboard-layout .sidebar {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    border-right: none !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+  }
+
+  .dashboard-layout .sidebar nav ul {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    padding: 16px !important;
+    gap: 8px !important;
+  }
+
+  .dashboard-layout .sidebar nav li {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  .dashboard-layout .sidebar nav li.active::before {
+    display: none !important;
+  }
+
+  .dashboard-layout .sidebar nav li.active::after {
+    content: "" !important;
+    position: absolute !important;
+    bottom: -16px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 20px !important;
+    height: 3px !important;
+    background-color: #3b82f6 !important;
+    border-radius: 2px !important;
+  }
+}
+
+/* Force main content to take remaining space */
+.dashboard-layout .dashboard-root,
+.dashboard-layout .booking-root,
+.dashboard-layout .customers-root,
+.dashboard-layout .notification-root {
+  flex: 1 !important;
+  min-width: 0 !important;
+  overflow-x: auto !important;
+}
+
+/* Scrollbar for sidebar */
+.dashboard-layout .sidebar nav::-webkit-scrollbar {
+  width: 4px !important;
+}
+
+.dashboard-layout .sidebar nav::-webkit-scrollbar-track {
+  background: #f8fafc !important;
+}
+
+.dashboard-layout .sidebar nav::-webkit-scrollbar-thumb {
+  background: #cbd5e1 !important;
+  border-radius: 2px !important;
+}
+
+.dashboard-layout .sidebar nav::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8 !important;
+}

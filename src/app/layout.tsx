@@ -1,3 +1,11 @@
+// app/layout.tsx
+import type { Metadata } from "next";
+// src/app/layout.tsx
+
+export const metadata: Metadata = {
+  title: "Booking Studio",
+  description: "Staff app for booking studio management",
+};
 import Header from "@/components/common/Header";
 import "./globals.css";
 import Footer from "@/components/common/Footer";
