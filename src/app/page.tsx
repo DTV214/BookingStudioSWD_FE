@@ -8,7 +8,6 @@ import ServiceBanner from "@/components/homepage/ServiceBanner";
 import TextInformationBanner from "@/components/homepage/TextInformationBanner";
 import React from "react";
 
-
 export default function Homepage() {
   return (
     <div>
