@@ -12,7 +12,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div>
+    <div className="container mx-auto">
       <RegisterForm onSubmit={handleLogin} />
     </div>
   );

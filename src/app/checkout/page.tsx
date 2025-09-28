@@ -1,9 +1,8 @@
-// src/app/checkout/page.tsx
 export default function CheckoutPage() {
   return (
-    <main>
+    <div>
       <h1>Checkout</h1>
-      <p>Complete your purchase here.</p>
-    </main>
+      <p>This is checkout page</p>
+    </div>
   );
 }

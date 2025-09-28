@@ -8,7 +8,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div>
+    <div className="container mx-auto">
       <LoginForm onSubmit={handleLogin} />
     </div>
   );

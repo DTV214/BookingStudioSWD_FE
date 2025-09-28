@@ -2,8 +2,13 @@
 import React from "react";
 import NotificationsForm from "@/components/AdminPage/NotificationsForm";
 
-// Mock data (thực tế sẽ fetch từ API)
-const Notifications: Notification[] = [
+interface NotificationData {
+  name: string;
+  status: string;
+  location: string;
+}
+
+const Notifications: NotificationData[] = [
   {
     name: "New booking",
     status: "Studio A at 10:00 AM",
@@ -19,8 +24,5 @@ const Notifications: Notification[] = [
 ];
 
 export default function NotificationsContainer() {
-  // Đây là nơi có thể xử lý fetch, filter, sort...
-  const notifications = Notifications;
-
-  return <NotificationsForm notifications={notifications} />;
+  return <NotificationsForm notifications={Notifications} />;
 }

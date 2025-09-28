@@ -77,12 +77,12 @@ export default function DashBoardForm({
         {/* METRICS ROW */}
         <div className="metrics-row">
           <div className="metric-card">
-            <div className="metric-title">Today's Bookings</div>
+            <div className="metric-title">Today&apos;s Bookings</div>
             <div className="metric-value">{stats.bookingsToday}</div>
           </div>
 
           <div className="metric-card">
-            <div className="metric-title">Today's Revenue</div>
+            <div className="metric-title">Today&apos;s Revenue</div>
             <div className="metric-value">${stats.revenueToday}</div>
           </div>
 

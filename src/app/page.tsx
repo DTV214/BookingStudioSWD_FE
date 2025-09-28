@@ -1,13 +1,24 @@
-"use client";
+import About from "@/components/homepage/About";
+import AlbumBanner from "@/components/homepage/AlbumBanner";
+import BackToTop from "@/components/homepage/BackToTop";
+import CategoryBanner from "@/components/homepage/CategoryBanner";
+import HeroBanner from "@/components/homepage/HeroBanner";
+import NewsBanner from "@/components/homepage/NewsBanner";
+import ServiceBanner from "@/components/homepage/ServiceBanner";
+import TextInformationBanner from "@/components/homepage/TextInformationBanner";
+import React from "react";
 
-import LoginForm from "@/components/forms/LoginForm";
-
-export default function LoginPage() {
+export default function Homepage() {
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <LoginForm onSubmit={LoginPage}></LoginForm>
-      </div>
+    <div>
+      <HeroBanner />
+      <About />
+      <CategoryBanner />
+      <TextInformationBanner />
+      <AlbumBanner />
+      <NewsBanner />
+      <ServiceBanner />
+      <BackToTop />
     </div>
   );
 }
