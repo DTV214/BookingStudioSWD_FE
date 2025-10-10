@@ -9,6 +9,7 @@ export const metadata: Metadata = {
 import Header from "@/components/common/Header";
 import "./globals.css";
 import Footer from "@/components/common/Footer";
+import { AuthProvider } from "@/context/AuthContext";
 
 export default function RootLayout({
   children,
@@ -18,9 +19,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-sans bg-gray-50 text-gray-900 container mx-auto">
-        <Header />
-        <main>{children}</main>
-        <Footer />
+        <AuthProvider>
+          <Header />
+          <main>{children}</main>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );
