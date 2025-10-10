@@ -8,7 +8,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import { storage, UserData } from "@/app/infrastructure/utils/storage";
+import { storage, UserData } from "@/infrastructure/utils/storage";
 
 export interface AuthContextType {
   user: UserData | null;

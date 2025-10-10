@@ -2,7 +2,7 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { storage, UserData } from "@/app/infrastructure/utils/storage";
+import { storage, UserData } from "@/infrastructure/utils/storage";
 import { jwtDecode } from "jwt-decode";
 import { useAuth } from "@/context/AuthContext";
 

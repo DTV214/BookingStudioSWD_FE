@@ -3,7 +3,7 @@
 import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
 import { ChevronDown, Menu, X, User, ShoppingCart, LogOut } from "lucide-react";
-import { useAuth } from "@/context/AuthContext"; // ✅ thêm dòng này
+import { useAuth } from "@/context/AuthContext";
 
 type NavChild = { label: string; href: string };
 type NavItem = { label: string; href?: string; children?: NavChild[] };
@@ -43,9 +43,8 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { user, setUser, logout } = useAuth(); // ✅ dùng context thay cho state cục bộ
+  const { user, logout } = useAuth();
 
-  // Lấy trạng thái cuộn để đổi shadow header
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
@@ -69,7 +68,7 @@ export default function Header() {
       );
       const json = await res.json();
       if (json.code === 200 && json.data) {
-        window.location.href = json.data; // redirect đến Google
+        window.location.href = json.data;
       } else {
         alert("Không thể lấy URL đăng nhập Google.");
       }
@@ -97,11 +96,7 @@ export default function Header() {
           <nav className="hidden md:flex items-center gap-7 text-[15px] font-semibold">
             {navItems.map((item) => (
               <div key={item.label} className="relative group">
-                <button
-                  className="inline-flex items-center gap-1 hover:text-gray-900 text-gray-800"
-                  aria-haspopup="true"
-                  aria-expanded="false"
-                >
+                <button className="inline-flex items-center gap-1 hover:text-gray-900 text-gray-800">
                   {item.label}
                   <ChevronDown className="w-4 h-4 text-gray-700 transition-transform duration-200 group-hover:rotate-180" />
                 </button>
@@ -145,16 +140,24 @@ export default function Header() {
             {/* Auth */}
             {user ? (
               <div className="flex items-center gap-3">
-                {user.picture ? (
-                  <img
-                    src={user.picture}
-                    alt="avatar"
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                ) : (
-                  <User className="w-5 h-5 text-gray-700" />
-                )}
+                <Link
+                  href="/profile"
+                  className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 transition-all"
+                  title="Trang cá nhân"
+                >
+                  {user.picture ? (
+                    <img
+                      src={user.picture}
+                      alt="avatar"
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <User className="w-5 h-5 text-gray-700" />
+                  )}
+                </Link>
+
                 <span className="text-gray-800">{user.name ?? "User"}</span>
+
                 <button
                   onClick={logout}
                   className="text-gray-600 hover:text-red-500 transition-colors"
@@ -185,7 +188,7 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile drawer */}
+      {/* Mobile Drawer */}
       <div
         className={`md:hidden overflow-hidden transition-[max-height] duration-300 bg-white ${
           mobileOpen ? "max-h-[80vh] border-t border-gray-100" : "max-h-0"
@@ -215,6 +218,7 @@ export default function Header() {
             </details>
           ))}
 
+          {/* Auth - Mobile */}
           <div className="pt-3 border-t border-gray-100 flex flex-col gap-3">
             <Link
               href="/booking"
@@ -223,6 +227,7 @@ export default function Header() {
             >
               Booking
             </Link>
+
             <Link
               href="/cart"
               className="inline-flex items-center gap-2 text-gray-900"
@@ -230,20 +235,17 @@ export default function Header() {
             >
               <ShoppingCart className="w-4 h-4" /> Cart
             </Link>
+
             {user ? (
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {user.picture ? (
-                    <img
-                      src={user.picture}
-                      alt="avatar"
-                      className="w-7 h-7 rounded-full object-cover"
-                    />
-                  ) : (
-                    <User className="w-4 h-4 text-gray-700" />
-                  )}
+                <Link
+                  href="/profile"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-2 hover:text-blue-600 transition-colors"
+                >
+                  <User className="w-4 h-4 text-gray-700" />
                   <span>{user.name ?? "User"}</span>
-                </div>
+                </Link>
                 <button
                   onClick={logout}
                   className="text-gray-600 hover:text-red-500"
