@@ -2,16 +2,11 @@
 
 import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
-import { ChevronDown, Menu, X, User, ShoppingCart } from "lucide-react";
+import { ChevronDown, Menu, X, User, ShoppingCart, LogOut } from "lucide-react";
+import { useAuth } from "@/context/AuthContext"; // ✅ thêm dòng này
 
 type NavChild = { label: string; href: string };
 type NavItem = { label: string; href?: string; children?: NavChild[] };
-
-// kiểu dữ liệu user (tùy backend bạn lưu gì)
-type UserData = {
-  name?: string;
-  email?: string;
-};
 
 const navItems: NavItem[] = [
   {
@@ -36,7 +31,7 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    label: "Các loại phụ kiện",
+    label: "Phụ kiện",
     children: [
       { label: "Máy ảnh", href: "/thue/may-anh" },
       { label: "Đèn", href: "/thue/den" },
@@ -47,23 +42,15 @@ const navItems: NavItem[] = [
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [user, setUser] = useState<UserData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const { user, setUser, logout } = useAuth(); // ✅ dùng context thay cho state cục bộ
 
+  // Lấy trạng thái cuộn để đổi shadow header
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  // Lấy user từ localStorage (tùy bạn đổi key)
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem("user");
-      if (raw) setUser(JSON.parse(raw));
-    } catch {
-      setUser(null);
-    }
   }, []);
 
   const wrapShadow = useMemo(
@@ -74,12 +61,35 @@ export default function Header() {
     [scrolled]
   );
 
+  const handleGoogleLogin = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/oauth-login`
+      );
+      const json = await res.json();
+      if (json.code === 200 && json.data) {
+        window.location.href = json.data; // redirect đến Google
+      } else {
+        alert("Không thể lấy URL đăng nhập Google.");
+      }
+    } catch (err) {
+      console.error("Lỗi khi gọi /auth/oauth-login:", err);
+      alert("Lỗi đăng nhập Google.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <header className={`sticky top-0 z-50 bg-white text-black ${wrapShadow}`}>
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="shrink-0 font-bold tracking-wide">
+          <Link
+            href="/"
+            className="shrink-0 font-bold text-lg tracking-wide text-gray-900"
+          >
             SWD Studio
           </Link>
 
@@ -99,13 +109,7 @@ export default function Header() {
                 {/* Dropdown */}
                 <div
                   role="menu"
-                  className="
-                    pointer-events-none absolute left-0 top-full mt-3 min-w-48 rounded-lg
-                    bg-white text-black shadow-lg ring-1 ring-black/10
-                    opacity-0 translate-y-2 scale-[0.98]
-                    transition-all duration-200 ease-out
-                    group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100 group-hover:pointer-events-auto
-                  "
+                  className="pointer-events-none absolute left-0 top-full mt-3 min-w-48 rounded-lg bg-white text-black shadow-lg ring-1 ring-black/10 opacity-0 translate-y-2 scale-[0.98] transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100 group-hover:pointer-events-auto"
                 >
                   <ul className="py-2">
                     {item.children?.map((child) => (
@@ -113,7 +117,6 @@ export default function Header() {
                         <Link
                           href={child.href}
                           className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-black transition-colors"
-                          role="menuitem"
                         >
                           {child.label}
                         </Link>
@@ -124,7 +127,7 @@ export default function Header() {
               </div>
             ))}
 
-            {/* Booking + Cart giữ nguyên */}
+            {/* Booking + Cart */}
             <Link
               href="/booking"
               className="px-3 py-2 rounded-2xl bg-amber-100 text-gray-900 font-bold hover:bg-amber-200 transition-colors"
@@ -138,31 +141,36 @@ export default function Header() {
             >
               <ShoppingCart className="w-4 h-4" /> Cart
             </Link>
-            {/* Auth (ẩn/hiện theo trạng thái) */}
+
+            {/* Auth */}
             {user ? (
-              // ĐÃ đăng nhập -> Hiện User
-              <Link
-                href="/user"
-                className=" inline-flex items-center gap-2 text-gray-900"
-              >
-                <User className="w-4 h-4" /> {user.name ?? "User"}
-              </Link>
+              <div className="flex items-center gap-3">
+                {user.picture ? (
+                  <img
+                    src={user.picture}
+                    alt="avatar"
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <User className="w-5 h-5 text-gray-700" />
+                )}
+                <span className="text-gray-800">{user.name ?? "User"}</span>
+                <button
+                  onClick={logout}
+                  className="text-gray-600 hover:text-red-500 transition-colors"
+                  title="Đăng xuất"
+                >
+                  <LogOut className="w-5 h-5" />
+                </button>
+              </div>
             ) : (
-              // CHƯA đăng nhập -> Hiện Đăng nhập / Đăng ký
-              <>
-                <Link
-                  href="/login"
-                  className="px-4 py-2 rounded-lg border border-gray-400 text-black font-medium hover:bg-gray-100 transition-colors"
-                >
-                  Đăng nhập
-                </Link>
-                <Link
-                  href="/register"
-                  className="px-4 py-2 rounded-lg bg-green-600 text-white font-semibold shadow hover:bg-green-700 transition-colors"
-                >
-                  Đăng ký
-                </Link>
-              </>
+              <button
+                onClick={handleGoogleLogin}
+                disabled={loading}
+                className="px-4 py-2 rounded-lg bg-red-500 text-white font-semibold hover:bg-red-600 transition-colors disabled:opacity-50"
+              >
+                {loading ? "Đang chuyển hướng..." : "Đăng nhập bằng Google"}
+              </button>
             )}
           </nav>
 
@@ -177,7 +185,7 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile drawer (sáng màu) */}
+      {/* Mobile drawer */}
       <div
         className={`md:hidden overflow-hidden transition-[max-height] duration-300 bg-white ${
           mobileOpen ? "max-h-[80vh] border-t border-gray-100" : "max-h-0"
@@ -207,9 +215,7 @@ export default function Header() {
             </details>
           ))}
 
-          <div className="pt-3 border-t container mx-auto border-gray-100 flex items-center gap-3">
-            {/* Auth mobile */}
-
+          <div className="pt-3 border-t border-gray-100 flex flex-col gap-3">
             <Link
               href="/booking"
               className="px-3 py-2 rounded-2xl bg-amber-100 text-gray-900 font-bold"
@@ -225,30 +231,34 @@ export default function Header() {
               <ShoppingCart className="w-4 h-4" /> Cart
             </Link>
             {user ? (
-              <Link
-                href="/user"
-                className="inline-flex items-center gap-2 text-gray-900"
-                onClick={() => setMobileOpen(false)}
-              >
-                <User className="w-4 h-4" /> {user.name ?? "User"}
-              </Link>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {user.picture ? (
+                    <img
+                      src={user.picture}
+                      alt="avatar"
+                      className="w-7 h-7 rounded-full object-cover"
+                    />
+                  ) : (
+                    <User className="w-4 h-4 text-gray-700" />
+                  )}
+                  <span>{user.name ?? "User"}</span>
+                </div>
+                <button
+                  onClick={logout}
+                  className="text-gray-600 hover:text-red-500"
+                >
+                  <LogOut className="w-5 h-5" />
+                </button>
+              </div>
             ) : (
-              <>
-                <Link
-                  href="/login"
-                  className="px-4 py-2 rounded-lg border border-gray-400 text-black font-medium hover:bg-gray-100 transition-colors"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  Đăng nhập
-                </Link>
-                <Link
-                  href="/register"
-                  className="px-4 py-2 rounded-lg bg-green-600 text-white font-semibold shadow hover:bg-green-700 transition-colors"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  Đăng ký
-                </Link>
-              </>
+              <button
+                onClick={handleGoogleLogin}
+                disabled={loading}
+                className="px-4 py-2 rounded-lg bg-red-500 text-white font-semibold hover:bg-red-600 transition-colors disabled:opacity-50"
+              >
+                {loading ? "Đang chuyển hướng..." : "Đăng nhập với Google"}
+              </button>
             )}
           </div>
         </div>

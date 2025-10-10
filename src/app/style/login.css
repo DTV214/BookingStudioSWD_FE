@@ -78,22 +78,32 @@
 
 .login-container {
   display: flex;
-  justify-content: center; /* Căn giữa ngang */
-  align-items: center; /* Căn giữa dọc */
-  height: 100vh; /* Chiếm toàn bộ chiều cao màn hình */
-  background: #f5f5f5; /* (tuỳ chọn) màu nền nhạt để form nổi bật hơn */
+  justify-content: center;
+  /* Căn giữa ngang */
+  align-items: center;
+  /* Căn giữa dọc */
+  height: 100vh;
+  /* Chiếm toàn bộ chiều cao màn hình */
+  background: #f5f5f5;
+  /* (tuỳ chọn) màu nền nhạt để form nổi bật hơn */
 }
 
 .login-form p {
-  text-align: left; /* chữ nằm về bên trái */
-  font-size: 14px; /* chữ nhỏ gọn */
-  font-weight: 500; /* đậm vừa phải */
-  margin: 0 0 6px 2px; /* cách input bên dưới một chút */
-  color: #111; /* màu chữ */
+  text-align: left;
+  /* chữ nằm về bên trái */
+  font-size: 14px;
+  /* chữ nhỏ gọn */
+  font-weight: 500;
+  /* đậm vừa phải */
+  margin: 0 0 6px 2px;
+  /* cách input bên dưới một chút */
+  color: #111;
+  /* màu chữ */
 }
 
 .login-form button.facebook-btn {
-  background: #1877f2; /* màu Facebook */
+  background: #1877f2;
+  /* màu Facebook */
   color: white;
   font-weight: bold;
   position: relative;
@@ -101,8 +111,7 @@
 
 .login-form button.facebook-btn::before {
   content: "";
-  background: url("https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/facebook.svg")
-    no-repeat center center;
+  background: url("https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/facebook.svg") no-repeat center center;
   background-size: 16px 16px;
   position: absolute;
   left: 16px;
@@ -122,8 +131,7 @@
 
 .login-form button.google-btn::before {
   content: "";
-  background: url("https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/google.svg")
-    no-repeat center center;
+  background: url("https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/google.svg") no-repeat center center;
   background-size: 16px 16px;
   position: absolute;
   left: 16px;
@@ -131,4 +139,23 @@
   transform: translateY(-50%);
   width: 20px;
   height: 20px;
+}
+
+.google-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  background-color: #ea4335;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+  text-decoration: none;
+}
+
+.google-btn:hover {
+  background-color: #d13b2e;
 }
