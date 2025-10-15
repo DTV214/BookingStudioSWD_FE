@@ -3,117 +3,221 @@ import type { ApiResponse } from "@/domain/models/common";
 import { ENV } from "../lib/env";
 import { storage } from "@/infrastructure/utils/storage";
 
-const BASE_URL = ENV.API_URL || process.env.NEXT_PUBLIC_API_URL || "";
-
 /**
- * ✅ Xây dựng headers chuẩn, tự động lấy token từ localStorage nếu không truyền vào
+ * Giả định ApiResponse<T> = { code: number; message: string; data: T }
+ * Hỗ trợ cả trường hợp backend trả trực tiếp JSON array/object
  */
+
+const RAW_BASE_URL: string =
+  ENV.API_URL || process.env.NEXT_PUBLIC_API_URL || "";
+
+/* -------------------- utils -------------------- */
+
+function joinURL(base: string, path: string): string {
+  if (!base) return path;
+  return `${base.replace(/\/+$/, "")}/${path.replace(/^\/+/, "")}`;
+}
+
+function hasBody(res: Response): boolean {
+  if (res.status === 204 || res.status === 205) return false;
+  const len = res.headers.get("content-length");
+  if (len !== null) return Number(len) > 0;
+  return true; // fallback cho transfer-encoding: chunked
+}
+
 function buildHeaders(token?: string, isJSON = true): HeadersInit {
-  const headers: HeadersInit = {};
+  const headers: HeadersInit = { Accept: "application/json" };
   if (isJSON) headers["Content-Type"] = "application/json";
 
-  // Ưu tiên token được truyền vào, nếu không có thì lấy từ storage
-  const authToken = token || storage.getToken();
+  const authToken = token ?? storage.getToken();
   if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
-
   return headers;
 }
 
-/**
- * ✅ Xử lý phản hồi HTTP chung
- * - Tự động redirect khi 401
- * - Parse JSON an toàn
- */
-async function handleResponse<T>(
-  res: Response,
-  url: string
-): Promise<ApiResponse<T>> {
-  // Trường hợp token hết hạn hoặc không hợp lệ
-  if (res.status === 401) {
-    console.warn(`[httpClient] 401 - Unauthorized for ${url}`);
-
-    // Xóa token + chuyển hướng login
-    storage.clearAll();
-
-    if (typeof window !== "undefined") {
-      window.location.href = "/auth/login";
-    }
-
-    throw new Error("Unauthorized. Token expired or invalid.");
-  }
-
-  if (!res.ok) {
-    // Nếu backend trả về JSON lỗi, parse ra để debug dễ hơn
-    try {
-      const errorBody = await res.json();
-      console.error(`[httpClient] Error ${res.status}:`, errorBody);
-      throw new Error(
-        errorBody?.message || `Request failed with ${res.statusText}`
-      );
-    } catch {
-      // Nếu không parse được JSON
-      const text = await res.text();
-      throw new Error(`${res.status} ${res.statusText}: ${text}`);
-    }
-  }
-
-  // ✅ Parse JSON an toàn
-  try {
-    const json = (await res.json()) as ApiResponse<T>;
-    return json;
-  } catch (e) {
-    console.error(`[httpClient] Failed to parse JSON for ${url}:`, e);
-    throw new Error("Invalid JSON response from server.");
+class HttpError<T = unknown> extends Error {
+  readonly status: number;
+  readonly data?: T;
+  constructor(status: number, message: string, data?: T) {
+    super(message);
+    this.status = status;
+    this.data = data;
   }
 }
 
-/**
- * ✅ HTTP Client – type-safe, có xử lý token, tự redirect khi 401
- */
-export const httpClient = {
-  async get<T>(url: string, token?: string): Promise<ApiResponse<T>> {
-    const res = await fetch(`${BASE_URL}${url}`, {
-      method: "GET",
-      headers: buildHeaders(token),
-      credentials: "include", // cho phép gửi cookie nếu cần (đăng nhập Google, v.v.)
-    });
-    return handleResponse<T>(res, url);
-  },
+type RequestMethod = "GET" | "POST" | "PUT" | "DELETE";
 
-  async post<T>(
-    url: string,
-    data?: unknown,
-    token?: string
-  ): Promise<ApiResponse<T>> {
-    const res = await fetch(`${BASE_URL}${url}`, {
-      method: "POST",
-      headers: buildHeaders(token),
-      body: data ? JSON.stringify(data) : undefined,
-      credentials: "include",
-    });
-    return handleResponse<T>(res, url);
-  },
-
-  async put<T>(
-    url: string,
-    data?: unknown,
-    token?: string
-  ): Promise<ApiResponse<T>> {
-    const res = await fetch(`${BASE_URL}${url}`, {
-      method: "PUT",
-      headers: buildHeaders(token),
-      body: data ? JSON.stringify(data) : undefined,
-      credentials: "include",
-    });
-    return handleResponse<T>(res, url);
-  },
-
-  async delete<T>(url: string, token?: string): Promise<ApiResponse<T>> {
-    const res = await fetch(`${BASE_URL}${url}`, {
-      method: "DELETE",
-      headers: buildHeaders(token),
-      credentials: "include",
-    });
-    return handleResponse<T>(res, url);
-  },
+type RequestOptions<TBody> = {
+  method: RequestMethod;
+  url: string;
+  token?: string;
+  data?: TBody;
+  signal?: AbortSignal;
+  retries?: number; // retry nhẹ lỗi mạng/tạm thời
 };
+
+function toBody<TBody>(data: TBody | undefined): BodyInit | undefined {
+  if (data === undefined) return undefined;
+  if (typeof FormData !== "undefined" && data instanceof FormData) return data;
+  return JSON.stringify(data);
+}
+
+function timeoutController(ms: number): {
+  signal: AbortSignal;
+  cancel: () => void;
+} {
+  const ctrl = new AbortController();
+  const id = setTimeout(() => ctrl.abort(), ms);
+  return { signal: ctrl.signal, cancel: () => clearTimeout(id) };
+}
+
+/* -------------------- core request -------------------- */
+
+async function request<TRespData, TBody = unknown>(
+  opts: RequestOptions<TBody>
+): Promise<ApiResponse<TRespData>> {
+  const { method, url, data, token, signal, retries = 1 } = opts;
+  const fullUrl = joinURL(RAW_BASE_URL, url);
+  const isJSON = !(typeof FormData !== "undefined" && data instanceof FormData);
+
+  const external = Boolean(signal);
+  const t = external ? null : timeoutController(15_000); // timeout 15s
+
+  try {
+    const res = await fetch(fullUrl, {
+      method,
+      headers: buildHeaders(token, isJSON),
+      body: method === "GET" || method === "DELETE" ? undefined : toBody(data),
+      credentials: "include",
+      signal: signal ?? t?.signal,
+    });
+
+    // 401: token hết hạn hoặc sai
+    if (res.status === 401) {
+      storage.clearAll();
+      throw new HttpError(401, "Unauthorized. Token expired or invalid.");
+    }
+
+    if (!res.ok) {
+      let errJson: unknown = undefined;
+      try {
+        if (hasBody(res)) errJson = await res.json();
+      } catch {
+        // ignore parse fail
+      }
+      const message: string =
+        typeof errJson === "object" && errJson !== null && "message" in errJson
+          ? String((errJson as { message?: unknown }).message)
+          : `${res.status} ${res.statusText}`;
+      throw new HttpError(res.status, message, errJson);
+    }
+
+    if (!hasBody(res)) {
+      return {
+        code: 200,
+        message: "No content",
+        data: null as unknown as TRespData,
+      };
+    }
+
+    // Parse JSON an toàn
+    const json = (await res.json()) as unknown;
+
+    /* -------------------- Tự động nhận diện kiểu dữ liệu -------------------- */
+    // 1️⃣ Nếu backend trả mảng hoặc object (trực tiếp data)
+    if (
+      Array.isArray(json) ||
+      (typeof json === "object" && json !== null && !("data" in json))
+    ) {
+      return {
+        code: 200,
+        message: "OK",
+        data: json as TRespData,
+      };
+    }
+
+    // 2️⃣ Nếu đúng chuẩn ApiResponse
+    if (
+      typeof json === "object" &&
+      json !== null &&
+      "code" in json &&
+      "message" in json &&
+      "data" in json
+    ) {
+      return json as ApiResponse<TRespData>;
+    }
+
+    throw new Error("Invalid JSON response shape.");
+  } catch (err) {
+    // Retry nhẹ nếu lỗi mạng/timeout/503
+    const shouldRetry =
+      retries > 0 &&
+      ((err instanceof DOMException && err.name === "AbortError") ||
+        (err instanceof HttpError &&
+          (err.status === 429 || err.status === 503)));
+
+    if (shouldRetry) {
+      await new Promise((r) => setTimeout(r, 300));
+      return request<TRespData, TBody>({ ...opts, retries: retries - 1 });
+    }
+
+    throw err;
+  } finally {
+    t?.cancel?.();
+  }
+}
+
+/* -------------------- public API -------------------- */
+
+export const httpClient = {
+  get<TResp>(url: string, token?: string, signal?: AbortSignal) {
+    return request<TResp>({ method: "GET", url, token, signal });
+  },
+  post<TResp, TBody = unknown>(
+    url: string,
+    data?: TBody,
+    token?: string,
+    signal?: AbortSignal
+  ) {
+    return request<TResp, TBody>({ method: "POST", url, data, token, signal });
+  },
+  put<TResp, TBody = unknown>(
+    url: string,
+    data?: TBody,
+    token?: string,
+    signal?: AbortSignal
+  ) {
+    return request<TResp, TBody>({ method: "PUT", url, data, token, signal });
+  },
+  delete<TResp>(url: string, token?: string, signal?: AbortSignal) {
+    return request<TResp>({ method: "DELETE", url, token, signal });
+  },
+
+  qs(
+    params?: Record<
+      string,
+      string | number | boolean | Array<string | number | boolean>
+    >
+  ) {
+    if (!params) return "";
+    const sp = new URLSearchParams();
+    Object.entries(params).forEach(([k, v]) => {
+      if (v === undefined || v === null) return;
+      if (Array.isArray(v)) v.forEach((x) => sp.append(k, String(x)));
+      else sp.append(k, String(v));
+    });
+    const s = sp.toString();
+    return s ? `?${s}` : "";
+  },
+
+  HttpError,
+};
+
+/* -------------------- cách xử lý 401 ở UI -------------------- */
+// Ví dụ: trong một hook/usecase, bạn có thể bắt lỗi và redirect (client-only)
+// try { await httpClient.get<User>('/me'); } catch (e) {
+//   if (e instanceof httpClient.HttpError && e.status === 401) {
+//     router.push('/auth/login');
+//     return;
+//   }
+//   throw e;
+// }

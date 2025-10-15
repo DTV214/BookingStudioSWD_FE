@@ -24,14 +24,11 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    label: "Video",
-    children: [
-      { label: "Highlight", href: "/video/highlight" },
-      { label: "Behind the scenes", href: "/video/behind" },
-    ],
+    label: "Studio đặc sắc",
+    children: [{ label: "Loại hình studio", href: "/studio-type" }],
   },
   {
-    label: "Phụ kiện",
+    label: "Dịch vụ cho thuê",
     children: [
       { label: "Máy ảnh", href: "/thue/may-anh" },
       { label: "Đèn", href: "/thue/den" },
@@ -96,28 +93,44 @@ export default function Header() {
           <nav className="hidden md:flex items-center gap-7 text-[15px] font-semibold">
             {navItems.map((item) => (
               <div key={item.label} className="relative group">
-                <button className="inline-flex items-center gap-1 hover:text-gray-900 text-gray-800">
+                <button
+                  className="cursor-pointer inline-flex  items-center gap-1 hover:text-gray-900 text-gray-800"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                >
                   {item.label}
-                  <ChevronDown className="w-4 h-4 text-gray-700 transition-transform duration-200 group-hover:rotate-180" />
+                  <ChevronDown className="w-4 h-4 text-gray-700 transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180" />
                 </button>
 
-                {/* Dropdown */}
+                {/* Dropdown wrapper: tạo cầu nối hover bằng ::before */}
                 <div
+                  className="
+          absolute left-0 top-full pt-3
+          opacity-0 translate-y-1 scale-[0.98]
+          transition-all duration-150 ease-out
+          pointer-events-none
+          group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100 group-hover:pointer-events-auto
+          group-focus-within:opacity-100 group-focus-within:translate-y-0 group-focus-within:scale-100 group-focus-within:pointer-events-auto
+          before:content-[''] before:absolute before:left-0 before:right-0 before:-top-3 before:h-3
+        "
                   role="menu"
-                  className="pointer-events-none absolute left-0 top-full mt-3 min-w-48 rounded-lg bg-white text-black shadow-lg ring-1 ring-black/10 opacity-0 translate-y-2 scale-[0.98] transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100 group-hover:pointer-events-auto"
                 >
-                  <ul className="py-2">
-                    {item.children?.map((child) => (
-                      <li key={child.label}>
-                        <Link
-                          href={child.href}
-                          className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-black transition-colors"
-                        >
-                          {child.label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
+                  {/* Panel thật của dropdown */}
+                  <div className="min-w-48 rounded-lg bg-white text-black shadow-lg ring-1 ring-black/10">
+                    <ul className="py-2">
+                      {item.children?.map((child) => (
+                        <li key={child.label}>
+                          <Link
+                            href={child.href}
+                            className="cursor-pointer block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-black transition-colors"
+                            role="menuitem"
+                          >
+                            {child.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               </div>
             ))}
