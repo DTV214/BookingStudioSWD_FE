@@ -18,7 +18,6 @@ export default function Homepage() {
       <AlbumBanner />
       <NewsBanner />
       <ServiceBanner />
-      <BackToTop />
     </div>
   );
 }
