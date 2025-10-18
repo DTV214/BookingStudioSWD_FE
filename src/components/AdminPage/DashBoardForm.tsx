@@ -58,7 +58,7 @@ export default function DashBoardForm({
               <Link href="/admin/notifications">Notifications</Link>
             </li>
             <li>
-              <Link href="#">Profile & Settings</Link>
+              <Link href="/admin/profile-setting">Profile & Settings</Link>
             </li>
           </ul>
         </nav>

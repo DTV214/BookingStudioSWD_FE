@@ -321,7 +321,7 @@ export default function NotificationsForm({ notifications }: Props) {
               </Link>
             </li>
             <li>
-              <Link href="/admin/profile" className="menu-link">
+              <Link href="/admin/profile-setting" className="menu-link">
                 Profile & Settings
               </Link>
             </li>
