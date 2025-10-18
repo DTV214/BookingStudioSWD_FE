@@ -12,30 +12,49 @@ import {
 } from "@/components/ui/select";
 import { ChevronsRight } from "lucide-react";
 
-// Mock Data cho Studio Types và Locations
-const MOCK_STUDIO_TYPES = [
-  {
-    id: "b1437061-01e6-4a47-b772-f454fd057060",
-    name: "Phòng chụp ảnh thời trang",
-  },
-  { id: "type-2", name: "Phòng thu âm chuyên nghiệp" },
-  { id: "type-3", name: "Phòng Livestream đa năng" },
-];
-
-const MOCK_LOCATIONS = [
-  {
-    id: "a329d001-67c0-44bb-a4d2-5ae072515a4f",
-    name: "Quận 1, TP.HCM - Chi nhánh Nguyễn Huệ",
-  },
-  { id: "location-2", name: "Quận 3, TP.HCM - Chi nhánh CMT8" },
-  { id: "location-3", name: "Quận Hai Bà Trưng, Hà Nội" },
-];
-
-interface StudioLocationFormProps {
-  // Sẽ thêm props để handle state sau
+// Giả định chúng ta sẽ tạo các Models này trong domain/models/
+interface StudioType {
+  id: string;
+  name: string;
+  description: string;
+  minArea: number;
+  maxArea: number;
+  bufferTime?: string | null;
+  selected?: boolean;
+  services?: string[];
 }
 
-export const StudioLocationForm: React.FC<StudioLocationFormProps> = () => {
+interface Location {
+  id: string;
+  locationName: string;
+  address: string;
+  latitude?: string;
+  longitude?: string;
+  studioTypeId?: string;
+  isDeleted?: boolean;
+}
+
+interface StudioLocationFormProps {
+  studioTypes: StudioType[]; // Nhận từ API GET /studio-types
+  locations: Location[]; // Nhận từ API GET /locations?typeId=...
+
+  // Các hàm callback để báo cho component cha (page.tsx)
+  onStudioTypeChange: (typeId: string) => void;
+  onLocationChange: (locationId: string) => void;
+  onRoomQuantityChange: (quantity: number) => void;
+
+  // Trạng thái loading khi đang gọi API
+  isLocationLoading: boolean;
+}
+
+export const StudioLocationForm: React.FC<StudioLocationFormProps> = ({
+  studioTypes,
+  locations,
+  onStudioTypeChange,
+  onLocationChange,
+  onRoomQuantityChange,
+  isLocationLoading,
+}) => {
   return (
     <Card className="shadow-lg">
       <CardHeader>
@@ -49,13 +68,12 @@ export const StudioLocationForm: React.FC<StudioLocationFormProps> = () => {
           <Label htmlFor="studioType">
             Loại Studio <span className="text-red-500">*</span>
           </Label>
-          {/* Sử dụng Shadcn Select */}
-          <Select defaultValue={MOCK_STUDIO_TYPES[0].id}>
+          <Select onValueChange={onStudioTypeChange}>
             <SelectTrigger id="studioType" className="w-full">
               <SelectValue placeholder="Chọn loại Studio..." />
             </SelectTrigger>
             <SelectContent>
-              {MOCK_STUDIO_TYPES.map((type) => (
+              {studioTypes?.map((type) => (
                 <SelectItem key={type.id} value={type.id}>
                   {type.name}
                 </SelectItem>
@@ -69,14 +87,23 @@ export const StudioLocationForm: React.FC<StudioLocationFormProps> = () => {
           <Label htmlFor="location">
             Địa điểm (Location) <span className="text-red-500">*</span>
           </Label>
-          <Select defaultValue={MOCK_LOCATIONS[0].id}>
+          <Select
+            onValueChange={onLocationChange}
+            disabled={isLocationLoading || locations?.length === 0}
+          >
             <SelectTrigger id="location" className="w-full">
-              <SelectValue placeholder="Chọn địa điểm..." />
+              <SelectValue
+                placeholder={
+                  isLocationLoading
+                    ? "Đang tải địa điểm..."
+                    : "Chọn địa điểm..."
+                }
+              />
             </SelectTrigger>
             <SelectContent>
-              {MOCK_LOCATIONS.map((location) => (
+              {locations?.map((location) => (
                 <SelectItem key={location.id} value={location.id}>
-                  {location.name}
+                  {location.locationName}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -88,14 +115,15 @@ export const StudioLocationForm: React.FC<StudioLocationFormProps> = () => {
           <Label htmlFor="roomQuantity">
             Số lượng phòng cần thuê <span className="text-red-500">*</span>
           </Label>
-          <Select defaultValue="2">
-            {" "}
-            {/* Mock chọn 2 phòng */}
+          <Select
+            defaultValue="1"
+            onValueChange={(value) => onRoomQuantityChange(Number(value))}
+          >
             <SelectTrigger id="roomQuantity" className="w-full">
               <SelectValue placeholder="Chọn số lượng..." />
             </SelectTrigger>
             <SelectContent>
-              {[1, 2, 3, 4].map((num) => (
+              {[1, 2, 3, 4, 5].map((num) => (
                 <SelectItem key={num} value={num.toString()}>
                   {num} phòng
                 </SelectItem>

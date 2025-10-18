@@ -1,4 +1,4 @@
-// src/components/common/booking/ContactInfoForm.tsx (Phiên bản đã đơn giản hóa)
+// src/components/common/booking/ContactInfoForm.tsx (ĐÃ SỬA LỖI)
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,9 +6,22 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 
-interface ContactInfoFormProps {}
+// SỬA LỖI 1: Thêm 'error' và 'onBlur' vào props
+interface ContactInfoFormProps {
+  phoneNumber: string;
+  note: string;
+  onChange: (field: "phoneNumber" | "note", value: string) => void;
+  onBlur: (field: "phoneNumber" | "note") => void; // Thêm onBlur để validate
+  error?: string; // Thêm prop để nhận lỗi
+}
 
-export const ContactInfoForm: React.FC<ContactInfoFormProps> = () => {
+export const ContactInfoForm: React.FC<ContactInfoFormProps> = ({
+  phoneNumber,
+  note,
+  onChange,
+  onBlur, // Nhận hàm onBlur
+  error, // Nhận thông báo lỗi
+}) => {
   return (
     <Card className="shadow-lg">
       <CardHeader>
@@ -25,16 +38,27 @@ export const ContactInfoForm: React.FC<ContactInfoFormProps> = () => {
             id="phone"
             type="tel"
             placeholder="090xxxxxxx"
-            defaultValue="0909989876" // Mock theo API request
-            className="mt-1"
+            value={phoneNumber}
+            onChange={(e) => onChange("phoneNumber", e.target.value)}
+            // SỬA LỖI 2: Thêm onBlur để kích hoạt validate
+            onBlur={() => onBlur("phoneNumber")}
+            // SỬA LỖI 3: Hiển thị viền đỏ nếu có lỗi
+            className={`mt-1 ${
+              error ? "border-red-500 focus-visible:ring-red-500" : ""
+            }`}
           />
+
+          {/* SỬA LỖI 4: Hiển thị thông báo lỗi nếu có */}
+          {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
         </div>
         <div>
           <Label htmlFor="note">Ghi chú (Tùy chọn)</Label>
           <Textarea
             id="note"
             placeholder="Yêu cầu đặc biệt về phòng/thiết bị..."
-            defaultValue="No" // Mock theo API request
+            value={note}
+            onChange={(e) => onChange("note", e.target.value)}
+            onBlur={() => onBlur("note")}
             className="mt-1"
           />
         </div>
