@@ -54,6 +54,11 @@ export default function BookingListForm({
               </Link>
             </li>
             <li>
+              <Link href="/admin/location" className="menu-link">
+                Location Management
+              </Link>
+            </li>
+            <li>
               <Link href="/admin/notifications" className="menu-link">
                 Notifications
               </Link>

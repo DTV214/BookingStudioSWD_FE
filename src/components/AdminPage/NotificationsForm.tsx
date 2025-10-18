@@ -315,6 +315,11 @@ export default function NotificationsForm({ notifications }: Props) {
                 Studios
               </Link>
             </li>
+            <li>
+              <Link href="/admin/location" className="menu-link">
+                Location Management
+              </Link>
+            </li>
             <li className="active">
               <Link href="/admin/notifications" className="menu-link">
                 Notifications
