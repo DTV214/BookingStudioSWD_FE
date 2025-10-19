@@ -306,13 +306,18 @@ export default function NotificationsForm({ notifications }: Props) {
               </Link>
             </li>
             <li>
-              <Link href="/admin/customers" className="menu-link">
-                Customers
+              <Link href="/admin/account" className="menu-link">
+                Account Management
               </Link>
             </li>
             <li>
               <Link href="/admin/studios" className="menu-link">
                 Studios
+              </Link>
+            </li>
+            <li>
+              <Link href="/admin/location" className="menu-link">
+                Location Management
               </Link>
             </li>
             <li className="active">

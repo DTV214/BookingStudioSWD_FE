@@ -1,4 +1,6 @@
 // src/app/components/AdminPage/StudiosForm.tsx
+"use client";
+
 import React from "react";
 import Link from "next/link";
 
@@ -35,8 +37,8 @@ export default function StudiosForm({ studios }: Props) {
               </Link>
             </li>
             <li>
-              <Link href="/admin/customers" className="menu-link">
-                Customers
+              <Link href="/admin/account" className="menu-link">
+                Account Management
               </Link>
             </li>
             <li className="active">
@@ -45,12 +47,17 @@ export default function StudiosForm({ studios }: Props) {
               </Link>
             </li>
             <li>
+              <Link href="/admin/location" className="menu-link">
+                Location Management
+              </Link>
+            </li>
+            <li>
               <Link href="/admin/notifications" className="menu-link">
                 Notifications
               </Link>
             </li>
             <li>
-              <Link href="/admin/profile" className="menu-link">
+              <Link href="/admin/profile-setting" className="menu-link">
                 Profile & Settings
               </Link>
             </li>
