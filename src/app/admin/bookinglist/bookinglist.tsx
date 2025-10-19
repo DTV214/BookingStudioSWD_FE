@@ -454,7 +454,6 @@ function BookingListForm({ bookings }: Props) {
           setIsViewModalOpen(false);
           setSelectedBooking(null);
         }}
-        onEdit={() => {}} // Not used anymore
       />
 
       {/* Edit Modal */}

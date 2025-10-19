@@ -15,9 +15,7 @@ interface BookingServiceInfoProps {
 }
 
 export default function BookingServiceInfo({ 
-  services, 
-  isEditable = false, 
-  onServicesChange 
+  services
 }: BookingServiceInfoProps) {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN', {

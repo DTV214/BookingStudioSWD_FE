@@ -114,7 +114,7 @@ export default function BookingEditModal({
 
   const handleStatusChange = (status: string) => {
     if (formData) {
-      setFormData({ ...formData, status: status as any });
+      setFormData({ ...formData, status: status as 'pending' | 'approved' | 'completed' | 'cancelled' });
     }
   };
 

@@ -60,7 +60,7 @@ export class LocationService {
     const url = `${API_BASE_URL}/api/locations`;
     console.log('Creating location with data:', locationData);
     
-    const response = await this.fetchWithErrorHandling<any>(url, {
+    const response = await this.fetchWithErrorHandling<{ data?: LocationData; id?: string; [key: string]: unknown }>(url, {
       method: 'POST',
       body: JSON.stringify(locationData),
     });
@@ -73,7 +73,7 @@ export class LocationService {
       return response.data;
     } else if (response.id) {
       console.log('Using response directly:', response);
-      return response;
+      return response as unknown as LocationData;
     } else {
       console.error('Invalid response format:', response);
       throw new Error('Invalid response format from create location API');
@@ -82,7 +82,7 @@ export class LocationService {
 
   static async updateLocation(id: string, locationData: Partial<Omit<LocationData, 'id' | 'isDeleted' | 'longitude' | 'latitude'>>): Promise<LocationData> {
     const url = `${API_BASE_URL}/api/locations/${id}`;
-    const response = await this.fetchWithErrorHandling<any>(url, {
+    const response = await this.fetchWithErrorHandling<{ data?: LocationData; id?: string; [key: string]: unknown }>(url, {
       method: 'PUT',
       body: JSON.stringify(locationData),
     });
@@ -91,7 +91,7 @@ export class LocationService {
     if (response.data) {
       return response.data;
     } else if (response.id) {
-      return response;
+      return response as unknown as LocationData;
     } else {
       throw new Error('Invalid response format from update location API');
     }

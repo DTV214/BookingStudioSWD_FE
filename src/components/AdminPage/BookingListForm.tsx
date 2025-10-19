@@ -279,7 +279,7 @@ function BookingEditModal({ booking, isOpen, onClose, onSave }: BookingEditModal
     }
   };
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string | number | boolean) => {
     if (formData) {
       setFormData({ ...formData, [field]: value });
     }
@@ -851,14 +851,14 @@ export default function BookingListForm({ bookings }: Props) {
                             </svg>
                           </button>
                         </div>
-                      </td>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+              </div>
             </div>
-        </div>
       </section>
 
       {/* Detail Modal */}
