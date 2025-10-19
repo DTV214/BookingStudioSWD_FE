@@ -44,8 +44,8 @@ export default function BookingListForm({
               </Link>
             </li>
             <li>
-              <Link href="/admin/customers" className="menu-link">
-                Customers
+              <Link href="/admin/account" className="menu-link">
+                Account Mangagement
               </Link>
             </li>
             <li>

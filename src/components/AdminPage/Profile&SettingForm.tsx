@@ -104,7 +104,7 @@ export default function ProfileSettingForm({ profile }: Props) {
               <Link href="/admin/bookinglist">Bookings List</Link>
             </li>
             <li>
-              <Link href="/admin/customers">Customers</Link>
+              <Link href="/admin/account">Account Mangagement</Link>
             </li>
             <li>
               <Link href="/admin/studios">Studios</Link>

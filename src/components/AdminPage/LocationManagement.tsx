@@ -63,7 +63,7 @@ export default function LocationManagement({ locations }: Props) {
               <Link href="/admin/bookinglist" className="menu-link">Bookings List</Link>
             </li>
             <li>
-              <Link href="/admin/customers" className="menu-link">Customers</Link>
+              <Link href="/admin/account" className="menu-link">Account Mangagement</Link>
             </li>
             <li>
               <Link href="/admin/studios" className="menu-link">Studios</Link>
