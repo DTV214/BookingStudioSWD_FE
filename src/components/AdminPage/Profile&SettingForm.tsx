@@ -110,6 +110,9 @@ export default function ProfileSettingForm({ profile }: Props) {
               <Link href="/admin/studios">Studios</Link>
             </li>
             <li>
+              <Link href="/admin/studio-types">Studio Types</Link>
+            </li>
+            <li>
               <Link href="/admin/location">Location Management</Link>
             </li>
             <li>
