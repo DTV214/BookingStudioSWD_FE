@@ -49,16 +49,22 @@ export default function DashBoardForm({
               <Link href="/admin/bookinglist">Bookings List</Link>
             </li>
             <li>
-              <Link href="/admin/customers">Customers</Link>
+              <Link href="/admin/account">Account Management</Link>
             </li>
             <li>
               <Link href="/admin/studios">Studios</Link>
             </li>
             <li>
+              <Link href="/admin/studio-types">Studio Types</Link>
+            </li>
+            <li>
+              <Link href="/admin/location">Location Management</Link>
+            </li>
+            <li>
               <Link href="/admin/notifications">Notifications</Link>
             </li>
             <li>
-              <Link href="#">Profile & Settings</Link>
+              <Link href="/admin/profile-setting">Profile & Settings</Link>
             </li>
           </ul>
         </nav>
