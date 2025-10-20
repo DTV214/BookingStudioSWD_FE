@@ -213,7 +213,7 @@ export default function StudioTypesForm({ studioTypes, onCreate, onUpdate, onDel
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="inline-flex items-center px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-medium">
-                        {t.bufferTime || "—"}
+                        {t.bufferTime && t.bufferTime !== '' ? `${t.bufferTime} phút` : "—"}
                       </span>
                     </td>
                     <td className="px-6 py-4 max-w-md">
@@ -286,36 +286,51 @@ export default function StudioTypesForm({ studioTypes, onCreate, onUpdate, onDel
 
         {/* Create Modal */}
         {showCreate && (
-          <div className="dialog-overlay">
-            <div className="dialog">
-              <div className="dialog-header">
-                <h3>Add Studio Type</h3>
-                <button className="icon-btn" onClick={() => setShowCreate(false)}>✕</button>
+          <div className="dialog-overlay fixed inset-0 z-50 bg-black/30 flex items-center justify-center p-4">
+            <div className="dialog max-w-xl w-full rounded-xl shadow-2xl border bg-white">
+              <div className="flex items-center justify-between px-6 py-4 border-b">
+                <h3 className="text-lg font-semibold">Add Studio Type</h3>
+                <button
+                  className="inline-flex items-center justify-center h-8 w-8 rounded-md hover:bg-gray-100"
+                  onClick={() => setShowCreate(false)}
+                  aria-label="Close"
+                >
+                  ✕
+                </button>
               </div>
-              <form className="form-grid" onSubmit={handleSubmitCreate}>
-                <label className="form-field">
-                  <span>Name</span>
-                  <input required className="input" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-                </label>
-                <label className="form-field">
-                  <span>Min Area (m²)</span>
-                  <input required type="number" min={0} className="input" value={form.minArea} onChange={(e) => setForm({ ...form, minArea: Number(e.target.value) })} />
-                </label>
-                <label className="form-field">
-                  <span>Max Area (m²)</span>
-                  <input required type="number" min={0} className="input" value={form.maxArea} onChange={(e) => setForm({ ...form, maxArea: Number(e.target.value) })} />
-                </label>
-                <label className="form-field">
-                  <span>Duration</span>
-                  <input className="input" placeholder="e.g., 2 hours" value={form.bufferTime ?? ""} onChange={(e) => setForm({ ...form, bufferTime: e.target.value })} />
-                </label>
-                <label className="form-field col-span-2">
-                  <span>Description</span>
-                  <textarea required className="textarea" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-                </label>
-                <div className="dialog-footer">
-                  <button type="button" className="btn" onClick={() => setShowCreate(false)}>Cancel</button>
-                  <button type="submit" className="btn btn-primary" disabled={creating}>Create</button>
+              <form className="px-6 py-5" onSubmit={handleSubmitCreate}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <input required className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Duration (minutes)</label>
+                    <input
+                      className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      type="number"
+                      min={0}
+                      placeholder="e.g., 120"
+                      value={form.bufferTime || ''}
+                      onChange={(e) => setForm({ ...form, bufferTime: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Min Area (m²)</label>
+                    <input required type="number" min={0} className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={form.minArea} onChange={(e) => setForm({ ...form, minArea: Number(e.target.value) })} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Max Area (m²)</label>
+                    <input required type="number" min={0} className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={form.maxArea} onChange={(e) => setForm({ ...form, maxArea: Number(e.target.value) })} />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea required rows={4} className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+                  </div>
+                </div>
+                <div className="mt-5 flex items-center justify-end gap-2">
+                  <button type="button" className="inline-flex items-center px-4 py-2 rounded-md border hover:bg-gray-50" onClick={() => setShowCreate(false)}>Cancel</button>
+                  <button type="submit" className="inline-flex items-center px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50" disabled={creating}>Create</button>
                 </div>
               </form>
             </div>
@@ -350,7 +365,7 @@ export default function StudioTypesForm({ studioTypes, onCreate, onUpdate, onDel
                       </tr>
                       <tr>
                         <td className="bg-gray-50 px-4 py-3 text-sm font-medium text-gray-600">Duration</td>
-                        <td className="px-4 py-3 text-gray-900">{detail.bufferTime || "—"}</td>
+                        <td className="px-4 py-3 text-gray-900">{detail.bufferTime && detail.bufferTime !== '' ? `${detail.bufferTime} phút` : "—"}</td>
                       </tr>
                       <tr>
                         <td className="bg-gray-50 px-4 py-3 text-sm font-medium text-gray-600 align-top">Description</td>
@@ -391,8 +406,15 @@ export default function StudioTypesForm({ studioTypes, onCreate, onUpdate, onDel
                     <input className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={editForm.name ?? ""} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
-                    <input className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={editForm.bufferTime ?? ""} onChange={(e) => setEditForm({ ...editForm, bufferTime: e.target.value })} />
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Duration (minutes)</label>
+                    <input
+                      className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      type="number"
+                      min={0}
+                      placeholder="e.g., 120"
+                      value={editForm.bufferTime ?? ""}
+                      onChange={(e) => setEditForm({ ...editForm, bufferTime: e.target.value })}
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Min Area (m²)</label>
