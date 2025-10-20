@@ -5,7 +5,24 @@ export const ENDPOINTS = {
   LOCATIONS: "/api/locations",
   SERVICES: "/api/services",
   PRICE_ITEMS: "/api/price-items/price",
-  BOOKINGS: "/api/admin/bookings",
+  BOOKINGS: "/api/bookings",
+  USER_BOOKINGS: {
+    /**
+     * GET: Lấy danh sách booking của user đã đăng nhập
+     * API: /api/bookings/profile
+     */
+    GET_BY_PROFILE: "/api/bookings/profile",
+
+    /**
+     * GET: Lấy chi tiết studio assigns của một booking
+     * API: /api/studio-assigns/booking/{bookingId}
+     */
+    GET_DETAILS: (bookingId: string) =>
+      `/api/studio-assigns/booking/${bookingId}`,
+    GET_SERVICES_FOR_SLOT: (studioAssignId: string) =>
+      `/api/service-assigns/studio-assign/${studioAssignId}`,
+  },
+
   // --- THÊM CÁC ENDPOINTS MỚI ---
   PRICE_TABLES: {
     // GET /api/price-tables/studio-types/{id}
