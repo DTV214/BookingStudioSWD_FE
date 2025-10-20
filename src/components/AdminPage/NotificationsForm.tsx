@@ -307,7 +307,7 @@ export default function NotificationsForm({ notifications }: Props) {
             </li>
             <li>
               <Link href="/admin/account" className="menu-link">
-                Account Mangagement
+                Account Management
               </Link>
             </li>
             <li>
