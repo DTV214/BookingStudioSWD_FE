@@ -25,15 +25,18 @@ export interface StudioTypeItemResponse {
   data: StudioTypeDto;
 }
 
-const API_BASE_URL = 'https://bookingstudioswd-be.onrender.com';
+const API_BASE_URL = "https://bookingstudioswd-be.onrender.com";
 
 export class StudioTypesService {
-  private static async fetchWithErrorHandling<T>(url: string, options?: RequestInit): Promise<T> {
+  private static async fetchWithErrorHandling<T>(
+    url: string,
+    options?: RequestInit
+  ): Promise<T> {
     try {
       const response = await fetch(url, {
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': '*/*',
+          "Content-Type": "application/json",
+          Accept: "*/*",
           ...options?.headers,
         },
         ...options,
@@ -43,10 +46,10 @@ export class StudioTypesService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data: T = await response.json();
       return data;
     } catch (error) {
-      console.error('StudioTypes API Error:', error);
+      console.error("StudioTypes API Error:", error);
       throw error;
     }
   }
@@ -65,55 +68,71 @@ export class StudioTypesService {
 
   static async getAll(): Promise<StudioType[]> {
     const url = `${API_BASE_URL}/api/studio-types`;
-    const res = await this.fetchWithErrorHandling<StudioTypesResponse>(url, { method: 'GET' });
+    const res = await this.fetchWithErrorHandling<StudioTypesResponse>(url, {
+      method: "GET",
+    });
     const list = Array.isArray(res.data) ? res.data : [];
     return list.map(this.toModel);
   }
 
   static async getById(id: string): Promise<StudioType> {
     const url = `${API_BASE_URL}/api/studio-types/${id}`;
-    const res = await this.fetchWithErrorHandling<StudioTypeItemResponse>(url, { method: 'GET' });
+    const res = await this.fetchWithErrorHandling<StudioTypeItemResponse>(url, {
+      method: "GET",
+    });
     return this.toModel(res.data);
   }
 
-  static async create(payload: Omit<StudioType, 'id'>): Promise<StudioType> {
+  static async create(
+    payload: Omit<StudioType, "id">
+  ): Promise<StudioType> {
     const url = `${API_BASE_URL}/api/studio-types`;
-    const res = await this.fetchWithErrorHandling<StudioTypeItemResponse | { data: StudioTypeDto }>(url, {
-      method: 'POST',
+    const res = await this.fetchWithErrorHandling<StudioTypeItemResponse>(url, {
+      method: "POST",
       body: JSON.stringify({
         name: payload.name,
         description: payload.description,
         minArea: payload.minArea,
         maxArea: payload.maxArea,
-        bufferTime: payload.bufferTime && payload.bufferTime !== '' ? Number(payload.bufferTime) : null,
+        bufferTime:
+          payload.bufferTime && payload.bufferTime !== ""
+            ? Number(payload.bufferTime)
+            : null,
         services: payload.services ?? [],
       }),
     });
-    const dto = (res as any).data ?? (res as any);
-    return this.toModel(dto as StudioTypeDto);
+
+    // Đảm bảo kiểu rõ ràng
+    const dto: StudioTypeDto = res.data;
+    return this.toModel(dto);
   }
 
-  static async update(id: string, payload: Partial<StudioType>): Promise<StudioType> {
+  static async update(
+    id: string,
+    payload: Partial<StudioType>
+  ): Promise<StudioType> {
     const url = `${API_BASE_URL}/api/studio-types/${id}`;
-    const res = await this.fetchWithErrorHandling<StudioTypeItemResponse | { data: StudioTypeDto }>(url, {
-      method: 'PUT',
+    const res = await this.fetchWithErrorHandling<StudioTypeItemResponse>(url, {
+      method: "PUT",
       body: JSON.stringify({
         name: payload.name,
         description: payload.description,
         minArea: payload.minArea,
         maxArea: payload.maxArea,
-        bufferTime: payload.bufferTime && payload.bufferTime !== '' ? Number(payload.bufferTime) : null,
-        services: payload.services,
+        bufferTime:
+          payload.bufferTime && payload.bufferTime !== ""
+            ? Number(payload.bufferTime)
+            : null,
+        services: payload.services ?? [],
       }),
     });
-    const dto = (res as any).data ?? (res as any);
-    return this.toModel(dto as StudioTypeDto);
+
+    const dto: StudioTypeDto = res.data;
+    return this.toModel(dto);
   }
 
   static async delete(id: string): Promise<void> {
     const url = `${API_BASE_URL}/api/studio-types/${id}`;
-    await this.fetchWithErrorHandling<void>(url, { method: 'DELETE' });
+    await this.fetchWithErrorHandling<void>(url, { method: "DELETE" });
   }
 }
-
-
