@@ -102,6 +102,9 @@ export default function LocationManagement({ locations, onCreateLocation, onUpda
             <li>
               <Link href="/admin/studios" className="menu-link">Studios</Link>
             </li>
+            <li>
+              <Link href="/admin/studio-types" className="menu-link">Studio Types</Link>
+            </li>
             <li className="active">
               <Link href="/admin/location" className="menu-link">Location Management</Link>
             </li>

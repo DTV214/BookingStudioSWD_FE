@@ -326,6 +326,11 @@ function BookingListForm({ bookings }: Props) {
               </Link>
             </li>
             <li>
+              <Link href="/admin/studio-types" className="menu-link">
+                Studio Types
+              </Link>
+            </li>
+            <li>
               <Link href="/admin/location" className="menu-link">
                 Location Management
               </Link>
