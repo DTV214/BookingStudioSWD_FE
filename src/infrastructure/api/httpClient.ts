@@ -9,7 +9,7 @@ import { storage } from "@/infrastructure/utils/storage";
  */
 
 const RAW_BASE_URL: string =
-  ENV.API_URL || process.env.NEXT_PUBLIC_API_URL || "";
+  ENV.API_URL || process.env.NEXT_PUBLIC_API_URL || "https://bookingstudioswd-be.onrender.com";
 
 /* -------------------- utils -------------------- */
 
@@ -212,12 +212,4 @@ export const httpClient = {
   HttpError,
 };
 
-/* -------------------- cách xử lý 401 ở UI -------------------- */
-// Ví dụ: trong một hook/usecase, bạn có thể bắt lỗi và redirect (client-only)
-// try { await httpClient.get<User>('/me'); } catch (e) {
-//   if (e instanceof httpClient.HttpError && e.status === 401) {
-//     router.push('/auth/login');
-//     return;
-//   }
-//   throw e;
-// }
+
