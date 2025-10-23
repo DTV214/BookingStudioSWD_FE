@@ -298,6 +298,11 @@ export default function AccountManagement({ accounts }: Props) {
               </Link>
             </li>
             <li>
+              <Link href="/admin/service" className="menu-link">
+                Service Management
+              </Link>
+            </li>
+            <li>
               <Link href="/admin/notifications" className="menu-link">
                 Notifications
               </Link>
