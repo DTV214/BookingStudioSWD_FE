@@ -2,26 +2,46 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-
-// Service interface
-export interface ServiceData {
-  id: string;
-  serviceName: string;
-  serviceFee: number;
-  description: string;
-  status: 'AVAILABLE' | 'UNAVAILABLE';
-}
+import { ServiceData } from "@/infrastructure/AdminAPI/ServiceManagementAPI";
 
 interface Props {
   services: ServiceData[];
+  onCreateService: (serviceData: Omit<ServiceData, 'id'>) => Promise<ServiceData>;
   onUpdateService: (id: string, serviceData: Partial<Omit<ServiceData, 'id'>>) => Promise<ServiceData>;
   onDeleteService: (id: string) => Promise<void>;
 }
 
 // ServiceManagement component for admin service management
-export default function ServiceManagement({ services, onUpdateService, onDeleteService }: Props) {
+export default function ServiceManagement({ services, onCreateService, onUpdateService, onDeleteService }: Props) {
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<ServiceData | null>(null);
+  const [newServiceData, setNewServiceData] = useState({
+    serviceName: '',
+    serviceFee: 0,
+    description: '',
+    status: 'AVAILABLE' as 'AVAILABLE' | 'UNAVAILABLE'
+  });
+
+  const handleAddService = async () => {
+    try {
+      console.log('Adding service with data:', newServiceData);
+      const result = await onCreateService(newServiceData);
+      console.log('Service added successfully:', result);
+
+      setIsAddModalOpen(false);
+      setNewServiceData({
+        serviceName: '',
+        serviceFee: 0,
+        description: '',
+        status: 'AVAILABLE'
+      });
+      alert('Service added successfully!');
+    } catch (error) {
+      console.error('Error adding service:', error);
+      alert('Failed to add service. Please try again.');
+    }
+  };
 
   const handleEditService = (service: ServiceData) => {
     setEditingService(service);
@@ -116,6 +136,19 @@ export default function ServiceManagement({ services, onUpdateService, onDeleteS
 
         {/* Service Content with Tailwind CSS */}
         <div className="service-tailwind-container">
+          {/* Add Service Button */}
+          <div className="mb-6 flex justify-end">
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center space-x-2 transition-colors duration-200 shadow-lg hover:shadow-xl"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+              <span>+ Add Service</span>
+            </button>
+          </div>
+
           {/* Services Table */}
           <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
@@ -208,6 +241,72 @@ export default function ServiceManagement({ services, onUpdateService, onDeleteS
           </div>
         </div>
       </section>
+
+      {/* Add Service Modal */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold mb-4">Add New Service</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Service Name</label>
+                <input
+                  type="text"
+                  value={newServiceData.serviceName}
+                  onChange={(e) => setNewServiceData({...newServiceData, serviceName: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter service name"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Service Fee</label>
+                <input
+                  type="number"
+                  value={newServiceData.serviceFee}
+                  onChange={(e) => setNewServiceData({...newServiceData, serviceFee: Number(e.target.value)})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter service fee"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                  value={newServiceData.description}
+                  onChange={(e) => setNewServiceData({...newServiceData, description: e.target.value})}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter service description"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <select
+                  value={newServiceData.status}
+                  onChange={(e) => setNewServiceData({...newServiceData, status: e.target.value as 'AVAILABLE' | 'UNAVAILABLE'})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="AVAILABLE">Available</option>
+                  <option value="UNAVAILABLE">Unavailable</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex justify-end space-x-2 mt-6">
+              <button
+                onClick={() => setIsAddModalOpen(false)}
+                className="px-4 py-2 text-gray-600 bg-gray-200 rounded-md hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddService}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Add Service
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Edit Service Modal */}
       {isEditModalOpen && editingService && (
