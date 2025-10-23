@@ -1,87 +1,89 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import ServiceManagement from "@/components/AdminPage/ServiceManagement";
-import { ServiceData } from "@/components/AdminPage/ServiceManagement";
+import { useServices } from "@/infrastructure/AdminAPI/ServiceManagementAPI";
 
-// Mock data for services
-const mockServices: ServiceData[] = [
-  {
-    id: "1",
-    serviceName: "Thuê bộ đèn Flash Studio (3 bộ)",
-    serviceFee: 150000,
-    description: "Bao gồm 3 đèn flash Godox/Elinchrom cơ bản, softbox và chân đèn.",
-    status: "AVAILABLE"
-  },
-  {
-    id: "2", 
-    serviceName: "Dịch vụ Makeup Artist",
-    serviceFee: 500000,
-    description: "Makeup chuyên nghiệp cho chụp ảnh studio, bao gồm cả trang điểm và tạo kiểu tóc.",
-    status: "AVAILABLE"
-  },
-  {
-    id: "3",
-    serviceName: "Thuê trang phục chụp ảnh",
-    serviceFee: 200000,
-    description: "Bộ sưu tập trang phục đa dạng cho nam và nữ, phù hợp với nhiều concept chụp ảnh.",
-    status: "AVAILABLE"
-  },
-  {
-    id: "4",
-    serviceName: "Máy quay phim chuyên nghiệp",
-    serviceFee: 800000,
-    description: "Máy quay Canon/Sony chuyên nghiệp với ống kính đa dạng cho quay video chất lượng cao.",
-    status: "UNAVAILABLE"
-  },
-  {
-    id: "5",
-    serviceName: "Máy chụp hình DSLR",
-    serviceFee: 300000,
-    description: "Máy ảnh Canon/Nikon DSLR với ống kính tele và wide angle cho chụp ảnh studio.",
-    status: "AVAILABLE"
-  },
-  {
-    id: "6",
-    serviceName: "Đạo cụ chụp ảnh",
-    serviceFee: 100000,
-    description: "Bộ đạo cụ đa dạng: ghế, bàn, hoa giả, phông nền và các vật dụng trang trí khác.",
-    status: "AVAILABLE"
-  }
-];
-
-// Service Container Component - Updated
 export default function ServiceContainer() {
-  const [services, setServices] = useState<ServiceData[]>(mockServices);
+  const { services, loading, error, createService, updateService, deleteService } = useServices();
 
-  const handleUpdateService = async (id: string, serviceData: Partial<Omit<ServiceData, 'id'>>): Promise<ServiceData> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const updatedServices = services.map(service => 
-          service.id === id ? { ...service, ...serviceData } : service
-        );
-        setServices(updatedServices);
-        
-        const updatedService = updatedServices.find(service => service.id === id);
-        resolve(updatedService!);
-      }, 500);
-    });
-  };
+  if (loading) {
+    return (
+      <div className="dashboard-layout">
+        <aside className="sidebar">
+          <h2 className="logo">Dashboard</h2>
+          <nav>
+            <ul>
+              <li><a href="/admin/dashboard" className="menu-link">Dashboard</a></li>
+              <li><a href="/admin/bookinglist" className="menu-link">Bookings List</a></li>
+              <li><a href="/admin/account" className="menu-link">Account Management</a></li>
+              <li><a href="/admin/studios" className="menu-link">Studios</a></li>
+              <li><a href="/admin/studio-types" className="menu-link">Studio Types</a></li>
+              <li><a href="/admin/location" className="menu-link">Location Management</a></li>
+              <li className="active"><a href="/admin/service" className="menu-link">Service Management</a></li>
+              <li><a href="/admin/notifications" className="menu-link">Notifications</a></li>
+              <li><a href="/admin/profile-setting" className="menu-link">Profile & Settings</a></li>
+            </ul>
+          </nav>
+        </aside>
+        <section className="dashboard-root">
+          <header className="dashboard-header">
+            <h1>Service Management</h1>
+            <div className="dashboard-search">
+              <input aria-label="Search" placeholder="Search" />
+            </div>
+          </header>
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
-  const handleDeleteService = async (id: string): Promise<void> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        setServices(services.filter(service => service.id !== id));
-        resolve();
-      }, 500);
-    });
-  };
+  if (error) {
+    return (
+      <div className="dashboard-layout">
+        <aside className="sidebar">
+          <h2 className="logo">Dashboard</h2>
+          <nav>
+            <ul>
+              <li><a href="/admin/dashboard" className="menu-link">Dashboard</a></li>
+              <li><a href="/admin/bookinglist" className="menu-link">Bookings List</a></li>
+              <li><a href="/admin/account" className="menu-link">Account Management</a></li>
+              <li><a href="/admin/studios" className="menu-link">Studios</a></li>
+              <li><a href="/admin/studio-types" className="menu-link">Studio Types</a></li>
+              <li><a href="/admin/location" className="menu-link">Location Management</a></li>
+              <li className="active"><a href="/admin/service" className="menu-link">Service Management</a></li>
+              <li><a href="/admin/notifications" className="menu-link">Notifications</a></li>
+              <li><a href="/admin/profile-setting" className="menu-link">Profile & Settings</a></li>
+            </ul>
+          </nav>
+        </aside>
+        <section className="dashboard-root">
+          <header className="dashboard-header">
+            <h1>Service Management</h1>
+            <div className="dashboard-search">
+              <input aria-label="Search" placeholder="Search" />
+            </div>
+          </header>
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="text-red-600 text-lg font-semibold mb-2">Error Loading Services</div>
+              <div className="text-gray-600">{error}</div>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <ServiceManagement
       services={services}
-      onUpdateService={handleUpdateService}
-      onDeleteService={handleDeleteService}
+      onCreateService={createService}
+      onUpdateService={updateService}
+      onDeleteService={deleteService}
     />
   );
 }
