@@ -61,6 +61,9 @@ export default function DashBoardForm({
               <Link href="/admin/location">Location Management</Link>
             </li>
             <li>
+              <Link href="/admin/service">Service Management</Link>
+            </li>
+            <li>
               <Link href="/admin/notifications">Notifications</Link>
             </li>
             <li>
