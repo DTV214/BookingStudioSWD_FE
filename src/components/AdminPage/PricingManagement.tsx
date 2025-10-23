@@ -16,10 +16,8 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [isPriceItemDetailModalOpen, setIsPriceItemDetailModalOpen] = useState(false);
   const [editingPriceTable, setEditingPriceTable] = useState<PricingData | null>(null);
   const [viewingPriceTable, setViewingPriceTable] = useState<PricingData | null>(null);
-  const [viewingPriceItem, setViewingPriceItem] = useState<PriceItem | null>(null);
   const [priceItems, setPriceItems] = useState<PriceItem[]>([]);
   const [loadingPriceItems, setLoadingPriceItems] = useState(false);
   const { fetchPriceItemsByTableId } = usePriceItems();
@@ -92,10 +90,10 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
   const handleEditPriceTable = (priceTable: PricingData) => {
     setEditingPriceTable(priceTable);
     setEditPriceData({
-      startDate: priceTable.startDate,
-      endDate: priceTable.endDate,
-      priority: priceTable.priority,
-      status: priceTable.status
+      startDate: priceTable.startDate || '',
+      endDate: priceTable.endDate || null,
+      priority: priceTable.priority || 0,
+      status: priceTable.status || 'COMING_SOON'
     });
     setIsEditModalOpen(true);
   };
@@ -142,18 +140,6 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
     }
   };
 
-  // Step 7: Handle view price item details
-  const handleViewPriceItem = (priceItem: PriceItem) => {
-    setViewingPriceItem(priceItem);
-    setIsPriceItemDetailModalOpen(true);
-  };
-
-  // Step 8: Close price item detail modal
-  const handleClosePriceItemDetail = () => {
-    setIsPriceItemDetailModalOpen(false);
-    setViewingPriceItem(null);
-  };
-
   // Step 6: Format date for display
   const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return 'N/A';
@@ -161,7 +147,7 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return 'Invalid Date';
       return date.toLocaleDateString('vi-VN');
-    } catch (error) {
+    } catch {
       return 'Invalid Date';
     }
   };
@@ -599,58 +585,6 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
             <div className="flex justify-end mt-6">
               <button
                 onClick={() => setIsDetailModalOpen(false)}
-                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Price Item Detail Modal */}
-      {isPriceItemDetailModalOpen && viewingPriceItem && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-lg">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Price Item Details</h3>
-              <button
-                onClick={handleClosePriceItemDetail}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                  <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">ID</label>
-                  <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">{viewingPriceItem.id}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Price Table ID</label>
-                  <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">{viewingPriceItem.priceTableId}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Studio Type Name</label>
-                  <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">{viewingPriceItem.studioTypeName}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Default Price</label>
-                  <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
-                    {viewingPriceItem.defaultPrice ? viewingPriceItem.defaultPrice.toLocaleString('vi-VN') + ' VND' : '0 VND'}
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex justify-end mt-6">
-              <button
-                onClick={handleClosePriceItemDetail}
                 className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
               >
                 Close

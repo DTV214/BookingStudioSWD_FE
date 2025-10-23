@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { PricingService, PricingData, PricingResponse, PriceTablePayload, PriceItem, PriceItemResponse } from './pricingService';
+import { PricingService, PricingData, PriceTablePayload, PriceItem } from './pricingService';
 
 export const usePriceTables = () => {
   const [priceTables, setPriceTables] = useState<PricingData[]>([]);
