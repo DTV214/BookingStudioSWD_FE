@@ -1,6 +1,6 @@
-interface StudioAssignRequest {
+export interface StudioAssignRequest {
   startTime: string; // ISO 8601 format
-  endTime: string;
+  hour: number;
   serviceIds: string[];
 }
 
