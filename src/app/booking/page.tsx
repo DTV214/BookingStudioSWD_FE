@@ -564,12 +564,10 @@ export default function BookingPage() {
 
       try {
         const result: BookingResponse = await createBookingUseCase(bookingData);
-        if (
-          result &&
-          typeof result.data === "string" &&
-          result.data.startsWith("http")
-        ) {
-          window.location.href = result.data;
+        if (result && typeof result === "string") {
+          console.log("Chuyển hướng đên VN PAY", result);
+
+          window.location.href = result;
         } else {
           alert(`Booking thành công! ${result?.message || ""}`);
           setIsSubmitting(false);
