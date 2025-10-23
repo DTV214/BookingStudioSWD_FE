@@ -55,7 +55,7 @@ const RoomTimeSlotItem: React.FC<RoomTimeSlotItemProps> = React.memo(
     // isPriceLoading, // Optional
   }) => {
     // Các lựa chọn thời lượng (có thể tùy chỉnh)
-    const durationOptions = [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 6, 7, 8];
+    const durationOptions = [1, 1.5, 2, 2.5, 3];
 
     // Hàm format giá tiền an toàn
     const formatPrice = (price: number | null | undefined): string => {
