@@ -7,9 +7,31 @@ export interface PricingResponse {
 
 export interface PricingData {
   id: string;
-  startDate: string; // ISO date string, e.g., "2025-04-30"
-  endDate: string; // ISO date string, e.g., "2027-04-30"
-  priority: number; // 0, 1, 2, etc.
+  startDate: string | null; // ISO date string, e.g., "2025-04-30" or null
+  endDate: string | null; // ISO date string, e.g., "2027-04-30" or null
+  priority: number | null; // 0, 1, 2, etc. or null
+  status: 'COMING_SOON' | 'IS_HAPPENING' | 'ENDED' | null;
+}
+
+// Price Item interfaces
+export interface PriceItem {
+  id: string;
+  priceTableId: string;
+  studioTypeName: string; // Changed from studioTypeId to studioTypeName
+  defaultPrice: number;
+}
+
+export interface PriceItemResponse {
+  code: number;
+  message: string;
+  data: PriceItem[];
+}
+
+// Request body for creating/updating price tables
+export interface PriceTablePayload {
+  startDate: string;
+  endDate?: string | null;
+  priority: number;
   status: 'COMING_SOON' | 'IS_HAPPENING' | 'ENDED';
 }
 
@@ -28,13 +50,13 @@ export class PricingService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
-      return data;
+      return response.json();
     } catch (error) {
-      console.error('API Error:', error);
+      console.error('API call failed:', error);
       throw error;
     }
   }
@@ -52,41 +74,52 @@ export class PricingService {
     return response;
   }
 
-  // Step 2: Get price table by ID
-  static async getPriceTableById(id: string): Promise<PricingData> {
-    const url = `${API_BASE_URL}/api/price-tables/${id}`;
-    const response = await this.fetchWithErrorHandling<{ data: PricingData }>(url, {
+  // Step 2: Get price items by table ID
+  static async getPriceItemsByTableId(tableId: string): Promise<PriceItemResponse> {
+    console.log('Service: Received tableId:', tableId);
+    console.log('Service: Type of tableId:', typeof tableId);
+    
+    if (!tableId) {
+      throw new Error('Table ID is required');
+    }
+    
+    const url = `${API_BASE_URL}/api/price-items/table/${tableId}`;
+    console.log('Service: Fetching price items from URL:', url);
+    
+    const response = await this.fetchWithErrorHandling<PriceItemResponse>(url, {
       method: 'GET',
     });
-    return response.data;
+
+    console.log('Service: Price items API response:', response);
+    return response;
   }
 
   // Step 3: Create new price table
-  static async createPriceTable(priceData: Omit<PricingData, 'id'>): Promise<PricingData> {
+  static async createPriceTable(priceData: PriceTablePayload): Promise<PricingData> {
     const url = `${API_BASE_URL}/api/price-tables`;
     console.log('Creating price table with data:', priceData);
     
-    const response = await this.fetchWithErrorHandling<{ data: PricingData }>(url, {
+    const response = await this.fetchWithErrorHandling<PricingData>(url, {
       method: 'POST',
       body: JSON.stringify(priceData),
     });
 
     console.log('Create price table API response:', response);
-    return response.data;
+    return response;
   }
 
   // Step 4: Update existing price table
-  static async updatePriceTable(id: string, priceData: Partial<Omit<PricingData, 'id'>>): Promise<PricingData> {
+  static async updatePriceTable(id: string, priceData: Partial<PriceTablePayload>): Promise<PricingData> {
     const url = `${API_BASE_URL}/api/price-tables/${id}`;
     console.log('Updating price table:', id, 'with data:', priceData);
     
-    const response = await this.fetchWithErrorHandling<{ data: PricingData }>(url, {
+    const response = await this.fetchWithErrorHandling<PricingData>(url, {
       method: 'PUT',
       body: JSON.stringify(priceData),
     });
 
     console.log('Update price table API response:', response);
-    return response.data;
+    return response;
   }
 
   // Step 5: Delete price table

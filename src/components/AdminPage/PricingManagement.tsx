@@ -2,12 +2,12 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { PricingData } from "@/infrastructure/AdminAPI/PricingManagementAPI";
+import { PricingData, PriceTablePayload, PriceItem, usePriceItems } from "@/infrastructure/AdminAPI/PricingManagementAPI";
 
 interface Props {
   priceTables: PricingData[];
-  onCreatePriceTable: (priceData: Omit<PricingData, 'id'>) => Promise<PricingData>;
-  onUpdatePriceTable: (id: string, priceData: Partial<Omit<PricingData, 'id'>>) => Promise<PricingData>;
+  onCreatePriceTable: (priceData: PriceTablePayload) => Promise<PricingData>;
+  onUpdatePriceTable: (id: string, priceData: Partial<PriceTablePayload>) => Promise<PricingData>;
   onDeletePriceTable: (id: string) => Promise<void>;
 }
 
@@ -15,12 +15,25 @@ interface Props {
 export default function PricingManagement({ priceTables, onCreatePriceTable, onUpdatePriceTable, onDeletePriceTable }: Props) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isPriceItemDetailModalOpen, setIsPriceItemDetailModalOpen] = useState(false);
   const [editingPriceTable, setEditingPriceTable] = useState<PricingData | null>(null);
-  const [newPriceData, setNewPriceData] = useState({
+  const [viewingPriceTable, setViewingPriceTable] = useState<PricingData | null>(null);
+  const [viewingPriceItem, setViewingPriceItem] = useState<PriceItem | null>(null);
+  const [priceItems, setPriceItems] = useState<PriceItem[]>([]);
+  const [loadingPriceItems, setLoadingPriceItems] = useState(false);
+  const { fetchPriceItemsByTableId } = usePriceItems();
+  const [newPriceData, setNewPriceData] = useState<PriceTablePayload>({
     startDate: '',
-    endDate: '',
+    endDate: null,
     priority: 0,
-    status: 'COMING_SOON' as 'COMING_SOON' | 'IS_HAPPENING' | 'ENDED'
+    status: 'COMING_SOON'
+  });
+  const [editPriceData, setEditPriceData] = useState<Partial<PriceTablePayload>>({
+    startDate: '',
+    endDate: null,
+    priority: 0,
+    status: 'COMING_SOON'
   });
 
   // Step 1: Handle create new price table
@@ -33,7 +46,7 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
       setIsAddModalOpen(false);
       setNewPriceData({
         startDate: '',
-        endDate: '',
+        endDate: null,
         priority: 0,
         status: 'COMING_SOON'
       });
@@ -44,25 +57,71 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
     }
   };
 
-  // Step 2: Handle edit price table
+  // Step 2: Handle view price table details
+  const handleViewPriceTable = async (priceTable: PricingData) => {
+    console.log('Opening price table details for:', priceTable);
+    console.log('Price table ID:', priceTable.id);
+    
+    setViewingPriceTable(priceTable);
+    setIsDetailModalOpen(true);
+    
+    // Fetch price items for this price table
+    try {
+      setLoadingPriceItems(true);
+      
+      // Ensure we have a valid ID before making the API call
+      if (!priceTable.id) {
+        console.error('Price table ID is missing:', priceTable);
+        setPriceItems([]);
+        return;
+      }
+      
+      console.log('Fetching price items for table ID:', priceTable.id);
+      const items = await fetchPriceItemsByTableId(priceTable.id);
+      console.log('Fetched price items:', items);
+      setPriceItems(items);
+    } catch (error) {
+      console.error('Error fetching price items:', error);
+      setPriceItems([]);
+    } finally {
+      setLoadingPriceItems(false);
+    }
+  };
+
+  // Step 3: Handle edit price table
   const handleEditPriceTable = (priceTable: PricingData) => {
     setEditingPriceTable(priceTable);
+    setEditPriceData({
+      startDate: priceTable.startDate,
+      endDate: priceTable.endDate,
+      priority: priceTable.priority,
+      status: priceTable.status
+    });
     setIsEditModalOpen(true);
   };
 
-  // Step 3: Handle update price table
+  // Step 4: Handle update price table
   const handleUpdatePriceTable = async () => {
     if (!editingPriceTable) return;
     
     try {
-      await onUpdatePriceTable(editingPriceTable.id, {
-        startDate: editingPriceTable.startDate,
-        endDate: editingPriceTable.endDate,
-        priority: editingPriceTable.priority,
-        status: editingPriceTable.status
-      });
+      // Ensure we have valid data before sending
+      const updateData = {
+        startDate: editPriceData.startDate || editingPriceTable.startDate || '',
+        endDate: editPriceData.endDate !== undefined ? editPriceData.endDate : editingPriceTable.endDate,
+        priority: editPriceData.priority !== undefined ? editPriceData.priority : editingPriceTable.priority || 0,
+        status: editPriceData.status || editingPriceTable.status || 'COMING_SOON'
+      };
+      
+      await onUpdatePriceTable(editingPriceTable.id, updateData);
       setIsEditModalOpen(false);
       setEditingPriceTable(null);
+      setEditPriceData({
+        startDate: '',
+        endDate: null,
+        priority: 0,
+        status: 'COMING_SOON'
+      });
       alert('Price table updated successfully!');
     } catch (error) {
       console.error('Error updating price table:', error);
@@ -70,7 +129,7 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
     }
   };
 
-  // Step 4: Handle delete price table
+  // Step 5: Handle delete price table
   const handleDeletePriceTable = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this price table?')) {
       try {
@@ -83,13 +142,36 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
     }
   };
 
-  // Step 5: Format date for display
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('vi-VN');
+  // Step 7: Handle view price item details
+  const handleViewPriceItem = (priceItem: PriceItem) => {
+    setViewingPriceItem(priceItem);
+    setIsPriceItemDetailModalOpen(true);
   };
 
-  // Step 6: Get status display text and color
-  const getStatusDisplay = (status: string) => {
+  // Step 8: Close price item detail modal
+  const handleClosePriceItemDetail = () => {
+    setIsPriceItemDetailModalOpen(false);
+    setViewingPriceItem(null);
+  };
+
+  // Step 6: Format date for display
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return 'N/A';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Invalid Date';
+      return date.toLocaleDateString('vi-VN');
+    } catch (error) {
+      return 'Invalid Date';
+    }
+  };
+
+  // Step 7: Get status display text and color
+  const getStatusDisplay = (status: string | null | undefined) => {
+    if (!status) {
+      return { text: 'N/A', color: 'bg-gray-100 text-gray-800', dotColor: 'bg-gray-400' };
+    }
+    
     switch (status) {
       case 'COMING_SOON':
         return { text: 'COMING_SOON', color: 'bg-yellow-100 text-yellow-800', dotColor: 'bg-yellow-400' };
@@ -208,7 +290,7 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
                     priceTables.map((priceTable, index) => {
                       const statusDisplay = getStatusDisplay(priceTable.status);
                       return (
-                        <tr key={priceTable.id} className="hover:bg-gray-50 transition-colors duration-150">
+                        <tr key={priceTable.id || `price-table-${index}`} className="hover:bg-gray-50 transition-colors duration-150">
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
                             {index + 1}
                           </td>
@@ -216,10 +298,10 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
                             {formatDate(priceTable.startDate)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                            {formatDate(priceTable.endDate)}
+                            {priceTable.endDate ? formatDate(priceTable.endDate) : 'N/A'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                            {priceTable.priority}
+                            {priceTable.priority ?? 'N/A'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusDisplay.color}`}>
@@ -229,6 +311,16 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() => handleViewPriceTable(priceTable)}
+                                className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-colors duration-150"
+                                title="View Price Table Details"
+                              >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                  <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                              </button>
                               <button
                                 onClick={() => handleEditPriceTable(priceTable)}
                                 className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 transition-colors duration-150"
@@ -266,7 +358,18 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
       {isAddModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold mb-4">Add New Price Table</h3>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Add New Price Table</h3>
+              <button
+                onClick={() => setIsAddModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
@@ -281,8 +384,8 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
                 <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
                 <input
                   type="date"
-                  value={newPriceData.endDate}
-                  onChange={(e) => setNewPriceData({...newPriceData, endDate: e.target.value})}
+                  value={newPriceData.endDate || ''}
+                  onChange={(e) => setNewPriceData({...newPriceData, endDate: e.target.value || null})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -338,8 +441,8 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
                 <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
                 <input
                   type="date"
-                  value={editingPriceTable.startDate}
-                  onChange={(e) => setEditingPriceTable({...editingPriceTable, startDate: e.target.value})}
+                  value={editPriceData.startDate || ''}
+                  onChange={(e) => setEditPriceData({...editPriceData, startDate: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -347,8 +450,8 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
                 <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
                 <input
                   type="date"
-                  value={editingPriceTable.endDate}
-                  onChange={(e) => setEditingPriceTable({...editingPriceTable, endDate: e.target.value})}
+                  value={editPriceData.endDate || ''}
+                  onChange={(e) => setEditPriceData({...editPriceData, endDate: e.target.value || null})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -356,8 +459,8 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
                 <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
                 <input
                   type="number"
-                  value={editingPriceTable.priority}
-                  onChange={(e) => setEditingPriceTable({...editingPriceTable, priority: Number(e.target.value)})}
+                  value={editPriceData.priority || 0}
+                  onChange={(e) => setEditPriceData({...editPriceData, priority: Number(e.target.value)})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   min="0"
                 />
@@ -365,8 +468,8 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                 <select
-                  value={editingPriceTable.status}
-                  onChange={(e) => setEditingPriceTable({...editingPriceTable, status: e.target.value as 'COMING_SOON' | 'IS_HAPPENING' | 'ENDED'})}
+                  value={editPriceData.status || 'COMING_SOON'}
+                  onChange={(e) => setEditPriceData({...editPriceData, status: e.target.value as 'COMING_SOON' | 'IS_HAPPENING' | 'ENDED'})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="COMING_SOON">Coming Soon</option>
@@ -387,6 +490,170 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
               >
                 Update Price Table
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Price Table Details Modal */}
+      {isDetailModalOpen && viewingPriceTable && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Price Table Details</h3>
+              <button
+                onClick={() => setIsDetailModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                {/* <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">ID</label>
+                  <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">{viewingPriceTable.id}</p>
+                </div> */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                  <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">{viewingPriceTable.priority}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                  <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">{formatDate(viewingPriceTable.startDate)}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                  <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                    {viewingPriceTable.endDate ? formatDate(viewingPriceTable.endDate) : 'N/A'}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <div className="mt-1">
+                    {(() => {
+                      const statusDisplay = getStatusDisplay(viewingPriceTable.status);
+                      return (
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusDisplay.color}`}>
+                          <div className={`w-2 h-2 rounded-full mr-2 ${statusDisplay.dotColor}`}></div>
+                          {statusDisplay.text}
+                        </span>
+                      );
+                    })()}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="border-t pt-4">
+                <h4 className="text-md font-medium text-gray-900 mb-3">Price Items</h4>
+                {loadingPriceItems ? (
+                  <div className="bg-gray-50 p-4 rounded-lg text-center">
+                    <p className="text-sm text-gray-600">Loading price items...</p>
+                  </div>
+                ) : priceItems.length > 0 ? (
+                  <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            PRICE TABLE ID
+                          </th> */}
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            STUDIO TYPE NAME
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            DEFAULT PRICE
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {priceItems.map((priceItem, index) => (
+                          <tr key={priceItem.id || `price-item-${index}`} className="hover:bg-gray-50 transition-colors duration-150">
+                            {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                              {priceItem.priceTableId || ''}
+                            </td> */}
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                              {priceItem.studioTypeName || ''}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                              {priceItem.defaultPrice ? priceItem.defaultPrice.toLocaleString('vi-VN') + ' VND' : '0 VND'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 p-4 rounded-lg text-center">
+                    <p className="text-sm text-gray-600">No price items found for this price table.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={() => setIsDetailModalOpen(false)}
+                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Price Item Detail Modal */}
+      {isPriceItemDetailModalOpen && viewingPriceItem && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-lg">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Price Item Details</h3>
+              <button
+                onClick={handleClosePriceItemDetail}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">ID</label>
+                  <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">{viewingPriceItem.id}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Price Table ID</label>
+                  <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">{viewingPriceItem.priceTableId}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Studio Type Name</label>
+                  <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">{viewingPriceItem.studioTypeName}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Default Price</label>
+                  <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                    {viewingPriceItem.defaultPrice ? viewingPriceItem.defaultPrice.toLocaleString('vi-VN') + ' VND' : '0 VND'}
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={handleClosePriceItemDetail}
+                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+              >
+                Close
               </button>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { PricingService, PricingData, PricingResponse } from './pricingService';
+import { PricingService, PricingData, PricingResponse, PriceTablePayload, PriceItem, PriceItemResponse } from './pricingService';
 
 export const usePriceTables = () => {
   const [priceTables, setPriceTables] = useState<PricingData[]>([]);
@@ -33,7 +33,7 @@ export const usePriceTables = () => {
   }, []);
 
   // Step 2: Create new price table
-  const createPriceTable = async (priceData: Omit<PricingData, 'id'>) => {
+  const createPriceTable = async (priceData: PriceTablePayload) => {
     try {
       setLoading(true);
       setError(null);
@@ -65,17 +65,27 @@ export const usePriceTables = () => {
   };
 
   // Step 3: Update existing price table
-  const updatePriceTable = async (id: string, priceData: Partial<Omit<PricingData, 'id'>>) => {
+  const updatePriceTable = async (id: string, priceData: Partial<PriceTablePayload>) => {
     try {
       setLoading(true);
       const updatedPriceTable = await PricingService.updatePriceTable(id, priceData);
+      
+      // Ensure the updated data has all required fields
+      const sanitizedData: PricingData = {
+        id: updatedPriceTable.id || id,
+        startDate: updatedPriceTable.startDate || priceData.startDate || '',
+        endDate: updatedPriceTable.endDate || priceData.endDate || null,
+        priority: updatedPriceTable.priority !== null ? updatedPriceTable.priority : (priceData.priority || 0),
+        status: updatedPriceTable.status || priceData.status || 'COMING_SOON'
+      };
+      
       setPriceTables(prev => 
         prev.map(priceTable => 
-          priceTable.id === id ? updatedPriceTable : priceTable
+          priceTable.id === id ? sanitizedData : priceTable
         )
       );
-      console.log('Price table updated successfully:', updatedPriceTable);
-      return updatedPriceTable;
+      console.log('Price table updated successfully:', sanitizedData);
+      return sanitizedData;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update price table';
       setError(errorMessage);
@@ -111,5 +121,51 @@ export const usePriceTables = () => {
     createPriceTable,
     updatePriceTable,
     deletePriceTable,
+  };
+};
+
+// Step 2: Hook for managing price items
+export const usePriceItems = () => {
+  const [priceItems, setPriceItems] = useState<PriceItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Step 1: Fetch price items by table ID
+  const fetchPriceItemsByTableId = async (tableId: string) => {
+    try {
+      console.log('Hook: Fetching price items for tableId:', tableId);
+      setLoading(true);
+      setError(null);
+      
+      if (!tableId) {
+        throw new Error('Table ID is required');
+      }
+      
+      const response = await PricingService.getPriceItemsByTableId(tableId);
+      console.log('Hook: API response received:', response);
+      
+      if (response.code === 200 && response.data) {
+        setPriceItems(response.data);
+        console.log('Hook: Price items set successfully:', response.data);
+        return response.data;
+      } else {
+        console.error('Hook: API response error:', response);
+        throw new Error(response.message || 'Failed to fetch price items');
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch price items';
+      setError(errorMessage);
+      console.error('Hook: Error fetching price items:', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    priceItems,
+    loading,
+    error,
+    fetchPriceItemsByTableId,
   };
 };
