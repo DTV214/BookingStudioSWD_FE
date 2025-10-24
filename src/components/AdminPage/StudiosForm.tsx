@@ -153,6 +153,11 @@ export default function StudiosForm({
               </Link>
             </li>
             <li>
+              <Link href="/admin/pricing" className="menu-link">
+                Pricing Management
+              </Link>
+            </li>
+            <li>
               <Link href="/admin/notifications" className="menu-link">
                 Notifications
               </Link>

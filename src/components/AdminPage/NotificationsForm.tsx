@@ -330,6 +330,11 @@ export default function NotificationsForm({ notifications }: Props) {
                 Service Management
               </Link>
             </li>
+            <li>
+              <Link href="/admin/pricing" className="menu-link">
+                Pricing Management
+              </Link>
+            </li>
             <li className="active">
               <Link href="/admin/notifications" className="menu-link">
                 Notifications
