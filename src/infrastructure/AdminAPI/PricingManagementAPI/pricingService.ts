@@ -13,9 +13,27 @@ export interface PricingData {
   status: 'COMING_SOON' | 'IS_HAPPENING' | 'ENDED' | null;
 }
 
+// Price Rule interfaces
+export interface PriceRule {
+  id: string;
+  priceTableItemId: string;
+  dayFilter: string[]; // Changed from daysOfWeek to dayFilter to match BE
+  startTime: string;
+  endTime: string;
+  pricePerUnit: number;
+  unit: string;
+  date: string;
+}
+
+export interface PriceRuleResponse {
+  code: number;
+  message: string;
+  data: PriceRule[];
+}
+
 // Price Item interfaces
 export interface PriceItem {
-  id: string;
+  id: string | null; // Allow null for price items
   priceTableId: string;
   studioTypeName: string; // Changed from studioTypeId to studioTypeName
   defaultPrice: number;
@@ -122,7 +140,26 @@ export class PricingService {
     return response;
   }
 
-  // Step 5: Delete price table
+  // Step 8: Get price rules by item ID
+  static async getPriceRulesByItemId(itemId: string): Promise<PriceRuleResponse> {
+    console.log('Service: Fetching price rules for itemId:', itemId);
+    
+    if (!itemId || itemId === 'null' || itemId === 'undefined') {
+      throw new Error('Item ID is required and cannot be null');
+    }
+    
+    const url = `${API_BASE_URL}/api/price-rules/item/${itemId}`;
+    console.log('Service: Fetching price rules from URL:', url);
+    
+    const response = await this.fetchWithErrorHandling<PriceRuleResponse>(url, {
+      method: 'GET',
+    });
+
+    console.log('Service: Price rules by item ID API response:', response);
+    return response;
+  }
+
+  // Step 9: Delete price table
   static async deletePriceTable(id: string): Promise<void> {
     const url = `${API_BASE_URL}/api/price-tables/${id}`;
     console.log('Deleting price table:', id);

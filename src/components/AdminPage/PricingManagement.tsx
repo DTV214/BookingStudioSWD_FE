@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { PricingData, PriceTablePayload, PriceItem, usePriceItems } from "@/infrastructure/AdminAPI/PricingManagementAPI";
+import { PricingData, PriceTablePayload, PriceItem, PriceRule, usePriceItems } from "@/infrastructure/AdminAPI/PricingManagementAPI";
 
 interface Props {
   priceTables: PricingData[];
@@ -16,11 +16,15 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isPriceItemDetailModalOpen, setIsPriceItemDetailModalOpen] = useState(false);
   const [editingPriceTable, setEditingPriceTable] = useState<PricingData | null>(null);
   const [viewingPriceTable, setViewingPriceTable] = useState<PricingData | null>(null);
+  const [viewingPriceItem, setViewingPriceItem] = useState<PriceItem | null>(null);
   const [priceItems, setPriceItems] = useState<PriceItem[]>([]);
+  const [priceRules, setPriceRules] = useState<PriceRule[]>([]);
   const [loadingPriceItems, setLoadingPriceItems] = useState(false);
-  const { fetchPriceItemsByTableId } = usePriceItems();
+  const [loadingPriceRules, setLoadingPriceRules] = useState(false);
+  const { fetchPriceItemsByTableId, fetchPriceRulesByItemId } = usePriceItems();
   const [newPriceData, setNewPriceData] = useState<PriceTablePayload>({
     startDate: '',
     endDate: null,
@@ -138,6 +142,59 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
         alert('Failed to delete price table. Please try again.');
       }
     }
+  };
+
+  // Step 7: Handle view price item details
+  const handleViewPriceItem = async (priceItem: PriceItem) => {
+    try {
+      console.log('Opening price item details for:', priceItem);
+      console.log('Price item ID:', priceItem.id);
+      console.log('Price item ID type:', typeof priceItem.id);
+      console.log('Price item ID length:', priceItem.id?.length);
+      
+      // Use existing price item data directly
+      console.log('Using existing price item data for modal');
+      setViewingPriceItem(priceItem);
+      setIsPriceItemDetailModalOpen(true);
+      
+      // Fetch price rules for this price item
+      try {
+        setLoadingPriceRules(true);
+        console.log('Fetching price rules for itemId:', priceItem.id);
+        
+        if (priceItem.id) {
+          const rules = await fetchPriceRulesByItemId(priceItem.id);
+          setPriceRules(rules);
+          console.log('Fetched price rules:', rules);
+          console.log('First rule details:', rules[0]);
+          if (rules[0]) {
+            console.log('dayFilter:', rules[0].dayFilter);
+            console.log('unit:', rules[0].unit);
+          }
+        } else {
+          console.warn('Price item ID is null, cannot fetch price rules');
+          setPriceRules([]);
+        }
+      } catch (rulesError) {
+        console.warn('Failed to fetch price rules:', rulesError);
+        setPriceRules([]);
+      } finally {
+        setLoadingPriceRules(false);
+      }
+      
+    } catch (error) {
+      console.error('Error in handleViewPriceItem:', error);
+      // Fallback to using the original price item data
+      setViewingPriceItem(priceItem);
+      setIsPriceItemDetailModalOpen(true);
+    }
+  };
+
+  // Step 8: Close price item detail modal
+  const handleClosePriceItemDetail = () => {
+    setIsPriceItemDetailModalOpen(false);
+    setViewingPriceItem(null);
+    setPriceRules([]);
   };
 
   // Step 6: Format date for display
@@ -340,10 +397,10 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
         </div>
       </section>
 
-      {/* Add Price Table Modal */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+       {/* Add Price Table Modal */}
+       {isAddModalOpen && (
+         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
+           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Add New Price Table</h3>
               <button
@@ -417,10 +474,10 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
         </div>
       )}
 
-      {/* Edit Price Table Modal */}
-      {isEditModalOpen && editingPriceTable && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+       {/* Edit Price Table Modal */}
+       {isEditModalOpen && editingPriceTable && (
+         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
+           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h3 className="text-lg font-semibold mb-4">Edit Price Table</h3>
             <div className="space-y-4">
               <div>
@@ -482,10 +539,10 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
         </div>
       )}
 
-      {/* View Price Table Details Modal */}
-      {isDetailModalOpen && viewingPriceTable && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+       {/* View Price Table Details Modal */}
+       {isDetailModalOpen && viewingPriceTable && (
+         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
+           <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Price Table Details</h3>
               <button
@@ -555,6 +612,9 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             DEFAULT PRICE
                           </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            ACTIONS
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
@@ -568,6 +628,18 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                               {priceItem.defaultPrice ? priceItem.defaultPrice.toLocaleString('vi-VN') + ' VND' : '0 VND'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <button
+                                onClick={() => handleViewPriceItem(priceItem)}
+                                className="text-blue-600 hover:text-blue-900 mr-3"
+                                title="View Price Item Details"
+                              >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                  <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                              </button>
                             </td>
                           </tr>
                         ))}
@@ -585,6 +657,117 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
             <div className="flex justify-end mt-6">
               <button
                 onClick={() => setIsDetailModalOpen(false)}
+                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+       {/* Price Item Detail Modal */}
+       {isPriceItemDetailModalOpen && viewingPriceItem && (
+         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
+           <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Price Item Details</h3>
+              <button
+                onClick={handleClosePriceItemDetail}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-4">
+                {/* <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">ID</label>
+                  <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">{viewingPriceItem.id}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Price Table ID</label>
+                  <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">{viewingPriceItem.priceTableId}</p>
+                </div> */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Studio Type Name</label>
+                  <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">{viewingPriceItem.studioTypeName}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Default Price</label>
+                  <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                    {viewingPriceItem.defaultPrice ? viewingPriceItem.defaultPrice.toLocaleString('vi-VN') + ' VND' : '0 VND'}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Price Rules Section */}
+              <div className="border-t pt-4">
+                <h4 className="text-md font-medium text-gray-900 mb-3">Price Rules</h4>
+                {loadingPriceRules ? (
+                  <div className="bg-gray-50 p-4 rounded-lg text-center">
+                    <p className="text-sm text-gray-600">Loading price rules...</p>
+                  </div>
+                ) : priceRules.length > 0 ? (
+                  <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            DAYS OF WEEK
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            TIME RANGE
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            PRICE PER UNIT
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            UNIT
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            DATE
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {priceRules.map((rule, index) => (
+                          <tr key={rule.id || `price-rule-${index}`} className="hover:bg-gray-50 transition-colors duration-150">
+                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                               {rule.dayFilter && rule.dayFilter.length > 0 ? rule.dayFilter.join(', ') : 'N/A'}
+                             </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                              {rule.startTime && rule.endTime ? `${rule.startTime} - ${rule.endTime}` : 'N/A'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                              {rule.pricePerUnit ? rule.pricePerUnit.toLocaleString('vi-VN') + ' VND' : '0 VND'}
+                            </td>
+                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                               {rule.unit && rule.unit.trim() !== '' ? rule.unit : 'N/A'}
+                             </td>
+                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                               {rule.date && rule.date !== null ? new Date(rule.date).toLocaleDateString('vi-VN') : 'N/A'}
+                             </td>
+                           </tr>
+                         ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 p-4 rounded-lg text-center">
+                    <p className="text-sm text-gray-600">No price rules found for this price item.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={handleClosePriceItemDetail}
                 className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
               >
                 Close

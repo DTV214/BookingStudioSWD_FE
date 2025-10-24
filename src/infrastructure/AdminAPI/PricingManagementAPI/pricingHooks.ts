@@ -162,10 +162,37 @@ export const usePriceItems = () => {
     }
   };
 
+
+
+  // Step 4: Fetch price rules by item ID
+  const fetchPriceRulesByItemId = async (itemId: string) => {
+    try {
+      console.log('Hook: Fetching price rules for itemId:', itemId);
+      setLoading(true);
+      setError(null);
+      
+      if (!itemId || itemId === 'null' || itemId === 'undefined') {
+        throw new Error('Item ID is required and cannot be null');
+      }
+      
+      const response = await PricingService.getPriceRulesByItemId(itemId);
+      console.log('Hook: Price rules by item ID fetched successfully:', response);
+      return response.data;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch price rules by item ID';
+      setError(errorMessage);
+      console.error('Hook: Error fetching price rules by item ID:', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     priceItems,
     loading,
     error,
     fetchPriceItemsByTableId,
+    fetchPriceRulesByItemId,
   };
 };

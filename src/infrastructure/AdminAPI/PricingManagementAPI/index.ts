@@ -5,5 +5,7 @@ export type {
   PriceTablePayload, 
   PricingResponse,
   PriceItem,
-  PriceItemResponse
+  PriceItemResponse,
+  PriceRule,
+  PriceRuleResponse
 } from './pricingService';
