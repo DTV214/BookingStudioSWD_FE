@@ -27,10 +27,7 @@ const navItems: NavItem[] = [
   },
   {
     label: "Dịch vụ cho thuê",
-    children: [
-      { label: "Máy ảnh", href: "/thue/may-anh" },
-      { label: "Đèn", href: "/thue/den" },
-    ],
+    children: [{ label: "Các dịch vụ hấp dẫn", href: "/service" }],
   },
 ];
 
