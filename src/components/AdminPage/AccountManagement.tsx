@@ -308,6 +308,11 @@ export default function AccountManagement({ accounts }: Props) {
               </Link>
             </li>
             <li>
+              <Link href="/admin/studio-assign" className="menu-link">
+              Studio Assign
+              </Link>
+            </li>
+            <li>
               <Link href="/admin/notifications" className="menu-link">
                 Notifications
               </Link>

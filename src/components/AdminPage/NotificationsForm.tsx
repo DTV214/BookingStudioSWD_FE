@@ -335,6 +335,11 @@ export default function NotificationsForm({ notifications }: Props) {
                 Pricing Management
               </Link>
             </li>
+            <li>
+              <Link href="/admin/studio-assign" className="menu-link">
+              Studio Assign
+              </Link>
+            </li>
             <li className="active">
               <Link href="/admin/notifications" className="menu-link">
                 Notifications
