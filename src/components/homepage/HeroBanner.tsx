@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
 interface Banner {
   id: number;
   title: string;
@@ -80,9 +81,12 @@ export default function HeroBanner() {
             <p className="mt-4 text-lg md:text-2xl max-w-2xl animate-fadeInUp text-white delay-200">
               {banner.subtitle}
             </p>
-            <button className="mt-6 px-6 py-3 bg-amber-100 text-black rounded-lg font-semibold shadow-md hover:bg-amber-300 transition">
+            <Link
+              href="/booking"
+              className="mt-6 px-6 py-3 bg-amber-100 text-black rounded-lg font-semibold shadow-md hover:bg-amber-300 transition"
+            >
               Đặt lịch ngay
-            </button>
+            </Link>
           </div>
         </div>
       ))}

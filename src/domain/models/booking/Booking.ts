@@ -1,6 +1,6 @@
-interface StudioAssignRequest {
+export interface StudioAssignRequest {
   startTime: string; // ISO 8601 format
-  endTime: string;
+  hour: number;
   serviceIds: string[];
 }
 
@@ -18,5 +18,5 @@ export interface BookingResponse {
   // Dựa trên response 200 OK
   id: string; // Giả định backend trả về ID của booking
   data: string; // URL hoặc thông tin khác liên quan đến booking
-  message: string;
+  message?: string;
 }

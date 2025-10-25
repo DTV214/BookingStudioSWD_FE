@@ -21,6 +21,8 @@ export default function LocationContainer() {
               <li><a href="/admin/studios" className="menu-link">Studios</a></li>
           <li><a href="/admin/studio-types" className="menu-link">Studio Types</a></li>
               <li className="active"><a href="/admin/location" className="menu-link">Location Management</a></li>
+              <li><a href="/admin/service" className="menu-link">Service Management</a></li>
+              <li><a href="/admin/pricing" className="menu-link">Pricing Management</a></li>
               <li><a href="/admin/notifications" className="menu-link">Notifications</a></li>
               <li><a href="/admin/profile-setting" className="menu-link">Profile & Settings</a></li>
             </ul>
@@ -54,6 +56,8 @@ export default function LocationContainer() {
               <li><a href="/admin/studios" className="menu-link">Studios</a></li>
           <li><a href="/admin/studio-types" className="menu-link">Studio Types</a></li>
               <li className="active"><a href="/admin/location" className="menu-link">Location Management</a></li>
+              <li><a href="/admin/service" className="menu-link">Service Management</a></li>
+              <li><a href="/admin/pricing" className="menu-link">Pricing Management</a></li>
               <li><a href="/admin/notifications" className="menu-link">Notifications</a></li>
               <li><a href="/admin/profile-setting" className="menu-link">Profile & Settings</a></li>
             </ul>

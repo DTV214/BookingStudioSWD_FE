@@ -719,6 +719,21 @@ export default function BookingListForm({ bookings }: Props) {
               </Link>
             </li>
             <li>
+              <Link href="/admin/service" className="menu-link">
+                Service Management
+              </Link>
+            </li>
+            <li>
+              <Link href="/admin/pricing" className="menu-link">
+                Pricing Management
+              </Link>
+            </li>
+            <li>
+              <Link href="/admin/studio-assign" className="menu-link">
+              Studio Assign
+              </Link>
+            </li>
+            <li>
               <Link href="/admin/notifications" className="menu-link">
                 Notifications
               </Link>
