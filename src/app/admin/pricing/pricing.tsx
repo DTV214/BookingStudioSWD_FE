@@ -15,7 +15,7 @@ export default function PricingContainer() {
           <nav>
             <ul>
               <li><a href="/admin/dashboard" className="menu-link">Dashboard</a></li>
-              <li><a href="/admin/bookinglist" className="menu-link">Bookings List</a></li>
+              <li><a href="/admin/bookinglist" className="menu-link">Booking Management</a></li>
               <li><a href="/admin/account" className="menu-link">Account Management</a></li>
               <li><a href="/admin/studios" className="menu-link">Studios</a></li>
               <li><a href="/admin/studio-types" className="menu-link">Studio Types</a></li>
@@ -49,7 +49,7 @@ export default function PricingContainer() {
           <nav>
             <ul>
               <li><a href="/admin/dashboard" className="menu-link">Dashboard</a></li>
-              <li><a href="/admin/bookinglist" className="menu-link">Bookings List</a></li>
+              <li><a href="/admin/bookinglist" className="menu-link">Booking Management</a></li>
               <li><a href="/admin/account" className="menu-link">Account Management</a></li>
               <li><a href="/admin/studios" className="menu-link">Studios</a></li>
               <li><a href="/admin/studio-types" className="menu-link">Studio Types</a></li>

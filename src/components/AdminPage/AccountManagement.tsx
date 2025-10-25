@@ -738,7 +738,7 @@ export default function AccountManagement({
             </li>
             <li>
               <Link href="/admin/bookinglist" className="menu-link">
-                Bookings List
+                Booking Management
               </Link>
             </li>
             <li className="active">

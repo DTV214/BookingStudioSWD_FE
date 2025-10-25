@@ -94,7 +94,7 @@ export default function LocationManagement({ locations, onCreateLocation, onUpda
               <Link href="/admin/dashboard" className="menu-link">Dashboard</Link>
             </li>
             <li>
-              <Link href="/admin/bookinglist" className="menu-link">Bookings List</Link>
+              <Link href="/admin/bookinglist" className="menu-link">Booking Management</Link>
             </li>
             <li>
               <Link href="/admin/account" className="menu-link">Account Management</Link>

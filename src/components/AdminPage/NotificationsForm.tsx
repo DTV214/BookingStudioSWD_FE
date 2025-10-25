@@ -302,7 +302,7 @@ export default function NotificationsForm({ notifications }: Props) {
             </li>
             <li>
               <Link href="/admin/bookinglist" className="menu-link">
-                Bookings List
+                Booking Management
               </Link>
             </li>
             <li>

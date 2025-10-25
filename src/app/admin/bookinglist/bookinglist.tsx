@@ -312,7 +312,7 @@ function BookingListForm({ bookings }: Props) {
             </li>
             <li className="active">
               <Link href="/admin/bookinglist" className="menu-link">
-                Bookings List
+                Booking Management
               </Link>
             </li>
             <li>
@@ -357,7 +357,7 @@ function BookingListForm({ bookings }: Props) {
       {/* Main content */}
       <section className="dashboard-root">
         <header className="dashboard-header">
-          <h1>Bookings List</h1>
+          <h1>Booking Management</h1>
         </header>
 
         {/* Booking Content with Tailwind CSS */}

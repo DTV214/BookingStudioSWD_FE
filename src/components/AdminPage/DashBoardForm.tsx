@@ -46,7 +46,7 @@ export default function DashBoardForm({
               <Link href="/admin/dashboard">Dashboard</Link>
             </li>
             <li>
-              <Link href="/admin/bookinglist">Bookings List</Link>
+              <Link href="/admin/bookinglist">Booking Management</Link>
             </li>
             <li>
               <Link href="/admin/account">Account Management</Link>
