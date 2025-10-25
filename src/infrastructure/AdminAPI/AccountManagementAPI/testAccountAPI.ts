@@ -2,7 +2,7 @@
 // This file helps verify that all API endpoints are working correctly
 
 import { AccountManagementAPI } from './accountManagementService';
-import { AccountCreateRequest, AccountUpdateRequest } from './types';
+import { AccountUpdateRequest } from './types';
 
 /**
  * Test suite for Account Management API
@@ -85,7 +85,7 @@ export class AccountAPITestSuite {
   /**
    * Test creating account with minimal data
    */
-  private static async testCreateAccountMinimal(): Promise<void> {
+  static async testCreateAccountMinimal(): Promise<void> {
     console.log('🔍 Testing create account with minimal data...');
     
     try {
@@ -111,7 +111,7 @@ export class AccountAPITestSuite {
   /**
    * Test creating account with comprehensive debugging
    */
-  private static async testCreateAccountComprehensive(): Promise<void> {
+  static async testCreateAccountComprehensive(): Promise<void> {
     console.log('🔍 Testing create account with comprehensive debugging...');
     
     try {
@@ -140,8 +140,8 @@ export class AccountAPITestSuite {
       
       // Check if it's an HttpError
       if (error && typeof error === 'object' && 'status' in error) {
-        console.log('HTTP Status:', (error as any).status);
-        console.log('HTTP Data:', (error as any).data);
+        console.log('HTTP Status:', (error as { status: number }).status);
+        console.log('HTTP Data:', (error as unknown as { data: unknown }).data);
       }
     }
   }
@@ -153,7 +153,7 @@ export class AccountAPITestSuite {
     console.log('🔍 Testing get account by ID...');
     
     try {
-      const testAccountId = (global as any).testAccountId;
+      const testAccountId = (global as { testAccountId?: string }).testAccountId;
       
       if (!testAccountId) {
         console.log('⚠️ No test account ID available, skipping test');
@@ -175,7 +175,7 @@ export class AccountAPITestSuite {
     console.log('✏️ Testing update account...');
     
     try {
-      const testAccountId = (global as any).testAccountId;
+      const testAccountId = (global as { testAccountId?: string }).testAccountId;
       
       if (!testAccountId) {
         console.log('⚠️ No test account ID available, skipping test');
@@ -203,7 +203,7 @@ export class AccountAPITestSuite {
     console.log('🔒 Testing ban/unban account...');
     
     try {
-      const testAccountId = (global as any).testAccountId;
+      const testAccountId = (global as { testAccountId?: string }).testAccountId;
       
       if (!testAccountId) {
         console.log('⚠️ No test account ID available, skipping test');
@@ -230,7 +230,7 @@ export class AccountAPITestSuite {
     console.log('🗑️ Testing delete account...');
     
     try {
-      const testAccountId = (global as any).testAccountId;
+      const testAccountId = (global as { testAccountId?: string }).testAccountId;
       
       if (!testAccountId) {
         console.log('⚠️ No test account ID available, skipping test');
@@ -241,7 +241,7 @@ export class AccountAPITestSuite {
       console.log('✅ Account deleted successfully');
       
       // Clean up global variable
-      delete (global as any).testAccountId;
+      delete (global as { testAccountId?: string }).testAccountId;
       
     } catch (error) {
       console.log('❌ Delete account test failed:', error);
@@ -308,8 +308,8 @@ export const testAccountAPIComprehensive = () => {
 
 // Make functions available globally for testing
 if (typeof window !== 'undefined') {
-  (window as any).testAccountAPI = testAccountAPI;
-  (window as any).testAccountAPICustom = testAccountAPICustom;
-  (window as any).testAccountAPIMinimal = testAccountAPIMinimal;
-  (window as any).testAccountAPIComprehensive = testAccountAPIComprehensive;
+  (window as { testAccountAPI?: () => Promise<void> }).testAccountAPI = testAccountAPI;
+  (window as { testAccountAPICustom?: (data: AccountUpdateRequest) => Promise<void> }).testAccountAPICustom = testAccountAPICustom;
+  (window as { testAccountAPIMinimal?: () => Promise<void> }).testAccountAPIMinimal = testAccountAPIMinimal;
+  (window as { testAccountAPIComprehensive?: () => Promise<void> }).testAccountAPIComprehensive = testAccountAPIComprehensive;
 }

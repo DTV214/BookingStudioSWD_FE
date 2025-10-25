@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import AccountManagement from "@/components/AdminPage/AccountManagement";
-import { AccountManagementAPI, AccountData, AccountStatistics } from "@/infrastructure/AdminAPI/AccountManagementAPI";
+import { AccountManagementAPI, AccountData, AccountStatistics, AccountCreateRequest, AccountUpdateRequest } from "@/infrastructure/AdminAPI/AccountManagementAPI";
 
 export default function AccountContainer() {
   const [accounts, setAccounts] = useState<AccountData[]>([]);
@@ -37,7 +37,7 @@ export default function AccountContainer() {
   }, []);
 
   // Handle account operations
-  const handleCreateAccount = async (accountData: any) => {
+  const handleCreateAccount = async (accountData: AccountCreateRequest) => {
     try {
       const newAccount = await AccountManagementAPI.createAccount(accountData);
       
@@ -51,7 +51,7 @@ export default function AccountContainer() {
     }
   };
 
-  const handleUpdateAccount = async (accountId: string, accountData: any) => {
+  const handleUpdateAccount = async (accountId: string, accountData: AccountUpdateRequest) => {
     try {
       const updatedAccount = await AccountManagementAPI.updateAccount(accountId, accountData);
       

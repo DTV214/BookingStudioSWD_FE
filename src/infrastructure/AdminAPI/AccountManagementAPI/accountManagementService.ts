@@ -1,7 +1,6 @@
 import { httpClient } from '@/infrastructure/api/httpClient';
 import {
   AccountData,
-  AccountListResponse,
   AccountResponse,
   AccountUpdateRequest,
   AccountCreateRequest,
@@ -99,7 +98,7 @@ export class AccountManagementAPI {
       }
       
       // Create payload according to Swagger documentation
-      const requestPayload: any = {
+      const requestPayload: AccountCreateRequest = {
         email: accountData.email.trim(),
         fullName: accountData.fullName.trim(),
         phoneNumber: accountData.phoneNumber.trim(),
@@ -129,10 +128,10 @@ export class AccountManagementAPI {
           id: `mock-${Date.now()}`,
           email: requestPayload.email,
           fullName: requestPayload.fullName,
-          phoneNumber: requestPayload.phoneNumber,
+          phoneNumber: requestPayload.phoneNumber || null,
           accountRole: requestPayload.role,
           status: requestPayload.status,
-          userType: requestPayload.userType,
+          userType: requestPayload.userType || null,
           locationId: requestPayload.locationId,
           createdDate: new Date().toISOString(),
           updatedDate: new Date().toISOString()
@@ -181,10 +180,10 @@ export class AccountManagementAPI {
             id: `mock-${Date.now()}`,
             email: requestPayload.email,
             fullName: requestPayload.fullName,
-            phoneNumber: requestPayload.phoneNumber,
+            phoneNumber: requestPayload.phoneNumber || null,
             accountRole: requestPayload.role,
             status: requestPayload.status,
-            userType: requestPayload.userType,
+            userType: requestPayload.userType || null,
             locationId: requestPayload.locationId,
             createdDate: new Date().toISOString(),
             updatedDate: new Date().toISOString()
@@ -201,8 +200,8 @@ export class AccountManagementAPI {
       console.error('Error details:', error);
       
       if (error && typeof error === 'object' && 'status' in error) {
-        console.error('HTTP Status:', (error as any).status);
-        console.error('HTTP Data:', (error as any).data);
+        console.error('HTTP Status:', (error as { status: number }).status);
+        console.error('HTTP Data:', (error as unknown as { data: unknown }).data);
       }
       
       throw error;
@@ -218,7 +217,7 @@ export class AccountManagementAPI {
   static async updateAccount(accountId: string, accountData: AccountUpdateRequest): Promise<AccountData> {
     try {
       // Create payload according to Swagger documentation
-      const requestPayload: any = {
+      const requestPayload: AccountUpdateRequest = {
         email: accountData.email?.trim(),
         fullName: accountData.fullName?.trim(),
         phoneNumber: accountData.phoneNumber?.trim(),
@@ -306,8 +305,8 @@ export class AccountManagementAPI {
       console.error('=== UPDATE ACCOUNT ERROR ===');
       console.error('Error details:', error);
       if (error && typeof error === 'object' && 'status' in error) {
-        console.error('HTTP Status:', (error as any).status);
-        console.error('HTTP Data:', (error as any).data);
+        console.error('HTTP Status:', (error as { status: number }).status);
+        console.error('HTTP Data:', (error as unknown as { data: unknown }).data);
       }
       throw error;
     }

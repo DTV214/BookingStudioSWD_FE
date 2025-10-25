@@ -75,12 +75,12 @@ function timeoutController(ms: number): {
 async function request<TRespData, TBody = unknown>(
   opts: RequestOptions<TBody>
 ): Promise<ApiResponse<TRespData>> {
-  const { method, url, data, token, signal, retries = 1 } = opts;
+  const { method, url, data, token, signal, retries = 3 } = opts;
   const fullUrl = joinURL(RAW_BASE_URL, url);
   const isJSON = !(typeof FormData !== "undefined" && data instanceof FormData);
 
   const external = Boolean(signal);
-  const t = external ? null : timeoutController(15_000); // timeout 15s
+  const t = external ? null : timeoutController(5_000); // timeout 5s để tránh chờ quá lâu
 
   try {
     const res = await fetch(fullUrl, {
@@ -148,17 +148,28 @@ async function request<TRespData, TBody = unknown>(
 
     throw new Error("Invalid JSON response shape.");
   } catch (err) {
-    // Retry nhẹ nếu lỗi mạng/timeout/503
+    // Retry nhẹ nếu lỗi mạng/timeout/503/502/504
     const shouldRetry =
       retries > 0 &&
       ((err instanceof DOMException && err.name === "AbortError") ||
         (err instanceof HttpError &&
-          (err.status === 429 || err.status === 503)));
+          (err.status === 429 || err.status === 502 || err.status === 503 || err.status === 504)) ||
+        (err instanceof TypeError && err.message.includes("Failed to fetch")));
 
     if (shouldRetry) {
-      await new Promise((r) => setTimeout(r, 300));
+      console.log(`Retrying request to ${fullUrl}, attempts left: ${retries - 1}`);
+      await new Promise((r) => setTimeout(r, 1000)); // Wait 1s before retry
       return request<TRespData, TBody>({ ...opts, retries: retries - 1 });
     }
+
+    // Log error details for debugging
+    console.error('HTTP Request failed:', {
+      url: fullUrl,
+      method,
+      error: err,
+      errorType: err?.constructor?.name,
+      errorMessage: err instanceof Error ? err.message : String(err)
+    });
 
     throw err;
   } finally {
@@ -212,4 +223,12 @@ export const httpClient = {
   HttpError,
 };
 
-
+/* -------------------- cách xử lý 401 ở UI -------------------- */
+// Ví dụ: trong một hook/usecase, bạn có thể bắt lỗi và redirect (client-only)
+// try { await httpClient.get<User>('/me'); } catch (e) {
+//   if (e instanceof httpClient.HttpError && e.status === 401) {
+//     router.push('/auth/login');
+//     return;
+//   }
+//   throw e;
+// }

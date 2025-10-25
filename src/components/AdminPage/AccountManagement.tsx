@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { AccountData, AccountStatistics } from "@/infrastructure/AdminAPI/AccountManagementAPI";
+import { AccountData, AccountStatistics, AccountCreateRequest, AccountUpdateRequest } from "@/infrastructure/AdminAPI/AccountManagementAPI";
 import { LocationAPI } from "@/infrastructure/AdminAPI/Location/locationAPI";
 import { LocationData } from "@/infrastructure/AdminAPI/Location/types";
 
@@ -11,8 +11,8 @@ interface Props {
   statistics: AccountStatistics | null;
   loading: boolean;
   error: string | null;
-  onCreateAccount: (accountData: any) => Promise<AccountData>;
-  onUpdateAccount: (accountId: string, accountData: any) => Promise<AccountData>;
+  onCreateAccount: (accountData: AccountCreateRequest) => Promise<AccountData>;
+  onUpdateAccount: (accountId: string, accountData: AccountUpdateRequest) => Promise<AccountData>;
   onBanAccount: (accountId: string) => Promise<void>;
   onUnbanAccount: (accountId: string) => Promise<void>;
   onDeleteAccount: (accountId: string) => Promise<void>;
@@ -29,7 +29,7 @@ interface EditModalProps {
 interface AddModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (newAccount: any) => void;
+  onSave: (newAccount: AccountCreateRequest) => void;
 }
 
 interface FilterState {
@@ -630,7 +630,7 @@ export default function AccountManagement({
     }
   };
 
-  const handleAddAccount = async (newAccountData: any) => {
+  const handleAddAccount = async (newAccountData: AccountCreateRequest) => {
     try {
       await onCreateAccount(newAccountData);
       // onCreateAccount already calls handleRefreshData, no need to call again
@@ -759,21 +759,6 @@ export default function AccountManagement({
             <li>
               <Link href="/admin/location" className="menu-link">
                 Location Management
-              </Link>
-            </li>
-            <li>
-              <Link href="/admin/service" className="menu-link">
-                Service Management
-              </Link>
-            </li>
-            <li>
-              <Link href="/admin/pricing" className="menu-link">
-                Pricing Management
-              </Link>
-            </li>
-            <li>
-              <Link href="/admin/studio-assign" className="menu-link">
-              Studio Assign
               </Link>
             </li>
             <li>
@@ -1007,7 +992,7 @@ export default function AccountManagement({
                   </p>
                   {searchTerm && (
                     <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                      Tìm kiếm: "{searchTerm}"
+                      Tìm kiếm: &quot;{searchTerm}&quot;
                     </span>
                   )}
                 </div>
