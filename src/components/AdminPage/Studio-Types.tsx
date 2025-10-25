@@ -120,7 +120,7 @@ export default function StudioTypesForm({ studioTypes, onCreate, onUpdate, onDel
             <li>
               <Link href="/admin/studios" className="menu-link">Studios</Link>
             </li>
-            <li className="active">
+            <li>
               <Link href="/admin/studio-types" className="menu-link">Studio Types</Link>
             </li>
             <li>
@@ -131,6 +131,9 @@ export default function StudioTypesForm({ studioTypes, onCreate, onUpdate, onDel
             </li>
             <li>
               <Link href="/admin/pricing" className="menu-link">Pricing Management</Link>
+            </li>
+            <li>
+              <Link href="/admin/studio-assign" className="menu-link">Studio Assign</Link>
             </li>
             <li>
               <Link href="/admin/notifications" className="menu-link">Notifications</Link>

@@ -67,6 +67,9 @@ export default function DashBoardForm({
               <Link href="/admin/pricing">Pricing Management</Link>
             </li>
             <li>
+              <Link href="/admin/studio-assign">Studio Assign</Link>
+            </li>
+            <li>
               <Link href="/admin/notifications">Notifications</Link>
             </li>
             <li>
