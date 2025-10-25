@@ -350,11 +350,6 @@ function BookingListForm({ bookings }: Props) {
                 Notifications
               </Link>
             </li>
-            <li>
-              <Link href="/admin/profile-setting" className="menu-link">
-                Profile & Settings
-              </Link>
-            </li>
           </ul>
         </nav>
       </aside>

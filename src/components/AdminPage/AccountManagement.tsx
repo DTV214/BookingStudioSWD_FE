@@ -762,13 +762,18 @@ export default function AccountManagement({
               </Link>
             </li>
             <li>
-              <Link href="/admin/notifications" className="menu-link">
-                Notifications
+              <Link href="/admin/service" className="menu-link">
+                Service Management
               </Link>
             </li>
             <li>
-              <Link href="/admin/profile-setting" className="menu-link">
-                Profile & Settings
+              <Link href="/admin/pricing" className="menu-link">
+                Pricing Management
+              </Link>
+            </li>
+            <li>
+              <Link href="/admin/notifications" className="menu-link">
+                Notifications
               </Link>
             </li>
           </ul>

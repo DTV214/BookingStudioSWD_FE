@@ -23,7 +23,6 @@ export default function PricingContainer() {
               <li><a href="/admin/service" className="menu-link">Service Management</a></li>
               <li className="active"><a href="/admin/pricing" className="menu-link">Pricing Management</a></li>
               <li><a href="/admin/notifications" className="menu-link">Notifications</a></li>
-              <li><a href="/admin/profile-setting" className="menu-link">Profile & Settings</a></li>
             </ul>
           </nav>
         </aside>
@@ -58,7 +57,6 @@ export default function PricingContainer() {
               <li><a href="/admin/service" className="menu-link">Service Management</a></li>
               <li className="active"><a href="/admin/pricing" className="menu-link">Pricing Management</a></li>
               <li><a href="/admin/notifications" className="menu-link">Notifications</a></li>
-              <li><a href="/admin/profile-setting" className="menu-link">Profile & Settings</a></li>
             </ul>
           </nav>
         </aside>
