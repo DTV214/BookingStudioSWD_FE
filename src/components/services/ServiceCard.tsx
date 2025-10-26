@@ -35,6 +35,9 @@ export function ServiceCard({ service }: ServiceCardProps) {
     if (serviceName.toLowerCase().includes('doanh nghiệp') || serviceName.toLowerCase().includes('corporate')) {
       return '/service/chup-anh-doanh-nghiep';
     }
+    if (serviceName.toLowerCase().includes('kỷ yếu lớp 12') || serviceName.toLowerCase().includes('ky yeu lop 12')) {
+      return '/service/chup-anh-ky-yeu-lop-12';
+    }
     return `/booking?service_id=${service.id}`;
   };
 
@@ -71,7 +74,8 @@ export function ServiceCard({ service }: ServiceCardProps) {
           <Link href={getServiceLink(service.serviceName)}>
             <span className="flex items-center justify-center">
               {service.serviceName.toLowerCase().includes('thẻ') || service.serviceName.toLowerCase().includes('id') || 
-               service.serviceName.toLowerCase().includes('doanh nghiệp') || service.serviceName.toLowerCase().includes('corporate')
+               service.serviceName.toLowerCase().includes('doanh nghiệp') || service.serviceName.toLowerCase().includes('corporate') ||
+               service.serviceName.toLowerCase().includes('kỷ yếu lớp 12') || service.serviceName.toLowerCase().includes('ky yeu lop 12')
                 ? 'Xem chi tiết' 
                 : 'Đặt lịch ngay'}
               <ArrowRight

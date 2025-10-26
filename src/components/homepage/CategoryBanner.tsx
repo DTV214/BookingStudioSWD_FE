@@ -20,7 +20,7 @@ const categories = [
   {
     title: "Chụp ảnh kỷ yếu lớp 12",
     img: "https://res.cloudinary.com/dratbz8bh/image/upload/v1758616794/Chup-anh-ky-yeu-dep-uy-tin-gia-re-chat-luong-hang-dau-scaled_enbf08.webp",
-    href: "/category/chup-anh-ky-yeu-12",
+    href: "/service/chup-anh-ky-yeu-lop-12",
     button: "Xem chi tiết",
   },
   {
