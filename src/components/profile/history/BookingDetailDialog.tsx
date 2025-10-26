@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   StudioAssignDetail,
   ServiceAssign,
+  PaymentDetail, // 1. THÊM IMPORT PAYMENT
 } from "@/domain/models/booking/BookingHistory";
 import {
   Loader2,
@@ -25,10 +26,15 @@ import {
   Sparkles,
   Camera,
   Info,
+  CreditCard, // 2. THÊM ICON MỚI
   type LucideIcon,
 } from "lucide-react";
 import { getBookingDetailsUseCase } from "@/domain/usecases/history-booking/getBookingDetails";
 import { getServiceAssignsUseCase } from "@/domain/usecases/history-booking/getServiceAssigns";
+// 3. THÊM IMPORT USE CASE MỚI
+import { getPaymentsForBookingUseCase } from "@/domain/usecases/history-booking/getPaymentsForBooking";
+// 4. THÊM IMPORT BẢNG MỚI
+import { PaymentHistoryTable } from "./PaymentHistoryTable";
 
 // --- Helper Types & Components ---
 
@@ -53,21 +59,31 @@ export function BookingDetailDialog({
 }: BookingDetailDialogProps) {
   const [details, setDetails] = useState<StudioAssignDetail[]>([]);
   const [services, setServices] = useState<Record<string, ServiceAssign[]>>({});
+  const [payments, setPayments] = useState<PaymentDetail[]>([]); // 5. THÊM STATE MỚI
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // 6. CẬP NHẬT useEffect ĐỂ GỌI 3 API
   useEffect(() => {
     if (open && bookingId) {
-      const fetchDetailsAndServices = async () => {
+      const fetchAllDetails = async () => {
         setLoading(true);
         setError(null);
         setDetails([]);
         setServices({});
+        setPayments([]); // Reset payment state
 
         try {
-          const slotData = await getBookingDetailsUseCase(bookingId);
-          setDetails(slotData);
+          // Chạy song song API lấy Slot và API lấy Payment
+          const [slotData, paymentData] = await Promise.all([
+            getBookingDetailsUseCase(bookingId),
+            getPaymentsForBookingUseCase(bookingId), // Gọi API payment
+          ]);
 
+          setDetails(slotData);
+          setPayments(paymentData); // Set state payment
+
+          // Sau khi có slotData, gọi API lấy services
           if (slotData?.length > 0) {
             const servicePromises = slotData.map((slot) =>
               getServiceAssignsUseCase(slot.id)
@@ -88,10 +104,12 @@ export function BookingDetailDialog({
           setLoading(false);
         }
       };
-      fetchDetailsAndServices();
+      fetchAllDetails();
     }
   }, [open, bookingId]);
+  // --- KẾT THÚC CẬP NHẬT useEffect ---
 
+  // 7. CẬP NHẬT renderContent ĐỂ HIỂN THỊ BẢNG
   const renderContent = () => {
     if (loading) return <DialogSkeleton />;
 
@@ -107,7 +125,7 @@ export function BookingDetailDialog({
       );
     }
 
-    if (details.length === 0) {
+    if (details.length === 0 && payments.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center h-56 text-center">
           <Info className="h-12 w-12 mb-4 text-slate-400" />
@@ -121,15 +139,38 @@ export function BookingDetailDialog({
       );
     }
 
+    // Chia làm 2 phần: Slot và Payment
     return (
-      <div className="space-y-4 max-h-[65vh] overflow-y-auto p-1 pr-4">
-        {details.map((slot) => (
-          <SlotCard
-            key={slot.id}
-            slot={slot}
-            services={services[slot.id] || []}
-          />
-        ))}
+      <div className="space-y-8 max-h-[65vh] overflow-y-auto p-1 pr-4">
+        {/* Phần 1: Chi tiết Slot */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-slate-700 flex items-center gap-2">
+            <Camera className="h-5 w-5 text-blue-600" />
+            Chi tiết Phòng & Dịch vụ
+          </h3>
+          {details.length > 0 ? (
+            details.map((slot) => (
+              <SlotCard
+                key={slot.id}
+                slot={slot}
+                services={services[slot.id] || []}
+              />
+            ))
+          ) : (
+            <p className="text-slate-500 italic text-sm">
+              Không có thông tin phòng.
+            </p>
+          )}
+        </div>
+
+        {/* Phần 2: Lịch sử Thanh toán */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-slate-700 flex items-center gap-2">
+            <CreditCard className="h-5 w-5 text-green-600" />
+            Lịch sử Thanh toán
+          </h3>
+          <PaymentHistoryTable payments={payments} />
+        </div>
       </div>
     );
   };
@@ -145,7 +186,8 @@ export function BookingDetailDialog({
             Chi tiết Đơn hàng
           </DialogTitle>
           <DialogDescription className="text-slate-500">
-            Thông tin chi tiết về các phòng và dịch vụ bạn đã đặt.
+            Thông tin chi tiết về các phòng, dịch vụ và lịch sử thanh toán của
+            bạn.
           </DialogDescription>
         </DialogHeader>
 
@@ -161,7 +203,7 @@ export function BookingDetailDialog({
   );
 }
 
-// --- Sub-components for better structure ---
+// --- Sub-components (SlotCard, DateTimeDisplay, InfoRow) giữ nguyên ---
 
 const SlotCard = ({
   slot,
@@ -264,13 +306,13 @@ const InfoRow = ({ icon: Icon, label, children }: InfoRowProps) => (
   </div>
 );
 
+// 8. CẬP NHẬT SKELETON
 const DialogSkeleton = () => (
-  <div className="space-y-4 p-1 pr-4">
-    {[...Array(2)].map((_, i) => (
-      <div
-        key={i}
-        className="bg-white rounded-xl border border-slate-200 shadow-sm"
-      >
+  <div className="space-y-8 p-1 pr-4">
+    {/* Skeleton cho Slot */}
+    <div className="space-y-4">
+      <Skeleton className="h-7 w-1/3" />
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
         <div className="p-5">
           <Skeleton className="h-7 w-3/5" />
         </div>
@@ -288,15 +330,13 @@ const DialogSkeleton = () => (
               <Skeleton className="h-5 w-full" />
             </div>
           </div>
-          <div className="flex gap-4">
-            <Skeleton className="h-5 w-5 rounded-full" />
-            <div className="w-full space-y-2">
-              <Skeleton className="h-5 w-1/4" />
-              <Skeleton className="h-5 w-1/2" />
-            </div>
-          </div>
         </div>
       </div>
-    ))}
+    </div>
+    {/* Skeleton cho Bảng Payment */}
+    <div className="space-y-4">
+      <Skeleton className="h-7 w-1/3" />
+      <Skeleton className="h-32 w-full rounded-lg" />
+    </div>
   </div>
 );
