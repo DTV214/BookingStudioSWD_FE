@@ -32,6 +32,9 @@ export function ServiceCard({ service }: ServiceCardProps) {
     if (serviceName.toLowerCase().includes('thẻ') || serviceName.toLowerCase().includes('id')) {
       return '/service/chup-anh-the';
     }
+    if (serviceName.toLowerCase().includes('doanh nghiệp') || serviceName.toLowerCase().includes('corporate')) {
+      return '/service/chup-anh-doanh-nghiep';
+    }
     return `/booking?service_id=${service.id}`;
   };
 
@@ -67,7 +70,8 @@ export function ServiceCard({ service }: ServiceCardProps) {
         >
           <Link href={getServiceLink(service.serviceName)}>
             <span className="flex items-center justify-center">
-              {service.serviceName.toLowerCase().includes('thẻ') || service.serviceName.toLowerCase().includes('id') 
+              {service.serviceName.toLowerCase().includes('thẻ') || service.serviceName.toLowerCase().includes('id') || 
+               service.serviceName.toLowerCase().includes('doanh nghiệp') || service.serviceName.toLowerCase().includes('corporate')
                 ? 'Xem chi tiết' 
                 : 'Đặt lịch ngay'}
               <ArrowRight

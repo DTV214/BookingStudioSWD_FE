@@ -15,7 +15,7 @@ const categories = [
   {
     title: "Chụp ảnh doanh nghiệp",
     img: "https://res.cloudinary.com/dratbz8bh/image/upload/v1758618411/50532682592_0ede566417_k_rxxreq.jpg",
-    href: "/category/chup-anh-doanh-nghiep",
+    href: "/service/chup-anh-doanh-nghiep",
   },
   {
     title: "Chụp ảnh kỷ yếu lớp 12",
