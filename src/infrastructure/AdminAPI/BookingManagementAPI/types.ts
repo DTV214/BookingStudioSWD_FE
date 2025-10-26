@@ -78,3 +78,64 @@ export interface CalendarResponse {
   message: string;
   data: CalendarBooking[];
 }
+
+// Studio Assign Types
+export interface StudioAssign {
+  id: string;
+  bookingId: string | null;
+  studioId: string;
+  studioName: string;
+  locationName: string;
+  startTime: string;
+  endTime: string;
+  studioAmount: number;
+  serviceAmount: number;
+  additionTime: number | null;
+  status: 'COMING_SOON' | 'IS_HAPPENING' | 'ENDED' | 'CANCELLED' | 'AWAITING_REFUND';
+  updatedAmount: number | null;
+}
+
+export interface StudioAssignListResponse {
+  code: number;
+  message: string;
+  data: StudioAssign[];
+}
+
+export interface StudioAssignDetailResponse {
+  code: number;
+  message: string;
+  data: StudioAssign;
+}
+
+export interface StudioAssignUpdateRequest {
+  startTime?: string;
+  endTime?: string;
+  additionTime?: number;
+  status?: 'COMING_SOON' | 'IS_HAPPENING' | 'ENDED' | 'CANCELLED' | 'AWAITING_REFUND';
+}
+
+export interface StudioAssignUpdateResponse {
+  code: number;
+  message: string;
+  data: StudioAssign;
+}
+
+export interface StudioAssignStatusUpdateRequest {
+  status: 'COMING_SOON' | 'IS_HAPPENING' | 'ENDED' | 'CANCELLED' | 'AWAITING_REFUND';
+}
+
+// Service Assign Types
+export interface ServiceAssign {
+  id: string;
+  studioAssignId: string | null;
+  serviceId: string;
+  serviceName: string;
+  serviceFee: number;
+  status: 'ACTIVE' | 'CANCELLED' | 'AWAITING_REFUND';
+}
+
+export interface ServiceAssignListResponse {
+  code: number;
+  message: string;
+  data: ServiceAssign[];
+}

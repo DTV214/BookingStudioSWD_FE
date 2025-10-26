@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { Booking, BookingStatistics } from "@/app/admin/bookinglist/bookinglist"; // Import types from container
+import StudioAssignList from "./StudioAssignList";
 
 interface Props {
   bookings: Booking[];
@@ -154,8 +155,8 @@ export default function BookingListForm({
               <li>
                 <Link href="/admin/pricing" className="menu-link">
                   Pricing Management
-                </Link>
-              </li>
+              </Link>
+            </li>
             <li>
               <Link href="/admin/notifications" className="menu-link">
                 Notifications
@@ -636,7 +637,7 @@ export default function BookingListForm({
         {/* View Modal */}
         {isViewModalOpen && selectedBooking && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 xl:w-1/2 shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
               <div className="mt-3">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-medium text-gray-900">Chi tiết Booking</h3>
@@ -676,6 +677,12 @@ export default function BookingListForm({
                       <p className="text-sm text-gray-600">{selectedBooking.notes}</p>
                     </div>
                   )}
+                </div>
+
+                {/* Studio Assign List Section */}
+                <div className="mt-6 border-t border-gray-200 pt-4">
+                  <h4 className="font-medium text-gray-900 mb-4">Những studio đã đăng kí</h4>
+                  <StudioAssignList bookingId={selectedBooking.id} />
                 </div>
               </div>
             </div>

@@ -8,7 +8,11 @@ import type {
   BookingQueryParams,
   BookingStatusUpdateRequest,
   BookingStatistics,
-  CalendarBooking
+  CalendarBooking,
+  StudioAssign,
+  StudioAssignUpdateRequest,
+  StudioAssignStatusUpdateRequest,
+  ServiceAssign
 } from './types';
 
 export interface UseBookingsReturn {
@@ -179,5 +183,119 @@ export function useCalendarBookings(params: {
     loading,
     error,
     refetch: fetchCalendarBookings,
+  };
+}
+
+// Studio Assign Hooks
+export interface UseStudioAssignsReturn {
+  studioAssigns: StudioAssign[];
+  loading: boolean;
+  error: string | null;
+  refetch: () => Promise<void>;
+  updateStudioAssign: (id: string, updateData: StudioAssignUpdateRequest) => Promise<void>;
+  updateStudioAssignStatus: (id: string, statusData: StudioAssignStatusUpdateRequest) => Promise<void>;
+}
+
+export function useStudioAssigns(bookingId?: string): UseStudioAssignsReturn {
+  const [studioAssigns, setStudioAssigns] = useState<StudioAssign[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchStudioAssigns = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      let response;
+      if (bookingId) {
+        response = await bookingManagementService.getStudioAssignsByBookingId(bookingId);
+      } else {
+        response = await bookingManagementService.getAllStudioAssigns();
+      }
+      setStudioAssigns(response.data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch studio assigns');
+      console.error('Error fetching studio assigns:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [bookingId]);
+
+  useEffect(() => {
+    fetchStudioAssigns();
+  }, [fetchStudioAssigns]);
+
+  const updateStudioAssign = useCallback(async (id: string, updateData: StudioAssignUpdateRequest) => {
+    try {
+      await bookingManagementService.updateStudioAssign(id, updateData);
+      // Refresh studio assigns after update
+      await fetchStudioAssigns();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update studio assign');
+      throw err;
+    }
+  }, [fetchStudioAssigns]);
+
+  const updateStudioAssignStatus = useCallback(async (id: string, statusData: StudioAssignStatusUpdateRequest) => {
+    try {
+      await bookingManagementService.updateStudioAssignStatus(id, statusData);
+      // Refresh studio assigns after status update
+      await fetchStudioAssigns();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update studio assign status');
+      throw err;
+    }
+  }, [fetchStudioAssigns]);
+
+  return {
+    studioAssigns,
+    loading,
+    error,
+    refetch: fetchStudioAssigns,
+    updateStudioAssign,
+    updateStudioAssignStatus,
+  };
+}
+
+// Service Assign Hooks
+export interface UseServiceAssignsReturn {
+  serviceAssigns: ServiceAssign[];
+  loading: boolean;
+  error: string | null;
+  refetch: () => Promise<void>;
+}
+
+export function useServiceAssigns(studioAssignId?: string): UseServiceAssignsReturn {
+  const [serviceAssigns, setServiceAssigns] = useState<ServiceAssign[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchServiceAssigns = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      let response;
+      if (studioAssignId) {
+        response = await bookingManagementService.getServiceAssignsByStudioAssignId(studioAssignId);
+      } else {
+        response = await bookingManagementService.getAllServiceAssigns();
+      }
+      setServiceAssigns(response.data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch service assigns');
+      console.error('Error fetching service assigns:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [studioAssignId]);
+
+  useEffect(() => {
+    fetchServiceAssigns();
+  }, [fetchServiceAssigns]);
+
+  return {
+    serviceAssigns,
+    loading,
+    error,
+    refetch: fetchServiceAssigns,
   };
 }

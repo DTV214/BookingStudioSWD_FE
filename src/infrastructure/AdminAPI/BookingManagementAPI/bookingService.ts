@@ -6,7 +6,13 @@ import {
   BookingStatusUpdateResponse,
   BookingQueryParams,
   BookingStatisticsResponse,
-  CalendarResponse
+  CalendarResponse,
+  StudioAssignListResponse,
+  StudioAssignDetailResponse,
+  StudioAssignUpdateRequest,
+  StudioAssignUpdateResponse,
+  StudioAssignStatusUpdateRequest,
+  ServiceAssignListResponse
 } from './types';
 
 const API_BASE_URL = 'https://api.eccubestudio.click/api';
@@ -132,6 +138,65 @@ class BookingManagementService {
     return this.updateBookingStatus(id, {
       status: 'COMPLETED',
       note: note || 'Booking completed'
+    });
+  }
+
+  // Studio Assign Methods
+  // Get all studio assigns
+  async getAllStudioAssigns(): Promise<StudioAssignListResponse> {
+    return this.makeRequest<StudioAssignListResponse>('/studio-assigns', {
+      method: 'GET',
+    });
+  }
+
+  // Get studio assigns by booking ID
+  async getStudioAssignsByBookingId(bookingId: string): Promise<StudioAssignListResponse> {
+    return this.makeRequest<StudioAssignListResponse>(`/studio-assigns/booking/${bookingId}`, {
+      method: 'GET',
+    });
+  }
+
+  // Get studio assign by ID
+  async getStudioAssignById(id: string): Promise<StudioAssignDetailResponse> {
+    return this.makeRequest<StudioAssignDetailResponse>(`/studio-assigns/${id}`, {
+      method: 'GET',
+    });
+  }
+
+  // Update studio assign
+  async updateStudioAssign(
+    id: string,
+    updateData: StudioAssignUpdateRequest
+  ): Promise<StudioAssignUpdateResponse> {
+    return this.makeRequest<StudioAssignUpdateResponse>(`/studio-assigns/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updateData),
+    });
+  }
+
+  // Update studio assign status only
+  async updateStudioAssignStatus(
+    id: string,
+    statusData: StudioAssignStatusUpdateRequest
+  ): Promise<StudioAssignUpdateResponse> {
+    return this.makeRequest<StudioAssignUpdateResponse>(`/studio-assigns/status/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(statusData),
+    });
+  }
+
+  // Service Assign Methods
+  // Get all service assigns
+  async getAllServiceAssigns(): Promise<ServiceAssignListResponse> {
+    return this.makeRequest<ServiceAssignListResponse>('/service-assigns', {
+      method: 'GET',
+    });
+  }
+
+  // Get service assigns by studio assign ID
+  async getServiceAssignsByStudioAssignId(studioAssignId: string): Promise<ServiceAssignListResponse> {
+    return this.makeRequest<ServiceAssignListResponse>(`/service-assigns/studio-assign/${studioAssignId}`, {
+      method: 'GET',
     });
   }
 }
