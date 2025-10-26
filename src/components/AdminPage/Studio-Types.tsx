@@ -112,7 +112,7 @@ export default function StudioTypesForm({ studioTypes, onCreate, onUpdate, onDel
               <Link href="/admin/dashboard" className="menu-link">Dashboard</Link>
             </li>
             <li>
-              <Link href="/admin/bookinglist" className="menu-link">Bookings List</Link>
+              <Link href="/admin/bookinglist" className="menu-link">Booking Management</Link>
             </li>
             <li>
               <Link href="/admin/account" className="menu-link">Account Management</Link>
@@ -120,17 +120,20 @@ export default function StudioTypesForm({ studioTypes, onCreate, onUpdate, onDel
             <li>
               <Link href="/admin/studios" className="menu-link">Studios</Link>
             </li>
-            <li className="active">
+            <li>
               <Link href="/admin/studio-types" className="menu-link">Studio Types</Link>
             </li>
             <li>
               <Link href="/admin/location" className="menu-link">Location Management</Link>
             </li>
             <li>
-              <Link href="/admin/notifications" className="menu-link">Notifications</Link>
+              <Link href="/admin/service" className="menu-link">Service Management</Link>
             </li>
             <li>
-              <Link href="/admin/profile-setting" className="menu-link">Profile & Settings</Link>
+              <Link href="/admin/pricing" className="menu-link">Pricing Management</Link>
+            </li>
+            <li>
+              <Link href="/admin/notifications" className="menu-link">Notifications</Link>
             </li>
           </ul>
         </nav>

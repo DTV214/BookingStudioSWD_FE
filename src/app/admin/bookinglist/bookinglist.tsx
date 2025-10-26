@@ -1,19 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
-import Link from "next/link";
-import BookingFilter from "./bookingfilter";
-import BookingViewModal from "./bookingviewmodal";
-import BookingEditModal from "./bookingeditmodal";
-import BookingActionBar from "./bookingactionbar";
+import React, { useState, useEffect } from "react";
+import BookingListForm from "../../../components/AdminPage/BookingListForm";
+import { useBookings, useBookingStatistics } from "../../../infrastructure/AdminAPI/BookingManagementAPI/bookingHooks";
+import type { BookingQueryParams } from "../../../infrastructure/AdminAPI/BookingManagementAPI/types";
 
-interface Customer {
+// UI Types (for presentation layer)
+export interface Customer {
   name: string;
   email: string;
   phone: string;
 }
 
-interface Studio {
+export interface Studio {
   name: string;
   address: string;
   date: string;
@@ -21,25 +20,25 @@ interface Studio {
   duration: string;
 }
 
-interface Service {
+export interface Service {
   name: string;
   price: number;
 }
 
-interface Pricing {
+export interface Pricing {
   studioPrice: number;
   servicePrice: number;
   overtimeFee: number;
   total: number;
 }
 
-interface BookingHistory {
+export interface BookingHistory {
   date: string;
   action: string;
   updatedBy: string;
 }
 
-interface Booking {
+export interface Booking {
   id: string;
   customer: Customer;
   studio: Studio;
@@ -47,434 +46,280 @@ interface Booking {
   pricing: Pricing;
   notes?: string;
   status: 'pending' | 'approved' | 'completed' | 'cancelled';
+  bookingType: 'studio_only' | 'studio_with_services' | 'services_only';
   approvedBy?: string;
   history: BookingHistory[];
   createdAt: string;
 }
 
-interface Props {
-  bookings: Booking[];
+export interface BookingStatistics {
+  totalBookings: number;
+  pendingBookings: number;
+  approvedBookings: number;
+  completedBookings: number;
+  cancelledBookings: number;
+  totalRevenue: number;
+  bookingsByStudio: Record<string, number>;
+  bookingsByMonth: Record<string, number>;
+  bookingsByStatus: { status: string; count: number }[];
 }
 
-const BookingData: Booking[] = [
-  {
-    id: "BK001",
+// Transform API Booking to UI Booking format
+const transformApiBookingToUiBooking = (apiBooking: {
+  id: string;
+  bookingDate: string;
+  updateDate: string;
+  note: string;
+  total: number;
+  status: string;
+  bookingType: string;
+  accountEmail: string;
+  accountName: string;
+  studioTypeName: string;
+}): Booking => {
+  return {
+    id: apiBooking.id,
     customer: {
-      name: "Nguyễn Thị Mai",
-      email: "nguyenthimai@gmail.com",
-      phone: "0123-456-789"
+      name: apiBooking.accountName || 'N/A',
+      email: apiBooking.accountEmail || 'N/A',
+      phone: 'N/A' // API doesn't provide phone
     },
     studio: {
-      name: "Studio Luxury",
-      address: "123 Nguyễn Huệ, Q1, TP.HCM",
-      date: "2024-01-20",
-      time: "09:00",
-      duration: "3 giờ"
+      name: apiBooking.studioTypeName || 'N/A',
+      address: 'N/A', // API doesn't provide address
+      date: new Date(apiBooking.bookingDate).toISOString().split('T')[0],
+      time: new Date(apiBooking.bookingDate).toLocaleTimeString('vi-VN', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      }),
+      duration: 'N/A' // API doesn't provide duration
     },
-    services: [
-      { name: "Makeup", price: 500000 },
-      { name: "Trang phục", price: 300000 },
-      { name: "Máy quay", price: 800000 }
-    ],
+    services: [], // API doesn't provide services details
     pricing: {
-      studioPrice: 2000000,
-      servicePrice: 1600000,
-      overtimeFee: 0,
-      total: 3600000
-    },
-    notes: "Khách hàng muốn trang điểm tự nhiên, trang phục vintage",
-    status: "approved",
-    approvedBy: "Admin",
-    history: [
-      { date: "2024-01-15 10:00", action: "Tạo đơn đặt", updatedBy: "Nguyễn Thị Mai" },
-      { date: "2024-01-15 14:30", action: "Duyệt đơn", updatedBy: "Admin" }
-    ],
-    createdAt: "2024-01-15T10:00:00Z"
-  },
-  {
-    id: "BK002",
-    customer: {
-      name: "Trần Văn Nam",
-      email: "tranvannam@gmail.com",
-      phone: "0987-654-321"
-    },
-    studio: {
-      name: "Studio Modern",
-      address: "456 Lê Lợi, Q3, TP.HCM",
-      date: "2024-01-22",
-      time: "14:00",
-      duration: "2 giờ"
-    },
-    services: [
-      { name: "Máy chụp hình", price: 600000 },
-      { name: "Đạo cụ", price: 200000 }
-    ],
-    pricing: {
-      studioPrice: 1500000,
-      servicePrice: 800000,
-      overtimeFee: 200000,
-      total: 2500000
-    },
-    notes: "Chụp ảnh sản phẩm, cần ánh sáng tự nhiên",
-    status: "pending",
-    history: [
-      { date: "2024-01-18 16:00", action: "Tạo đơn đặt", updatedBy: "Trần Văn Nam" }
-    ],
-    createdAt: "2024-01-18T16:00:00Z"
-  },
-  {
-    id: "BK003",
-    customer: {
-      name: "Lê Thị Hoa",
-      email: "lethihoa@gmail.com",
-      phone: "0456-789-123"
-    },
-    studio: {
-      name: "Studio Classic",
-      address: "789 Điện Biên Phủ, Q.Bình Thạnh, TP.HCM",
-      date: "2024-01-25",
-      time: "11:00",
-      duration: "4 giờ"
-    },
-    services: [
-      { name: "Makeup", price: 700000 },
-      { name: "Trang phục", price: 500000 },
-      { name: "Máy quay", price: 1000000 },
-      { name: "Máy chụp hình", price: 800000 }
-    ],
-    pricing: {
-      studioPrice: 3000000,
-      servicePrice: 3000000,
-      overtimeFee: 500000,
-      total: 6500000
-    },
-    notes: "Quay video ca nhạc, cần trang điểm đậm",
-    status: "completed",
-    approvedBy: "Manager",
-    history: [
-      { date: "2024-01-20 09:00", action: "Tạo đơn đặt", updatedBy: "Lê Thị Hoa" },
-      { date: "2024-01-20 11:30", action: "Duyệt đơn", updatedBy: "Manager" },
-      { date: "2024-01-25 15:00", action: "Hoàn thành", updatedBy: "Staff" }
-    ],
-    createdAt: "2024-01-20T09:00:00Z"
-  },
-  {
-    id: "BK004",
-    customer: {
-      name: "Phạm Minh Tuấn",
-      email: "phamminhtuan@gmail.com",
-      phone: "0321-654-987"
-    },
-    studio: {
-      name: "Studio Premium",
-      address: "321 Võ Văn Tần, Q3, TP.HCM",
-      date: "2024-01-28",
-      time: "16:00",
-      duration: "2 giờ"
-    },
-    services: [],
-    pricing: {
-      studioPrice: 1800000,
+      studioPrice: apiBooking.total || 0,
       servicePrice: 0,
       overtimeFee: 0,
-      total: 1800000
+      total: apiBooking.total || 0
     },
-    notes: "Chỉ thuê studio, không cần dịch vụ kèm theo",
-    status: "cancelled",
-    approvedBy: "Admin",
+    notes: apiBooking.note || '',
+    status: mapApiStatusToUiStatus(apiBooking.status),
+    approvedBy: 'Admin', // Default value
     history: [
-      { date: "2024-01-22 14:00", action: "Tạo đơn đặt", updatedBy: "Phạm Minh Tuấn" },
-      { date: "2024-01-22 16:00", action: "Duyệt đơn", updatedBy: "Admin" },
-      { date: "2024-01-25 10:00", action: "Hủy đơn", updatedBy: "Phạm Minh Tuấn" }
+      {
+        date: new Date(apiBooking.bookingDate).toLocaleString('vi-VN'),
+        action: 'Tạo đơn đặt',
+        updatedBy: apiBooking.accountName || 'Customer'
+      },
+      {
+        date: new Date(apiBooking.updateDate).toLocaleString('vi-VN'),
+        action: 'Cập nhật trạng thái',
+        updatedBy: 'Admin'
+      }
     ],
-    createdAt: "2024-01-22T14:00:00Z"
-  },
-  {
-    id: "BK005",
-    customer: {
-      name: "Hoàng Thị Lan",
-      email: "hoangthilan@gmail.com",
-      phone: "0789-123-456"
-    },
-    studio: {
-      name: "Studio Art",
-      address: "654 Nguyễn Thị Minh Khai, Q1, TP.HCM",
-      date: "2024-01-30",
-      time: "10:00",
-      duration: "3 giờ"
-    },
-    services: [
-      { name: "Makeup", price: 600000 },
-      { name: "Đạo cụ", price: 300000 }
-    ],
-    pricing: {
-      studioPrice: 2200000,
-      servicePrice: 900000,
-      overtimeFee: 0,
-      total: 3100000
-    },
-    notes: "Chụp ảnh nghệ thuật, cần đạo cụ đặc biệt",
-    status: "pending",
-    history: [
-      { date: "2024-01-25 15:30", action: "Tạo đơn đặt", updatedBy: "Hoàng Thị Lan" }
-    ],
-    createdAt: "2024-01-25T15:30:00Z"
+    createdAt: apiBooking.bookingDate,
+    bookingType: mapApiBookingTypeToUiBookingType(apiBooking.bookingType)
+  };
+};
+
+// Map API status to UI status
+const mapApiStatusToUiStatus = (apiStatus: string): 'pending' | 'approved' | 'completed' | 'cancelled' => {
+  switch (apiStatus) {
+    case 'PENDING': return 'pending';
+    case 'IN_PROGRESS': return 'approved';
+    case 'COMPLETED': return 'completed';
+    case 'CANCELLED': return 'cancelled';
+    default: return 'pending';
   }
-];
+};
 
-function BookingListForm({ bookings }: Props) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [bookingsList, setBookingsList] = useState<Booking[]>(bookings);
+// Map API booking type to UI booking type
+const mapApiBookingTypeToUiBookingType = (apiBookingType: string): 'studio_only' | 'studio_with_services' | 'services_only' => {
+  switch (apiBookingType) {
+    case 'PAY_FULL': return 'studio_with_services';
+    case 'PAY_PARTIAL': return 'studio_with_services';
+    case 'FREE': return 'studio_only';
+    default: return 'studio_only';
+  }
+};
 
-  const filteredBookings = bookingsList.filter(booking =>
-    booking.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    booking.studio.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    booking.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleViewBooking = (booking: Booking) => {
-    setSelectedBooking(booking);
-    setIsViewModalOpen(true);
+// Transform API statistics to UI statistics
+const transformApiStatisticsToUiStatistics = (apiStats: {
+  totalBookings?: number;
+  pendingBookings?: number;
+  approvedBookings?: number;
+  completedBookings?: number;
+  cancelledBookings?: number;
+  totalRevenue?: number;
+  bookingsByStudio?: Record<string, number>;
+  bookingsByMonth?: Record<string, number>;
+  bookingsByStatus?: Record<string, number>;
+}): BookingStatistics => {
+  return {
+    totalBookings: apiStats.totalBookings || 0,
+    pendingBookings: apiStats.pendingBookings || 0,
+    approvedBookings: apiStats.approvedBookings || 0,
+    completedBookings: apiStats.completedBookings || 0,
+    cancelledBookings: apiStats.cancelledBookings || 0,
+    totalRevenue: apiStats.totalRevenue || 0,
+    bookingsByStudio: apiStats.bookingsByStudio || {},
+    bookingsByMonth: apiStats.bookingsByMonth || {},
+    bookingsByStatus: Object.entries(apiStats.bookingsByStatus || {}).map(([status, count]) => ({
+      status,
+      count: count as number
+    }))
   };
+};
 
-  const handleEditBooking = (booking: Booking) => {
-    setEditingBooking(booking);
-    setIsEditModalOpen(true);
-  };
+export default function BookingListContainer() {
+  const [queryParams] = useState<BookingQueryParams>({});
+  const [uiBookings, setUiBookings] = useState<Booking[]>([]);
+  const [uiStatistics, setUiStatistics] = useState<BookingStatistics>({
+    totalBookings: 0,
+    pendingBookings: 0,
+    approvedBookings: 0,
+    completedBookings: 0,
+    cancelledBookings: 0,
+    totalRevenue: 0,
+    bookingsByStudio: {},
+    bookingsByMonth: {},
+    bookingsByStatus: []
+  });
 
-  const handleSaveBooking = (updatedBooking: Booking) => {
-    setBookingsList(prev => 
-      prev.map(booking => 
-        booking.id === updatedBooking.id ? updatedBooking : booking
-      )
-    );
-    setIsEditModalOpen(false);
-    setEditingBooking(null);
-  };
+  // Use API hooks
+  const { 
+    bookings: apiBookings, 
+    loading: bookingsLoading, 
+    error: bookingsError,
+    updateBookingStatus: apiUpdateBookingStatus
+  } = useBookings(queryParams);
 
-  const handleAddNewBooking = () => {
-    // TODO: Implement add new booking functionality
-    console.log('Add new booking');
-  };
+  // Temporarily disable statistics API call to avoid 400 error
+  // const { 
+  //   statistics: apiStatistics, 
+  //   loading: statisticsLoading, 
+  //   error: statisticsError 
+  // } = useBookingStatistics();
+  
+  const apiStatistics = null;
+  const statisticsLoading = false;
+  const statisticsError = null;
 
-  const getStatusDisplay = (status: string) => {
-    switch (status) {
-      case 'pending': return 'Đang chờ xử lý';
-      case 'approved': return 'Đã duyệt';
-      case 'completed': return 'Đã hoàn thành';
-      case 'cancelled': return 'Đã hủy';
-      default: return status;
+  // Transform API data to UI format
+  useEffect(() => {
+    if (apiBookings) {
+      const transformedBookings = apiBookings.map(transformApiBookingToUiBooking);
+      setUiBookings(transformedBookings);
+    }
+  }, [apiBookings]);
+
+  useEffect(() => {
+    if (apiStatistics) {
+      const transformedStatistics = transformApiStatisticsToUiStatistics(apiStatistics);
+      setUiStatistics(transformedStatistics);
+    } else {
+      // Use mock statistics data when API is not available
+      const mockStatistics: BookingStatistics = {
+        totalBookings: uiBookings.length,
+        pendingBookings: uiBookings.filter(b => b.status === 'pending').length,
+        approvedBookings: uiBookings.filter(b => b.status === 'approved').length,
+        completedBookings: uiBookings.filter(b => b.status === 'completed').length,
+        cancelledBookings: uiBookings.filter(b => b.status === 'cancelled').length,
+        totalRevenue: uiBookings.reduce((sum, b) => sum + b.pricing.total, 0),
+        bookingsByStudio: uiBookings.reduce((acc, booking) => {
+          const studioName = booking.studio.name;
+          acc[studioName] = (acc[studioName] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>),
+        bookingsByMonth: {},
+        bookingsByStatus: [
+          { status: 'pending', count: uiBookings.filter(b => b.status === 'pending').length },
+          { status: 'approved', count: uiBookings.filter(b => b.status === 'approved').length },
+          { status: 'completed', count: uiBookings.filter(b => b.status === 'completed').length },
+          { status: 'cancelled', count: uiBookings.filter(b => b.status === 'cancelled').length }
+        ]
+      };
+      setUiStatistics(mockStatistics);
+    }
+  }, [apiStatistics, uiBookings]);
+
+  // Handle booking status updates
+  const handleUpdateBookingStatus = async (bookingId: string, newStatus: Booking['status']) => {
+    try {
+      const apiStatus = mapUiStatusToApiStatus(newStatus);
+      await apiUpdateBookingStatus(bookingId, {
+        status: apiStatus,
+        note: `Status updated to ${newStatus}`
+      });
+    } catch (error) {
+      console.error('Error updating booking status:', error);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'approved': return 'bg-blue-100 text-blue-800';
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+  // Map UI status to API status
+  const mapUiStatusToApiStatus = (uiStatus: Booking['status']): 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' => {
+    switch (uiStatus) {
+      case 'pending': return 'PENDING';
+      case 'approved': return 'IN_PROGRESS';
+      case 'completed': return 'COMPLETED';
+      case 'cancelled': return 'CANCELLED';
+      default: return 'PENDING';
     }
   };
 
-  const getStatusDotColor = (status: string) => {
-    switch (status) {
-      case 'pending': return 'bg-yellow-400';
-      case 'approved': return 'bg-blue-400';
-      case 'completed': return 'bg-green-400';
-      case 'cancelled': return 'bg-red-400';
-      default: return 'bg-gray-400';
+  // Handle booking updates
+  const handleUpdateBooking = async (updatedBooking: Booking) => {
+    try {
+      const apiStatus = mapUiStatusToApiStatus(updatedBooking.status);
+      await apiUpdateBookingStatus(updatedBooking.id, {
+        status: apiStatus,
+        note: updatedBooking.notes || 'Booking updated'
+      });
+    } catch (error) {
+      console.error('Error updating booking:', error);
     }
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
-    }).format(price);
-  };
-
+  // Loading state
+  if (bookingsLoading || statisticsLoading) {
   return (
-    <div className="dashboard-layout">
-      {/* Sidebar */}
-      <aside className="sidebar">
-        <h2 className="logo">Dashboard</h2>
-        <nav>
-          <ul>
-            <li>
-              <Link href="/admin/dashboard" className="menu-link">
-                Dashboard
-              </Link>
-            </li>
-            <li className="active">
-              <Link href="/admin/bookinglist" className="menu-link">
-                Bookings List
-              </Link>
-            </li>
-            <li>
-              <Link href="/admin/account" className="menu-link">
-                Account Management
-              </Link>
-            </li>
-            <li>
-              <Link href="/admin/studios" className="menu-link">
-                Studios
-              </Link>
-            </li>
-            <li>
-              <Link href="/admin/studio-types" className="menu-link">
-                Studio Types
-              </Link>
-            </li>
-            <li>
-              <Link href="/admin/location" className="menu-link">
-                Location Management
-              </Link>
-            </li>
-            <li>
-              <Link href="/admin/notifications" className="menu-link">
-                Notifications
-              </Link>
-            </li>
-            <li>
-              <Link href="/admin/profile-setting" className="menu-link">
-                Profile & Settings
-              </Link>
-            </li>
-          </ul>
-        </nav>
-      </aside>
-
-      {/* Main content */}
-      <section className="dashboard-root">
-        <header className="dashboard-header">
-          <h1>Bookings List</h1>
-        </header>
-
-        {/* Booking Content with Tailwind CSS */}
-        <div className="booking-tailwind-container">
-          {/* Filter and Add Button */}
-          <BookingFilter
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            onAddNewBooking={handleAddNewBooking}
-          />
-
-          {/* Bookings Table */}
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-800 flex items-center">
-                <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                </svg>
-                Bookings List
-              </h2>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">ID</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Customer</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Studio</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date & Time</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Services</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Total</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredBookings.map((booking) => (
-                    <tr key={booking.id} className="hover:bg-gray-50 transition-colors duration-150">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600 cursor-pointer hover:text-blue-800 hover:underline"
-                          onClick={() => handleViewBooking(booking)}>
-                        {booking.id}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{booking.customer.name}</div>
-                        <div className="text-sm text-gray-500">{booking.customer.email}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{booking.studio.name}</div>
-                        <div className="text-sm text-gray-500">{booking.studio.address}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <div>{booking.studio.date}</div>
-                        <div className="text-gray-500">{booking.studio.time} ({booking.studio.duration})</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {booking.services.length > 0 ? (
-                          <div className="flex flex-wrap gap-1">
-                            {booking.services.slice(0, 2).map((service, index) => (
-                              <span key={index} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                {service.name}
-                              </span>
-                            ))}
-                            {booking.services.length > 2 && (
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                +{booking.services.length - 2}
-                              </span>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-gray-400 italic">Không có</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">
-                        {formatPrice(booking.pricing.total)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>
-                          <div className={`w-1.5 h-1.5 rounded-full mr-1.5 ${getStatusDotColor(booking.status)}`}></div>
-                          {getStatusDisplay(booking.status)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <BookingActionBar
-                          onViewDetails={() => handleViewBooking(booking)}
-                          onEdit={() => handleEditBooking(booking)}
-                          status={booking.status}
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-lg text-gray-600">Đang tải dữ liệu...</p>
             </div>
           </div>
+    );
+  }
+
+  // Error state
+  if (bookingsError || statisticsError) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Lỗi tải dữ liệu</h2>
+          <p className="text-gray-600 mb-4">
+            {bookingsError || statisticsError}
+          </p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+          >
+            Thử lại
+          </button>
         </div>
-      </section>
-
-      {/* View Modal */}
-      <BookingViewModal
-        booking={selectedBooking}
-        isOpen={isViewModalOpen}
-        onClose={() => {
-          setIsViewModalOpen(false);
-          setSelectedBooking(null);
-        }}
-      />
-
-      {/* Edit Modal */}
-      <BookingEditModal
-        booking={editingBooking}
-        isOpen={isEditModalOpen}
-        onClose={() => {
-          setIsEditModalOpen(false);
-          setEditingBooking(null);
-        }}
-        onSave={handleSaveBooking}
-      />
     </div>
   );
 }
 
-export default function BookingListContainer() {
-  return <BookingListForm bookings={BookingData} />;
+  return (
+    <BookingListForm
+      bookings={uiBookings}
+      statistics={uiStatistics}
+      onUpdateBookingStatus={handleUpdateBookingStatus}
+      onUpdateBooking={handleUpdateBooking}
+      loading={bookingsLoading || statisticsLoading}
+      error={bookingsError || statisticsError}
+    />
+  );
 }

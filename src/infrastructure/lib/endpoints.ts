@@ -21,6 +21,8 @@ export const ENDPOINTS = {
       `/api/studio-assigns/booking/${bookingId}`,
     GET_SERVICES_FOR_SLOT: (studioAssignId: string) =>
       `/api/service-assigns/studio-assign/${studioAssignId}`,
+    GET_PAYMENTS_FOR_BOOKING: (bookingId: string) =>
+      `/api/payments/staff/booking/${bookingId}`,
   },
 
   // --- THÊM CÁC ENDPOINTS MỚI ---

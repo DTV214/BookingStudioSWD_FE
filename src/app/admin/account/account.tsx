@@ -1,103 +1,143 @@
 "use client";
 
-import React from "react";
-// Import AccountManagement component
+import React, { useState, useEffect } from "react";
 import AccountManagement from "@/components/AdminPage/AccountManagement";
-
-interface Account {
-  id: string;
-  name: string;
-  email: string;
-  role: 'staff' | 'employee' | 'customer';
-  status: 'active' | 'inactive';
-  phone?: string;
-  createdAt: string;
-}
-
-const AccountData: Account[] = [
-  {
-    id: "01",
-    name: "Trần Thiện Nam",
-    email: "trantiennam@gmail.com",
-    role: "staff",
-    status: "active",
-    phone: "0123-456-789",
-    createdAt: "2024-01-01"
-  },
-  {
-    id: "02", 
-    name: "Lê Bảo Bình",
-    email: "lebaobinh@gmail.com",
-    role: "employee",
-    status: "active",
-    phone: "0987-654-321",
-    createdAt: "2024-01-02"
-  },
-  {
-    id: "03",
-    name: "Nguyễn Thị An",
-    email: "nguyenthian@gmail.com", 
-    role: "customer",
-    status: "active",
-    phone: "0456-789-123",
-    createdAt: "2024-01-03"
-  },
-  {
-    id: "04",
-    name: "Phạm Văn Cường",
-    email: "phamvancuong@gmail.com",
-    role: "staff",
-    status: "inactive",
-    phone: "0789-123-456",
-    createdAt: "2024-01-04"
-  },
-  {
-    id: "05",
-    name: "Hoàng Thị Dung",
-    email: "hoangthidung@gmail.com",
-    role: "employee", 
-    status: "active",
-    phone: "0321-654-987",
-    createdAt: "2024-01-05"
-  },
-  {
-    id: "06",
-    name: "Võ Minh Đức",
-    email: "vominhduc@gmail.com",
-    role: "customer",
-    status: "active",
-    phone: "0654-321-789",
-    createdAt: "2024-01-06"
-  },
-  {
-    id: "07",
-    name: "Đặng Thị Em",
-    email: "dangthiem@gmail.com",
-    role: "employee",
-    status: "inactive",
-    phone: "0987-123-456",
-    createdAt: "2024-01-07"
-  },
-  {
-    id: "08",
-    name: "Bùi Văn Phúc",
-    email: "buivanphuc@gmail.com",
-    role: "customer",
-    status: "active",
-    phone: "0123-987-654",
-    createdAt: "2024-01-08"
-  },
-  {
-    id: "09",
-    name: "Lý Thị Giang",
-    email: "lythigiang@gmail.com",
-    role: "staff",
-    status: "active",
-    phone: "0456-123-789",
-    createdAt: "2024-01-09"
-  }
-];
+import { AccountManagementAPI, AccountData, AccountStatistics, AccountCreateRequest, AccountUpdateRequest } from "@/infrastructure/AdminAPI/AccountManagementAPI";
 
 export default function AccountContainer() {
-  return <AccountManagement accounts={AccountData} />;
+  const [accounts, setAccounts] = useState<AccountData[]>([]);
+  const [statistics, setStatistics] = useState<AccountStatistics | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load accounts and statistics from API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Load accounts
+        const accountsData = await AccountManagementAPI.getAllAccounts();
+        setAccounts(accountsData);
+        
+        // Load statistics
+        const statsData = await AccountManagementAPI.getAccountStatistics();
+        setStatistics(statsData);
+        
+      } catch (err) {
+        console.error('Error fetching account data:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch account data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Handle account operations
+  const handleCreateAccount = async (accountData: AccountCreateRequest) => {
+    try {
+      const newAccount = await AccountManagementAPI.createAccount(accountData);
+      
+      // Refresh data from server instead of local state update
+      await handleRefreshData();
+      
+      return newAccount;
+    } catch (error) {
+      console.error('Error creating account:', error);
+      throw error;
+    }
+  };
+
+  const handleUpdateAccount = async (accountId: string, accountData: AccountUpdateRequest) => {
+    try {
+      const updatedAccount = await AccountManagementAPI.updateAccount(accountId, accountData);
+      
+      // Refresh data from server instead of local state update
+      await handleRefreshData();
+      
+      return updatedAccount;
+    } catch (error) {
+      console.error('Error updating account:', error);
+      throw error;
+    }
+  };
+
+  const handleBanAccount = async (accountId: string) => {
+    try {
+      await AccountManagementAPI.banAccount(accountId);
+      
+      // Refresh data from server instead of local state update
+      await handleRefreshData();
+    } catch (error) {
+      console.error('Error banning account:', error);
+      throw error;
+    }
+  };
+
+  const handleUnbanAccount = async (accountId: string) => {
+    try {
+      await AccountManagementAPI.unbanAccount(accountId);
+      
+      // Refresh data from server instead of local state update
+      await handleRefreshData();
+    } catch (error) {
+      console.error('Error unbanning account:', error);
+      throw error;
+    }
+  };
+
+  const handleDeleteAccount = async (accountId: string) => {
+    try {
+      await AccountManagementAPI.deleteAccount(accountId);
+      
+      // Refresh data from server instead of local state update
+      await handleRefreshData();
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      throw error;
+    }
+  };
+
+  const handleRefreshData = async () => {
+    try {
+      console.log('=== REFRESH DATA START ===');
+      setLoading(true);
+      setError(null);
+      
+      const accountsData = await AccountManagementAPI.getAllAccounts();
+      console.log('=== REFRESH DATA SUCCESS ===');
+      console.log('Accounts data:', accountsData);
+      console.log('Accounts count:', accountsData.length);
+      setAccounts(accountsData);
+      
+      const statsData = await AccountManagementAPI.getAccountStatistics();
+      setStatistics(statsData);
+      
+    } catch (err) {
+      console.error('=== REFRESH DATA ERROR ===');
+      console.error('Error refreshing data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to refresh data');
+    } finally {
+      setLoading(false);
+      console.log('=== REFRESH DATA END ===');
+    }
+  };
+
+  return (
+    <AccountManagement 
+      accounts={accounts}
+      statistics={statistics}
+      loading={loading}
+      error={error}
+      onCreateAccount={handleCreateAccount}
+      onUpdateAccount={handleUpdateAccount}
+      onBanAccount={handleBanAccount}
+      onUnbanAccount={handleUnbanAccount}
+      onDeleteAccount={handleDeleteAccount}
+      onRefreshData={handleRefreshData}
+    />
+  );
 }

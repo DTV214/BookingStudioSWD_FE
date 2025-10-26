@@ -302,7 +302,7 @@ export default function NotificationsForm({ notifications }: Props) {
             </li>
             <li>
               <Link href="/admin/bookinglist" className="menu-link">
-                Bookings List
+                Booking Management
               </Link>
             </li>
             <li>
@@ -325,14 +325,19 @@ export default function NotificationsForm({ notifications }: Props) {
                 Location Management
               </Link>
             </li>
-            <li className="active">
-              <Link href="/admin/notifications" className="menu-link">
-                Notifications
+            <li>
+              <Link href="/admin/service" className="menu-link">
+                Service Management
               </Link>
             </li>
             <li>
-              <Link href="/admin/profile-setting" className="menu-link">
-                Profile & Settings
+              <Link href="/admin/pricing" className="menu-link">
+                Pricing Management
+              </Link>
+            </li>
+            <li className="active">
+              <Link href="/admin/notifications" className="menu-link">
+                Notifications
               </Link>
             </li>
           </ul>

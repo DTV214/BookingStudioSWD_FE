@@ -48,7 +48,7 @@ export const PaymentSuccess: React.FC<PaymentSuccessProps> = (
               Về Trang Chủ
             </Button>
           </Link>
-          <Link href="/profile/bookings" passHref>
+          <Link href="/profile/history" passHref>
             {" "}
             {/* Điều chỉnh link nếu cần */}
             <Button className="w-full sm:w-auto">

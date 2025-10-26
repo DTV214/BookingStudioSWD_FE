@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { DashboardData } from "@/infrastructure/AdminAPI/DashBoard/types";
 
 type Booking = {
   id: string;
@@ -26,6 +27,8 @@ export type DashProps = {
   bookingsByStudio: Record<string, number>;
   studios: StudioStatus[];
   notifications: string[];
+  // New API data
+  dashboardData?: DashboardData;
 };
 
 export default function DashBoardForm({
@@ -34,6 +37,7 @@ export default function DashBoardForm({
   bookingsByStudio,
   studios,
   notifications,
+  dashboardData,
 }: DashProps) {
   return (
     <div className="dashboard-layout">
@@ -46,7 +50,7 @@ export default function DashBoardForm({
               <Link href="/admin/dashboard">Dashboard</Link>
             </li>
             <li>
-              <Link href="/admin/bookinglist">Bookings List</Link>
+              <Link href="/admin/bookinglist">Booking Management</Link>
             </li>
             <li>
               <Link href="/admin/account">Account Management</Link>
@@ -61,10 +65,13 @@ export default function DashBoardForm({
               <Link href="/admin/location">Location Management</Link>
             </li>
             <li>
-              <Link href="/admin/notifications">Notifications</Link>
+              <Link href="/admin/service">Service Management</Link>
             </li>
             <li>
-              <Link href="/admin/profile-setting">Profile & Settings</Link>
+              <Link href="/admin/pricing">Pricing Management</Link>
+            </li>
+            <li>
+              <Link href="/admin/notifications">Notifications</Link>
             </li>
           </ul>
         </nav>
@@ -83,13 +90,28 @@ export default function DashBoardForm({
         {/* METRICS ROW */}
         <div className="metrics-row">
           <div className="metric-card">
-            <div className="metric-title">Today&apos;s Bookings</div>
-            <div className="metric-value">{stats.bookingsToday}</div>
+            <div className="metric-title">Total Accounts</div>
+            <div className="metric-value">{dashboardData?.totalAccounts || stats.bookingsToday}</div>
           </div>
 
           <div className="metric-card">
-            <div className="metric-title">Today&apos;s Revenue</div>
-            <div className="metric-value">${stats.revenueToday}</div>
+            <div className="metric-title">Total Studios</div>
+            <div className="metric-value">{dashboardData?.totalStudios || 0}</div>
+          </div>
+
+          <div className="metric-card">
+            <div className="metric-title">Total Bookings</div>
+            <div className="metric-value">{dashboardData?.totalBookings || stats.bookingsToday}</div>
+          </div>
+
+          <div className="metric-card">
+            <div className="metric-title">Total Revenue</div>
+            <div className="metric-value">{dashboardData?.totalRevenue ? `${dashboardData.totalRevenue.toLocaleString()} đ` : `${stats.revenueToday} đ`}</div>
+          </div>
+
+          <div className="metric-card">
+            <div className="metric-title">Total Payments</div>
+            <div className="metric-value">{dashboardData?.totalPayments || 0}</div>
           </div>
 
           <div className="metric-card">
@@ -190,6 +212,42 @@ export default function DashBoardForm({
               ))}
             </div>
           </div>
+
+          {/* Booking Status Stats */}
+          {dashboardData?.bookingStatusStats && (
+            <div className="card booking-status-card">
+              <h3>Booking Status Statistics</h3>
+              <div className="status-stats-grid">
+                <div className="status-stat-item">
+                  <div className="status-label">In Progress</div>
+                  <div className="status-value">{dashboardData.bookingStatusStats.IN_PROGRESS}</div>
+                </div>
+                <div className="status-stat-item">
+                  <div className="status-label">Completed</div>
+                  <div className="status-value">{dashboardData.bookingStatusStats.COMPLETED}</div>
+                </div>
+                <div className="status-stat-item">
+                  <div className="status-label">Cancelled</div>
+                  <div className="status-value">{dashboardData.bookingStatusStats.CANCELLED}</div>
+                </div>
+                <div className="status-stat-item">
+                  <div className="status-label">Awaiting Refund</div>
+                  <div className="status-value">{dashboardData.bookingStatusStats.AWAITING_REFUND}</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Top Service */}
+          {dashboardData?.topServiceName && (
+            <div className="card top-service-card">
+              <h3>Top Service</h3>
+              <div className="top-service-info">
+                <div className="service-name">{dashboardData.topServiceName}</div>
+                <div className="service-usage">Used {dashboardData.topServiceUsage} times</div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
     </div>
