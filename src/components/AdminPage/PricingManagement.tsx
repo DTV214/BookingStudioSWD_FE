@@ -439,7 +439,7 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
               <Link href="/admin/dashboard" className="menu-link">Dashboard</Link>
             </li>
             <li>
-              <Link href="/admin/bookinglist" className="menu-link">Bookings List</Link>
+              <Link href="/admin/bookinglist" className="menu-link">Booking Management</Link>
             </li>
             <li>
               <Link href="/admin/account" className="menu-link">Account Management</Link>
@@ -461,9 +461,6 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
             </li>
             <li>
               <Link href="/admin/notifications" className="menu-link">Notifications</Link>
-            </li>
-            <li>
-              <Link href="/admin/profile-setting" className="menu-link">Profile & Settings</Link>
             </li>
           </ul>
         </nav>

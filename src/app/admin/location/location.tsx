@@ -16,7 +16,7 @@ export default function LocationContainer() {
           <nav>
             <ul>
               <li><a href="/admin/dashboard" className="menu-link">Dashboard</a></li>
-              <li><a href="/admin/bookinglist" className="menu-link">Bookings List</a></li>
+              <li><a href="/admin/bookinglist" className="menu-link">Booking Management</a></li>
               <li><a href="/admin/account" className="menu-link">Account Management</a></li>
               <li><a href="/admin/studios" className="menu-link">Studios</a></li>
           <li><a href="/admin/studio-types" className="menu-link">Studio Types</a></li>
@@ -24,7 +24,6 @@ export default function LocationContainer() {
               <li><a href="/admin/service" className="menu-link">Service Management</a></li>
               <li><a href="/admin/pricing" className="menu-link">Pricing Management</a></li>
               <li><a href="/admin/notifications" className="menu-link">Notifications</a></li>
-              <li><a href="/admin/profile-setting" className="menu-link">Profile & Settings</a></li>
             </ul>
           </nav>
         </aside>
@@ -51,7 +50,7 @@ export default function LocationContainer() {
           <nav>
             <ul>
               <li><a href="/admin/dashboard" className="menu-link">Dashboard</a></li>
-              <li><a href="/admin/bookinglist" className="menu-link">Bookings List</a></li>
+              <li><a href="/admin/bookinglist" className="menu-link">Booking Management</a></li>
               <li><a href="/admin/account" className="menu-link">Account Management</a></li>
               <li><a href="/admin/studios" className="menu-link">Studios</a></li>
           <li><a href="/admin/studio-types" className="menu-link">Studio Types</a></li>
@@ -59,7 +58,6 @@ export default function LocationContainer() {
               <li><a href="/admin/service" className="menu-link">Service Management</a></li>
               <li><a href="/admin/pricing" className="menu-link">Pricing Management</a></li>
               <li><a href="/admin/notifications" className="menu-link">Notifications</a></li>
-              <li><a href="/admin/profile-setting" className="menu-link">Profile & Settings</a></li>
             </ul>
           </nav>
         </aside>

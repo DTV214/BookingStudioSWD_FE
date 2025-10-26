@@ -46,7 +46,7 @@ export default function DashBoardForm({
               <Link href="/admin/dashboard">Dashboard</Link>
             </li>
             <li>
-              <Link href="/admin/bookinglist">Bookings List</Link>
+              <Link href="/admin/bookinglist">Booking Management</Link>
             </li>
             <li>
               <Link href="/admin/account">Account Management</Link>
@@ -68,9 +68,6 @@ export default function DashBoardForm({
             </li>
             <li>
               <Link href="/admin/notifications">Notifications</Link>
-            </li>
-            <li>
-              <Link href="/admin/profile-setting">Profile & Settings</Link>
             </li>
           </ul>
         </nav>
