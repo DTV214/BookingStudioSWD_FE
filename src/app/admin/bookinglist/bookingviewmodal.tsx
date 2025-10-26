@@ -3,8 +3,6 @@
 
 import React from "react";
 import BookingCustomerInfo from "./bookingcustomerinfo";
-import BookingServiceInfo from "./bookingserviceinfo";
-import BookingCostInfo from "./bookingcostinfo";
 import BookingStatusInfo from "./bookingstatusinfo";
 import BookingNoteSection from "./bookingnotesection";
 
@@ -116,32 +114,31 @@ export default function BookingViewModal({
           {/* Studio Info - Read Only */}
           <div style={{ backgroundColor: '#f0f9ff', padding: '1.5rem', borderRadius: '8px' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '1rem', color: '#374151' }}>
-              Thông tin studio
+              Thông tin loại studio
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <div><strong>Tên studio:</strong> {booking.studio.name}</div>
-              <div><strong>Địa chỉ:</strong> {booking.studio.address}</div>
+              <div><strong>Tên:</strong> {booking.studio.name}</div>
               <div><strong>Ngày:</strong> {booking.studio.date}</div>
               <div><strong>Giờ:</strong> {booking.studio.time}</div>
-              <div><strong>Thời gian:</strong> {booking.studio.duration}</div>
             </div>
           </div>
         </div>
 
-        {/* Service Info - Read Only */}
-        <div style={{ marginTop: '1.5rem' }}>
-          <BookingServiceInfo 
-            services={booking.services}
-            isEditable={false}
-          />
-        </div>
-
         {/* Cost Info - Read Only */}
         <div style={{ marginTop: '1.5rem' }}>
-          <BookingCostInfo 
-            pricing={booking.pricing}
-            isEditable={false}
-          />
+          <div style={{ backgroundColor: '#f0f9ff', padding: '1.5rem', borderRadius: '8px' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '1rem', color: '#374151' }}>
+              Tổng tiền
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <div style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>
+                <strong>Tổng:</strong> {new Intl.NumberFormat('vi-VN', {
+                  style: 'currency',
+                  currency: 'VND'
+                }).format(booking.pricing.total)}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Notes - Read Only */}
