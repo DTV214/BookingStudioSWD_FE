@@ -27,6 +27,14 @@ const formatCurrency = (amount: number) => {
 };
 
 export function ServiceCard({ service }: ServiceCardProps) {
+  // Xác định đường dẫn dựa trên tên dịch vụ
+  const getServiceLink = (serviceName: string) => {
+    if (serviceName.toLowerCase().includes('thẻ') || serviceName.toLowerCase().includes('id')) {
+      return '/service/chup-anh-the';
+    }
+    return `/booking?service_id=${service.id}`;
+  };
+
   return (
     <Card
       className="flex flex-col justify-between h-full
@@ -57,9 +65,11 @@ export function ServiceCard({ service }: ServiceCardProps) {
                      hover:from-amber-600 hover:to-orange-600
                      transition-all duration-300 transform hover:scale-105"
         >
-          <Link href={`/booking?service_id=${service.id}`}>
+          <Link href={getServiceLink(service.serviceName)}>
             <span className="flex items-center justify-center">
-              Đặt lịch ngay
+              {service.serviceName.toLowerCase().includes('thẻ') || service.serviceName.toLowerCase().includes('id') 
+                ? 'Xem chi tiết' 
+                : 'Đặt lịch ngay'}
               <ArrowRight
                 className="ml-2 h-4 w-4 transition-transform
                                  group-hover:translate-x-1"

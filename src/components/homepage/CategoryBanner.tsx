@@ -10,7 +10,7 @@ const categories = [
   {
     title: "Chụp ảnh thẻ",
     img: "https://res.cloudinary.com/dratbz8bh/image/upload/v1758618220/anh-the-nen-trang-inkythuatso-27-10-33-14_obb6hv.jpg",
-    href: "/category/chup-anh-the",
+    href: "/service/chup-anh-the",
   },
   {
     title: "Chụp ảnh doanh nghiệp",
