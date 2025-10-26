@@ -44,6 +44,9 @@ export function ServiceCard({ service }: ServiceCardProps) {
     if (serviceName.toLowerCase().includes('kỷ yếu đại học') || serviceName.toLowerCase().includes('ky yeu dai hoc')) {
       return '/service/chup-anh-ky-yeu-dai-hoc';
     }
+    if (serviceName.toLowerCase().includes('kỷ yếu lớp 5') || serviceName.toLowerCase().includes('ky yeu lop 5')) {
+      return '/service/chup-anh-ky-yeu-lop-5';
+    }
     return `/booking?service_id=${service.id}`;
   };
 
@@ -83,7 +86,8 @@ export function ServiceCard({ service }: ServiceCardProps) {
                service.serviceName.toLowerCase().includes('doanh nghiệp') || service.serviceName.toLowerCase().includes('corporate') ||
                service.serviceName.toLowerCase().includes('kỷ yếu lớp 12') || service.serviceName.toLowerCase().includes('ky yeu lop 12') ||
                service.serviceName.toLowerCase().includes('kỷ yếu mầm non') || service.serviceName.toLowerCase().includes('ky yeu mam non') ||
-               service.serviceName.toLowerCase().includes('kỷ yếu đại học') || service.serviceName.toLowerCase().includes('ky yeu dai hoc')
+               service.serviceName.toLowerCase().includes('kỷ yếu đại học') || service.serviceName.toLowerCase().includes('ky yeu dai hoc') ||
+               service.serviceName.toLowerCase().includes('kỷ yếu lớp 5') || service.serviceName.toLowerCase().includes('ky yeu lop 5')
                 ? 'Xem chi tiết' 
                 : 'Đặt lịch ngay'}
               <ArrowRight

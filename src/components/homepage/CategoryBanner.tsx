@@ -36,7 +36,7 @@ const categories = [
   {
     title: "Chụp ảnh kỷ yếu lớp 5",
     img: "https://res.cloudinary.com/dratbz8bh/image/upload/v1758619020/Chup-anh-ky-yeu-mam-non-dep-gia-re-uy-tin-2_niazex.jpg",
-    href: "/category/chup-anh-ky-yeu-lop-5",
+    href: "/service/chup-anh-ky-yeu-lop-5",
   },
   {
     title: "Chụp ảnh studio",
