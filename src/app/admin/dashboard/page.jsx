@@ -1,4 +1,4 @@
-// src/app/admin/dashboard/page.tsx
+// src/app/admin/dashboard/page.jsx
 import React from "react";
 import DashboardContainer from "./dashboard";
 

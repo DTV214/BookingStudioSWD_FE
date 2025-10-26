@@ -14,10 +14,23 @@ export interface PricingData {
 }
 
 // Price Rule interfaces
+// API Response interface (what we receive from backend)
+export interface PriceRuleAPIResponse {
+  id: string;
+  priceTableItemId: string;
+  dayFilter: string[]; // Backend returns dayFilter
+  startTime: string;
+  endTime: string;
+  pricePerUnit: number;
+  unit: string;
+  date: string;
+}
+
+// Frontend interface (what we use in components)
 export interface PriceRule {
   id: string;
   priceTableItemId: string;
-  dayFilter: string[]; // Changed from daysOfWeek to dayFilter to match BE
+  daysOfWeek: string[]; // Frontend uses daysOfWeek
   startTime: string;
   endTime: string;
   pricePerUnit: number;
@@ -28,7 +41,7 @@ export interface PriceRule {
 export interface PriceRuleResponse {
   code: number;
   message: string;
-  data: PriceRule[];
+  data: PriceRuleAPIResponse[];
 }
 
 // Price Item interfaces
@@ -53,7 +66,39 @@ export interface PriceTablePayload {
   status: 'COMING_SOON' | 'IS_HAPPENING' | 'ENDED';
 }
 
+// Request body for creating/updating price items
+export interface PriceItemPayload {
+  priceTableId: string;
+  studioTypeName: string;
+  defaultPrice: number;
+}
+
+// Request body for creating/updating price rules
+export interface PriceRulePayload {
+  priceTableItemId: string;
+  daysOfWeek: string[];
+  startTime: string;
+  endTime: string;
+  pricePerUnit: number;
+  unit: string;
+  date: string;
+}
+
 const API_BASE_URL = 'https://api.eccubestudio.click';
+
+// Helper function to transform API response to frontend format
+const transformPriceRule = (apiRule: PriceRuleAPIResponse): PriceRule => {
+  return {
+    id: apiRule.id,
+    priceTableItemId: apiRule.priceTableItemId,
+    daysOfWeek: apiRule.dayFilter, // Transform dayFilter to daysOfWeek
+    startTime: apiRule.startTime,
+    endTime: apiRule.endTime,
+    pricePerUnit: apiRule.pricePerUnit,
+    unit: apiRule.unit,
+    date: apiRule.date
+  };
+};
 
 export class PricingService {
   private static async fetchWithErrorHandling<T>(url: string, options?: RequestInit): Promise<T> {
@@ -141,7 +186,7 @@ export class PricingService {
   }
 
   // Step 8: Get price rules by item ID
-  static async getPriceRulesByItemId(itemId: string): Promise<PriceRuleResponse> {
+  static async getPriceRulesByItemId(itemId: string): Promise<PriceRule[]> {
     console.log('Service: Fetching price rules for itemId:', itemId);
     
     if (!itemId || itemId === 'null' || itemId === 'undefined') {
@@ -156,7 +201,12 @@ export class PricingService {
     });
 
     console.log('Service: Price rules by item ID API response:', response);
-    return response;
+    
+    // Transform API response to frontend format
+    const transformedRules = response.data.map(transformPriceRule);
+    console.log('Service: Transformed price rules:', transformedRules);
+    
+    return transformedRules;
   }
 
   // Step 9: Delete price table
@@ -169,5 +219,95 @@ export class PricingService {
     });
 
     console.log('Price table deleted successfully');
+  }
+
+  // Step 10: Create new price item
+  static async createPriceItem(priceItemData: PriceItemPayload): Promise<PriceItem> {
+    const url = `${API_BASE_URL}/api/price-items`;
+    console.log('Creating price item with data:', priceItemData);
+    
+    const response = await this.fetchWithErrorHandling<PriceItem>(url, {
+      method: 'POST',
+      body: JSON.stringify(priceItemData),
+    });
+
+    console.log('Create price item API response:', response);
+    return response;
+  }
+
+  // Step 11: Update existing price item
+  static async updatePriceItem(id: string, priceItemData: Partial<PriceItemPayload>): Promise<PriceItem> {
+    const url = `${API_BASE_URL}/api/price-items/${id}`;
+    console.log('Updating price item:', id, 'with data:', priceItemData);
+    
+    const response = await this.fetchWithErrorHandling<PriceItem>(url, {
+      method: 'PUT',
+      body: JSON.stringify(priceItemData),
+    });
+
+    console.log('Update price item API response:', response);
+    return response;
+  }
+
+  // Step 12: Delete price item
+  static async deletePriceItem(id: string): Promise<void> {
+    const url = `${API_BASE_URL}/api/price-items/${id}`;
+    console.log('Deleting price item:', id);
+    
+    await this.fetchWithErrorHandling<void>(url, {
+      method: 'DELETE',
+    });
+
+    console.log('Price item deleted successfully');
+  }
+
+  // Step 13: Create new price rule
+  static async createPriceRule(priceRuleData: PriceRulePayload): Promise<PriceRule> {
+    const url = `${API_BASE_URL}/api/price-rules`;
+    console.log('Creating price rule with data:', priceRuleData);
+    
+    const response = await this.fetchWithErrorHandling<PriceRuleAPIResponse>(url, {
+      method: 'POST',
+      body: JSON.stringify(priceRuleData),
+    });
+
+    console.log('Create price rule API response:', response);
+    
+    // Transform API response to frontend format
+    const transformedRule = transformPriceRule(response);
+    console.log('Create price rule transformed response:', transformedRule);
+    
+    return transformedRule;
+  }
+
+  // Step 14: Update existing price rule
+  static async updatePriceRule(id: string, priceRuleData: Partial<PriceRulePayload>): Promise<PriceRule> {
+    const url = `${API_BASE_URL}/api/price-rules/${id}`;
+    console.log('Updating price rule:', id, 'with data:', priceRuleData);
+    
+    const response = await this.fetchWithErrorHandling<PriceRuleAPIResponse>(url, {
+      method: 'PUT',
+      body: JSON.stringify(priceRuleData),
+    });
+
+    console.log('Update price rule API response:', response);
+    
+    // Transform API response to frontend format
+    const transformedRule = transformPriceRule(response);
+    console.log('Update price rule transformed response:', transformedRule);
+    
+    return transformedRule;
+  }
+
+  // Step 15: Delete price rule
+  static async deletePriceRule(id: string): Promise<void> {
+    const url = `${API_BASE_URL}/api/price-rules/${id}`;
+    console.log('Deleting price rule:', id);
+    
+    await this.fetchWithErrorHandling<void>(url, {
+      method: 'DELETE',
+    });
+
+    console.log('Price rule deleted successfully');
   }
 }

@@ -4,6 +4,16 @@
  * Định nghĩa các trạng thái booking
  * Dựa trên file: image_3db0db.png
  */
+export interface PaymentDetail {
+  id: string;
+  paymentMethod: string;
+  status: string; // "SUCCESS"
+  paymentType: string; // "FULL_PAYMENT"
+  paymentDate: string | null; // API có thể trả null
+  amount: number;
+  paymentStatus: string; // "SUCCESS" (trùng lặp, nhưng vẫn định nghĩa)
+  // 4 trường bị ẩn theo yêu cầu: bookingId, bookingStatus, accountEmail, accountName
+}
 export type BookingStatus =
   | "IN_PROGRESS"
   | "COMPLETED"
