@@ -31,7 +31,7 @@ const categories = [
   {
     title: "Chụp ảnh kỷ yếu đại học",
     img: "https://res.cloudinary.com/dratbz8bh/image/upload/v1758619363/chup-anh-ky-yeu-uy-tin-chuyen-nghiep-dep-tron-goi-gia-re-75_sdzlmb.png",
-    href: "/category/chup-anh-ky-yeu-dai-hoc",
+    href: "/service/chup-anh-ky-yeu-dai-hoc",
   },
   {
     title: "Chụp ảnh kỷ yếu lớp 5",
