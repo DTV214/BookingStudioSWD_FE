@@ -1,6 +1,7 @@
 import { ENDPOINTS } from "@/infrastructure/lib/endpoints";
 import {
   BookingHistoryItem,
+  PaymentDetail,
   ServiceAssign,
   StudioAssignDetail,
 } from "@/domain/models/booking/BookingHistory";
@@ -48,6 +49,14 @@ export const bookingHistoryService = {
   ): Promise<ApiResponse<ServiceAssign[]>> => {
     const res = await httpClient.get<ServiceAssign[]>(
       ENDPOINTS.USER_BOOKINGS.GET_SERVICES_FOR_SLOT(studioAssignId)
+    );
+    return res;
+  },
+  getPaymentsForBooking: async (
+    bookingId: string
+  ): Promise<ApiResponse<PaymentDetail[]>> => {
+    const res = await httpClient.get<PaymentDetail[]>(
+      ENDPOINTS.USER_BOOKINGS.GET_PAYMENTS_FOR_BOOKING(bookingId)
     );
     return res;
   },
