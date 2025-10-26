@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { PricingData, PriceTablePayload, PriceItem, PriceRule, usePriceItems } from "@/infrastructure/AdminAPI/PricingManagementAPI";
+import { PricingData, PriceTablePayload, PriceItem, PriceRule, PriceItemPayload, PriceRulePayload, usePriceItems, usePriceRules } from "@/infrastructure/AdminAPI/PricingManagementAPI";
 
 interface Props {
   priceTables: PricingData[];
@@ -17,14 +17,21 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isPriceItemDetailModalOpen, setIsPriceItemDetailModalOpen] = useState(false);
+  const [isAddPriceItemModalOpen, setIsAddPriceItemModalOpen] = useState(false);
+  const [isEditPriceItemModalOpen, setIsEditPriceItemModalOpen] = useState(false);
+  const [isAddPriceRuleModalOpen, setIsAddPriceRuleModalOpen] = useState(false);
+  const [isEditPriceRuleModalOpen, setIsEditPriceRuleModalOpen] = useState(false);
   const [editingPriceTable, setEditingPriceTable] = useState<PricingData | null>(null);
+  const [editingPriceItem, setEditingPriceItem] = useState<PriceItem | null>(null);
+  const [editingPriceRule, setEditingPriceRule] = useState<PriceRule | null>(null);
   const [viewingPriceTable, setViewingPriceTable] = useState<PricingData | null>(null);
   const [viewingPriceItem, setViewingPriceItem] = useState<PriceItem | null>(null);
   const [priceItems, setPriceItems] = useState<PriceItem[]>([]);
   const [priceRules, setPriceRules] = useState<PriceRule[]>([]);
   const [loadingPriceItems, setLoadingPriceItems] = useState(false);
   const [loadingPriceRules, setLoadingPriceRules] = useState(false);
-  const { fetchPriceItemsByTableId, fetchPriceRulesByItemId } = usePriceItems();
+  const { fetchPriceItemsByTableId, fetchPriceRulesByItemId, createPriceItem, updatePriceItem, deletePriceItem } = usePriceItems();
+  const { createPriceRule, updatePriceRule, deletePriceRule } = usePriceRules();
   const [newPriceData, setNewPriceData] = useState<PriceTablePayload>({
     startDate: '',
     endDate: null,
@@ -36,6 +43,32 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
     endDate: null,
     priority: 0,
     status: 'COMING_SOON'
+  });
+  const [newPriceItemData, setNewPriceItemData] = useState<PriceItemPayload>({
+    priceTableId: '',
+    studioTypeName: '',
+    defaultPrice: 0
+  });
+  const [editPriceItemData, setEditPriceItemData] = useState<Partial<PriceItemPayload>>({
+    studioTypeName: '',
+    defaultPrice: 0
+  });
+  const [newPriceRuleData, setNewPriceRuleData] = useState<PriceRulePayload>({
+    priceTableItemId: '',
+    daysOfWeek: [],
+    startTime: '',
+    endTime: '',
+    pricePerUnit: 0,
+    unit: '',
+    date: ''
+  });
+  const [editPriceRuleData, setEditPriceRuleData] = useState<Partial<PriceRulePayload>>({
+    daysOfWeek: [],
+    startTime: '',
+    endTime: '',
+    pricePerUnit: 0,
+    unit: '',
+    date: ''
   });
 
   // Step 1: Handle create new price table
@@ -168,7 +201,7 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
           console.log('Fetched price rules:', rules);
           console.log('First rule details:', rules[0]);
           if (rules[0]) {
-            console.log('dayFilter:', rules[0].dayFilter);
+            console.log('daysOfWeek:', rules[0].daysOfWeek);
             console.log('unit:', rules[0].unit);
           }
         } else {
@@ -195,6 +228,186 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
     setIsPriceItemDetailModalOpen(false);
     setViewingPriceItem(null);
     setPriceRules([]);
+  };
+
+  // Step 9: Handle add new price item
+  const handleAddPriceItem = async () => {
+    try {
+      if (!viewingPriceTable?.id) {
+        alert('Price table ID is missing');
+        return;
+      }
+
+      const priceItemData = {
+        ...newPriceItemData,
+        priceTableId: viewingPriceTable.id
+      };
+
+      const newPriceItem = await createPriceItem(priceItemData);
+      setPriceItems(prev => [...prev, newPriceItem]);
+      setIsAddPriceItemModalOpen(false);
+      setNewPriceItemData({
+        priceTableId: '',
+        studioTypeName: '',
+        defaultPrice: 0
+      });
+      alert('Price item added successfully!');
+    } catch (error) {
+      console.error('Error adding price item:', error);
+      alert('Failed to add price item. Please try again.');
+    }
+  };
+
+  // Step 10: Handle edit price item
+  const handleEditPriceItem = (priceItem: PriceItem) => {
+    setEditingPriceItem(priceItem);
+    setEditPriceItemData({
+      studioTypeName: priceItem.studioTypeName,
+      defaultPrice: priceItem.defaultPrice
+    });
+    setIsEditPriceItemModalOpen(true);
+  };
+
+  // Step 11: Handle update price item
+  const handleUpdatePriceItem = async () => {
+    if (!editingPriceItem?.id) return;
+    
+    try {
+      await updatePriceItem(editingPriceItem.id, editPriceItemData);
+      setPriceItems(prev => 
+        prev.map(item => 
+          item.id === editingPriceItem.id 
+            ? { ...item, ...editPriceItemData }
+            : item
+        )
+      );
+      setIsEditPriceItemModalOpen(false);
+      setEditingPriceItem(null);
+      setEditPriceItemData({
+        studioTypeName: '',
+        defaultPrice: 0
+      });
+      alert('Price item updated successfully!');
+    } catch (error) {
+      console.error('Error updating price item:', error);
+      alert('Failed to update price item. Please try again.');
+    }
+  };
+
+  // Step 12: Handle delete price item
+  const handleDeletePriceItem = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this price item?')) {
+      try {
+        await deletePriceItem(id);
+        setPriceItems(prev => prev.filter(item => item.id !== id));
+        alert('Price item deleted successfully!');
+      } catch (error) {
+        console.error('Error deleting price item:', error);
+        alert('Failed to delete price item. Please try again.');
+      }
+    }
+  };
+
+  // Step 13: Handle add new price rule
+  const handleAddPriceRule = async () => {
+    try {
+      if (!viewingPriceItem?.id) {
+        alert('Price item ID is missing');
+        return;
+      }
+
+      const priceRuleData = {
+        ...newPriceRuleData,
+        priceTableItemId: viewingPriceItem.id
+      };
+
+      const newPriceRule = await createPriceRule(priceRuleData);
+      
+      // Refresh the price rules list to get the complete data
+      if (viewingPriceItem?.id) {
+        const updatedRules = await fetchPriceRulesByItemId(viewingPriceItem.id);
+        setPriceRules(updatedRules);
+      }
+      
+      setIsAddPriceRuleModalOpen(false);
+      setNewPriceRuleData({
+        priceTableItemId: '',
+        daysOfWeek: [],
+        startTime: '',
+        endTime: '',
+        pricePerUnit: 0,
+        unit: '',
+        date: ''
+      });
+      alert('Price rule added successfully!');
+    } catch (error) {
+      console.error('Error adding price rule:', error);
+      alert('Failed to add price rule. Please try again.');
+    }
+  };
+
+  // Step 14: Handle edit price rule
+  const handleEditPriceRule = (priceRule: PriceRule) => {
+    setEditingPriceRule(priceRule);
+    setEditPriceRuleData({
+      daysOfWeek: priceRule.daysOfWeek,
+      startTime: priceRule.startTime,
+      endTime: priceRule.endTime,
+      pricePerUnit: priceRule.pricePerUnit,
+      unit: priceRule.unit,
+      date: priceRule.date
+    });
+    setIsEditPriceRuleModalOpen(true);
+  };
+
+  // Step 15: Handle update price rule
+  const handleUpdatePriceRule = async () => {
+    if (!editingPriceRule?.id) return;
+    
+    try {
+      await updatePriceRule(editingPriceRule.id, editPriceRuleData);
+      
+      // Refresh the price rules list to get the complete data
+      if (viewingPriceItem?.id) {
+        const updatedRules = await fetchPriceRulesByItemId(viewingPriceItem.id);
+        setPriceRules(updatedRules);
+      }
+      
+      setIsEditPriceRuleModalOpen(false);
+      setEditingPriceRule(null);
+      setEditPriceRuleData({
+        daysOfWeek: [],
+        startTime: '',
+        endTime: '',
+        pricePerUnit: 0,
+        unit: '',
+        date: ''
+      });
+      alert('Price rule updated successfully!');
+    } catch (error) {
+      console.error('Error updating price rule:', error);
+      alert('Failed to update price rule. Please try again.');
+    }
+  };
+
+  // Step 16: Handle delete price rule
+  const handleDeletePriceRule = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this price rule?')) {
+      try {
+        await deletePriceRule(id);
+        
+        // Refresh the price rules list to get the updated data
+        if (viewingPriceItem?.id) {
+          const updatedRules = await fetchPriceRulesByItemId(viewingPriceItem.id);
+          setPriceRules(updatedRules);
+        }
+        
+        alert('Price rule deleted successfully!');
+      } catch (error) {
+        console.error('Error deleting price rule:', error);
+        alert('Failed to delete price rule. Please try again.');
+      }
+    }
   };
 
   // Step 6: Format date for display
@@ -590,14 +803,26 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
               </div>
               
               <div className="border-t pt-4">
-                <h4 className="text-md font-medium text-gray-900 mb-3">Price Items</h4>
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="text-md font-medium text-gray-900">Price Items</h4>
+                  <button
+                    onClick={() => setIsAddPriceItemModalOpen(true)}
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2 transition-colors duration-200"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                    <span>Add Price Item</span>
+                  </button>
+                </div>
                 {loadingPriceItems ? (
                   <div className="bg-gray-50 p-4 rounded-lg text-center">
                     <p className="text-sm text-gray-600">Loading price items...</p>
                   </div>
                 ) : priceItems.length > 0 ? (
                   <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                    <table className="min-w-full divide-y divide-gray-200">
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
                         <tr>
                           {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -627,21 +852,44 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
                               {priceItem.defaultPrice ? priceItem.defaultPrice.toLocaleString('vi-VN') + ' VND' : '0 VND'}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <button
-                                onClick={() => handleViewPriceItem(priceItem)}
-                                className="text-blue-600 hover:text-blue-900 mr-3"
-                                title="View Price Item Details"
-                              >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                  <circle cx="12" cy="12" r="3"/>
-                                </svg>
-                              </button>
+                              <div className="flex items-center space-x-2">
+                                <button
+                                  onClick={() => handleViewPriceItem(priceItem)}
+                                  className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-colors duration-150"
+                                  title="View Price Item Details"
+                                >
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                  </svg>
+                                </button>
+                                <button
+                                  onClick={() => handleEditPriceItem(priceItem)}
+                                  className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 transition-colors duration-150"
+                                  title="Edit Price Item"
+                                >
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                  </svg>
+                                </button>
+                                <button
+                                  onClick={() => handleDeletePriceItem(priceItem.id!)}
+                                  className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-colors duration-150"
+                                  title="Delete Price Item"
+                                >
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <polyline points="3,6 5,6 21,6"/>
+                                    <path d="M19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"/>
+                                  </svg>
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
+                    </div>
                   </div>
                 ) : (
                   <div className="bg-gray-50 p-4 rounded-lg text-center">
@@ -666,7 +914,7 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
        {/* Price Item Detail Modal */}
        {isPriceItemDetailModalOpen && viewingPriceItem && (
          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
-           <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+           <div className="bg-white rounded-lg p-6 w-full max-w-7xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Price Item Details</h3>
               <button
@@ -704,14 +952,26 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
               
               {/* Price Rules Section */}
               <div className="border-t pt-4">
-                <h4 className="text-md font-medium text-gray-900 mb-3">Price Rules</h4>
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="text-md font-medium text-gray-900">Price Rules</h4>
+                  <button
+                    onClick={() => setIsAddPriceRuleModalOpen(true)}
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2 transition-colors duration-200"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                    <span>Add Price Rule</span>
+                  </button>
+                </div>
                 {loadingPriceRules ? (
                   <div className="bg-gray-50 p-4 rounded-lg text-center">
                     <p className="text-sm text-gray-600">Loading price rules...</p>
                   </div>
                 ) : priceRules.length > 0 ? (
                   <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                    <table className="min-w-full divide-y divide-gray-200">
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
                         <tr>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -729,13 +989,16 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             DATE
                           </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            ACTIONS
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
                         {priceRules.map((rule, index) => (
                           <tr key={rule.id || `price-rule-${index}`} className="hover:bg-gray-50 transition-colors duration-150">
                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                               {rule.dayFilter && rule.dayFilter.length > 0 ? rule.dayFilter.join(', ') : 'N/A'}
+                               {rule.daysOfWeek && rule.daysOfWeek.length > 0 ? rule.daysOfWeek.join(', ') : 'N/A'}
                              </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                               {rule.startTime && rule.endTime ? `${rule.startTime} - ${rule.endTime}` : 'N/A'}
@@ -749,10 +1012,35 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                {rule.date && rule.date !== null ? new Date(rule.date).toLocaleDateString('vi-VN') : 'N/A'}
                              </td>
+                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                               <div className="flex items-center space-x-2">
+                                 <button
+                                   onClick={() => handleEditPriceRule(rule)}
+                                   className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 transition-colors duration-150"
+                                   title="Edit Price Rule"
+                                 >
+                                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                   </svg>
+                                 </button>
+                                 <button
+                                   onClick={() => handleDeletePriceRule(rule.id)}
+                                   className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-colors duration-150"
+                                   title="Delete Price Rule"
+                                 >
+                                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                     <polyline points="3,6 5,6 21,6"/>
+                                     <path d="M19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"/>
+                                   </svg>
+                                 </button>
+                               </div>
+                             </td>
                            </tr>
                          ))}
                       </tbody>
                     </table>
+                    </div>
                   </div>
                 ) : (
                   <div className="bg-gray-50 p-4 rounded-lg text-center">
@@ -768,6 +1056,356 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
                 className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Price Item Modal */}
+      {isAddPriceItemModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Add New Price Item</h3>
+              <button
+                onClick={() => setIsAddPriceItemModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Studio Type Name</label>
+                <input
+                  type="text"
+                  value={newPriceItemData.studioTypeName}
+                  onChange={(e) => setNewPriceItemData({...newPriceItemData, studioTypeName: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter studio type name"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Default Price</label>
+                <input
+                  type="number"
+                  value={newPriceItemData.defaultPrice}
+                  onChange={(e) => setNewPriceItemData({...newPriceItemData, defaultPrice: Number(e.target.value) || 0})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter default price"
+                  min="0"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end space-x-2 mt-6">
+              <button
+                onClick={() => setIsAddPriceItemModalOpen(false)}
+                className="px-4 py-2 text-gray-600 bg-gray-200 rounded-md hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddPriceItem}
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+              >
+                Add Price Item
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Price Item Modal */}
+      {isEditPriceItemModalOpen && editingPriceItem && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Edit Price Item</h3>
+              <button
+                onClick={() => setIsEditPriceItemModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Studio Type Name</label>
+                <input
+                  type="text"
+                  value={editPriceItemData.studioTypeName || ''}
+                  onChange={(e) => setEditPriceItemData({...editPriceItemData, studioTypeName: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Default Price</label>
+                <input
+                  type="number"
+                  value={editPriceItemData.defaultPrice || 0}
+                  onChange={(e) => setEditPriceItemData({...editPriceItemData, defaultPrice: Number(e.target.value) || 0})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  min="0"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end space-x-2 mt-6">
+              <button
+                onClick={() => setIsEditPriceItemModalOpen(false)}
+                className="px-4 py-2 text-gray-600 bg-gray-200 rounded-md hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdatePriceItem}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Update Price Item
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Price Rule Modal */}
+      {isAddPriceRuleModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Add New Price Rule</h3>
+              <button
+                onClick={() => setIsAddPriceRuleModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Days of Week</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'].map(day => (
+                    <label key={day} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={newPriceRuleData.daysOfWeek.includes(day)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setNewPriceRuleData({
+                              ...newPriceRuleData,
+                              daysOfWeek: [...newPriceRuleData.daysOfWeek, day]
+                            });
+                          } else {
+                            setNewPriceRuleData({
+                              ...newPriceRuleData,
+                              daysOfWeek: newPriceRuleData.daysOfWeek.filter(d => d !== day)
+                            });
+                          }
+                        }}
+                        className="mr-2"
+                      />
+                      <span className="text-sm">{day}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                  <input
+                    type="time"
+                    value={newPriceRuleData.startTime}
+                    onChange={(e) => setNewPriceRuleData({...newPriceRuleData, startTime: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                  <input
+                    type="time"
+                    value={newPriceRuleData.endTime}
+                    onChange={(e) => setNewPriceRuleData({...newPriceRuleData, endTime: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Price Per Unit</label>
+                  <input
+                    type="number"
+                    value={newPriceRuleData.pricePerUnit}
+                    onChange={(e) => setNewPriceRuleData({...newPriceRuleData, pricePerUnit: Number(e.target.value) || 0})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    min="0"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Unit</label>
+                  <select
+                    value={newPriceRuleData.unit}
+                    onChange={(e) => setNewPriceRuleData({...newPriceRuleData, unit: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select unit</option>
+                    <option value="HOUR">Hour</option>
+                    <option value="DAY">Day</option>
+                    <option value="WEEK">Week</option>
+                    <option value="MONTH">Month</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                <input
+                  type="date"
+                  value={newPriceRuleData.date}
+                  onChange={(e) => setNewPriceRuleData({...newPriceRuleData, date: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end space-x-2 mt-6">
+              <button
+                onClick={() => setIsAddPriceRuleModalOpen(false)}
+                className="px-4 py-2 text-gray-600 bg-gray-200 rounded-md hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddPriceRule}
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+              >
+                Add Price Rule
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Price Rule Modal */}
+      {isEditPriceRuleModalOpen && editingPriceRule && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Edit Price Rule</h3>
+              <button
+                onClick={() => setIsEditPriceRuleModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Days of Week</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'].map(day => (
+                    <label key={day} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={editPriceRuleData.daysOfWeek?.includes(day) || false}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setEditPriceRuleData({
+                              ...editPriceRuleData,
+                              daysOfWeek: [...(editPriceRuleData.daysOfWeek || []), day]
+                            });
+                          } else {
+                            setEditPriceRuleData({
+                              ...editPriceRuleData,
+                              daysOfWeek: (editPriceRuleData.daysOfWeek || []).filter(d => d !== day)
+                            });
+                          }
+                        }}
+                        className="mr-2"
+                      />
+                      <span className="text-sm">{day}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                  <input
+                    type="time"
+                    value={editPriceRuleData.startTime || ''}
+                    onChange={(e) => setEditPriceRuleData({...editPriceRuleData, startTime: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                  <input
+                    type="time"
+                    value={editPriceRuleData.endTime || ''}
+                    onChange={(e) => setEditPriceRuleData({...editPriceRuleData, endTime: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Price Per Unit</label>
+                  <input
+                    type="number"
+                    value={editPriceRuleData.pricePerUnit || 0}
+                    onChange={(e) => setEditPriceRuleData({...editPriceRuleData, pricePerUnit: Number(e.target.value) || 0})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    min="0"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Unit</label>
+                  <select
+                    value={editPriceRuleData.unit || ''}
+                    onChange={(e) => setEditPriceRuleData({...editPriceRuleData, unit: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select unit</option>
+                    <option value="HOUR">Hour</option>
+                    <option value="DAY">Day</option>
+                    <option value="WEEK">Week</option>
+                    <option value="MONTH">Month</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                <input
+                  type="date"
+                  value={editPriceRuleData.date || ''}
+                  onChange={(e) => setEditPriceRuleData({...editPriceRuleData, date: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end space-x-2 mt-6">
+              <button
+                onClick={() => setIsEditPriceRuleModalOpen(false)}
+                className="px-4 py-2 text-gray-600 bg-gray-200 rounded-md hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdatePriceRule}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Update Price Rule
               </button>
             </div>
           </div>
