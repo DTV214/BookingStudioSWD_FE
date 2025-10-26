@@ -38,6 +38,9 @@ export function ServiceCard({ service }: ServiceCardProps) {
     if (serviceName.toLowerCase().includes('kỷ yếu lớp 12') || serviceName.toLowerCase().includes('ky yeu lop 12')) {
       return '/service/chup-anh-ky-yeu-lop-12';
     }
+    if (serviceName.toLowerCase().includes('kỷ yếu mầm non') || serviceName.toLowerCase().includes('ky yeu mam non')) {
+      return '/service/chup-anh-ky-yeu-mam-non';
+    }
     return `/booking?service_id=${service.id}`;
   };
 
@@ -75,7 +78,8 @@ export function ServiceCard({ service }: ServiceCardProps) {
             <span className="flex items-center justify-center">
               {service.serviceName.toLowerCase().includes('thẻ') || service.serviceName.toLowerCase().includes('id') || 
                service.serviceName.toLowerCase().includes('doanh nghiệp') || service.serviceName.toLowerCase().includes('corporate') ||
-               service.serviceName.toLowerCase().includes('kỷ yếu lớp 12') || service.serviceName.toLowerCase().includes('ky yeu lop 12')
+               service.serviceName.toLowerCase().includes('kỷ yếu lớp 12') || service.serviceName.toLowerCase().includes('ky yeu lop 12') ||
+               service.serviceName.toLowerCase().includes('kỷ yếu mầm non') || service.serviceName.toLowerCase().includes('ky yeu mam non')
                 ? 'Xem chi tiết' 
                 : 'Đặt lịch ngay'}
               <ArrowRight

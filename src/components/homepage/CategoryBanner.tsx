@@ -26,7 +26,7 @@ const categories = [
   {
     title: "Chụp ảnh kỷ yếu mầm non",
     img: "https://res.cloudinary.com/dratbz8bh/image/upload/v1758618590/chup-ky-yeu-mam-non-39-1536x1024_n0857d.jpg",
-    href: "/category/chup-anh-ky-yeu-mam-non",
+    href: "/service/chup-anh-ky-yeu-mam-non",
   },
   {
     title: "Chụp ảnh kỷ yếu đại học",
