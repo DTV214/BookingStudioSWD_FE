@@ -8,6 +8,7 @@ export type {
   PriceItemResponse,
   PriceItemPayload,
   PriceRule,
+  PriceRuleAPIResponse,
   PriceRuleResponse,
   PriceRulePayload
 } from './pricingService';

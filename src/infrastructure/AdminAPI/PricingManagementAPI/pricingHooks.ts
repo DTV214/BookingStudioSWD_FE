@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { PricingService, PricingData, PriceTablePayload, PriceItem, PriceItemPayload, PriceRule, PriceRulePayload } from './pricingService';
+import { PricingService, PricingData, PriceTablePayload, PriceItem, PriceItemPayload, PriceRule, PriceRuleAPIResponse, PriceRulePayload } from './pricingService';
 
 export const usePriceTables = () => {
   const [priceTables, setPriceTables] = useState<PricingData[]>([]);
@@ -177,7 +177,7 @@ export const usePriceItems = () => {
       
       const response = await PricingService.getPriceRulesByItemId(itemId);
       console.log('Hook: Price rules by item ID fetched successfully:', response);
-      return response.data;
+      return response;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch price rules by item ID';
       setError(errorMessage);
@@ -280,12 +280,8 @@ export const usePriceRules = () => {
       const response = await PricingService.getPriceRulesByItemId(itemId);
       console.log('Hook: Price rules by item ID fetched successfully:', response);
       
-      if (response.code === 200 && response.data) {
-        setPriceRules(response.data);
-        return response.data;
-      } else {
-        throw new Error(response.message || 'Failed to fetch price rules');
-      }
+      setPriceRules(response);
+      return response;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch price rules by item ID';
       setError(errorMessage);

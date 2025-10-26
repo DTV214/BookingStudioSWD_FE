@@ -55,7 +55,7 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
   });
   const [newPriceRuleData, setNewPriceRuleData] = useState<PriceRulePayload>({
     priceTableItemId: '',
-    dayFilter: [],
+    daysOfWeek: [],
     startTime: '',
     endTime: '',
     pricePerUnit: 0,
@@ -63,7 +63,7 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
     date: ''
   });
   const [editPriceRuleData, setEditPriceRuleData] = useState<Partial<PriceRulePayload>>({
-    dayFilter: [],
+    daysOfWeek: [],
     startTime: '',
     endTime: '',
     pricePerUnit: 0,
@@ -201,7 +201,7 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
           console.log('Fetched price rules:', rules);
           console.log('First rule details:', rules[0]);
           if (rules[0]) {
-            console.log('dayFilter:', rules[0].dayFilter);
+            console.log('daysOfWeek:', rules[0].daysOfWeek);
             console.log('unit:', rules[0].unit);
           }
         } else {
@@ -322,11 +322,17 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
       };
 
       const newPriceRule = await createPriceRule(priceRuleData);
-      setPriceRules(prev => [...prev, newPriceRule]);
+      
+      // Refresh the price rules list to get the complete data
+      if (viewingPriceItem?.id) {
+        const updatedRules = await fetchPriceRulesByItemId(viewingPriceItem.id);
+        setPriceRules(updatedRules);
+      }
+      
       setIsAddPriceRuleModalOpen(false);
       setNewPriceRuleData({
         priceTableItemId: '',
-        dayFilter: [],
+        daysOfWeek: [],
         startTime: '',
         endTime: '',
         pricePerUnit: 0,
@@ -344,7 +350,7 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
   const handleEditPriceRule = (priceRule: PriceRule) => {
     setEditingPriceRule(priceRule);
     setEditPriceRuleData({
-      dayFilter: priceRule.dayFilter,
+      daysOfWeek: priceRule.daysOfWeek,
       startTime: priceRule.startTime,
       endTime: priceRule.endTime,
       pricePerUnit: priceRule.pricePerUnit,
@@ -360,17 +366,17 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
     
     try {
       await updatePriceRule(editingPriceRule.id, editPriceRuleData);
-      setPriceRules(prev => 
-        prev.map(rule => 
-          rule.id === editingPriceRule.id 
-            ? { ...rule, ...editPriceRuleData }
-            : rule
-        )
-      );
+      
+      // Refresh the price rules list to get the complete data
+      if (viewingPriceItem?.id) {
+        const updatedRules = await fetchPriceRulesByItemId(viewingPriceItem.id);
+        setPriceRules(updatedRules);
+      }
+      
       setIsEditPriceRuleModalOpen(false);
       setEditingPriceRule(null);
       setEditPriceRuleData({
-        dayFilter: [],
+        daysOfWeek: [],
         startTime: '',
         endTime: '',
         pricePerUnit: 0,
@@ -389,7 +395,13 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
     if (window.confirm('Are you sure you want to delete this price rule?')) {
       try {
         await deletePriceRule(id);
-        setPriceRules(prev => prev.filter(rule => rule.id !== id));
+        
+        // Refresh the price rules list to get the updated data
+        if (viewingPriceItem?.id) {
+          const updatedRules = await fetchPriceRulesByItemId(viewingPriceItem.id);
+          setPriceRules(updatedRules);
+        }
+        
         alert('Price rule deleted successfully!');
       } catch (error) {
         console.error('Error deleting price rule:', error);
@@ -986,7 +998,7 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
                         {priceRules.map((rule, index) => (
                           <tr key={rule.id || `price-rule-${index}`} className="hover:bg-gray-50 transition-colors duration-150">
                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                               {rule.dayFilter && rule.dayFilter.length > 0 ? rule.dayFilter.join(', ') : 'N/A'}
+                               {rule.daysOfWeek && rule.daysOfWeek.length > 0 ? rule.daysOfWeek.join(', ') : 'N/A'}
                              </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                               {rule.startTime && rule.endTime ? `${rule.startTime} - ${rule.endTime}` : 'N/A'}
@@ -1186,17 +1198,17 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
                     <label key={day} className="flex items-center">
                       <input
                         type="checkbox"
-                        checked={newPriceRuleData.dayFilter.includes(day)}
+                        checked={newPriceRuleData.daysOfWeek.includes(day)}
                         onChange={(e) => {
                           if (e.target.checked) {
                             setNewPriceRuleData({
                               ...newPriceRuleData,
-                              dayFilter: [...newPriceRuleData.dayFilter, day]
+                              daysOfWeek: [...newPriceRuleData.daysOfWeek, day]
                             });
                           } else {
                             setNewPriceRuleData({
                               ...newPriceRuleData,
-                              dayFilter: newPriceRuleData.dayFilter.filter(d => d !== day)
+                              daysOfWeek: newPriceRuleData.daysOfWeek.filter(d => d !== day)
                             });
                           }
                         }}
@@ -1305,17 +1317,17 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
                     <label key={day} className="flex items-center">
                       <input
                         type="checkbox"
-                        checked={editPriceRuleData.dayFilter?.includes(day) || false}
+                        checked={editPriceRuleData.daysOfWeek?.includes(day) || false}
                         onChange={(e) => {
                           if (e.target.checked) {
                             setEditPriceRuleData({
                               ...editPriceRuleData,
-                              dayFilter: [...(editPriceRuleData.dayFilter || []), day]
+                              daysOfWeek: [...(editPriceRuleData.daysOfWeek || []), day]
                             });
                           } else {
                             setEditPriceRuleData({
                               ...editPriceRuleData,
-                              dayFilter: (editPriceRuleData.dayFilter || []).filter(d => d !== day)
+                              daysOfWeek: (editPriceRuleData.daysOfWeek || []).filter(d => d !== day)
                             });
                           }
                         }}
