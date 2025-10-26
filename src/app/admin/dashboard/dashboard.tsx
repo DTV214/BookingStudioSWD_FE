@@ -1,15 +1,15 @@
 // src/app/admin/dashboard/dashboard.tsx
 import React from "react";
-import DashBoardForm, { DashProps } from "@/components/AdminPage/DashBoardForm";
+import { DashProps } from "@/components/AdminPage/DashBoardForm";
+import DashboardClient from "@/components/AdminPage/DashboardClient";
 
 /**
- * DashboardContainer is a server component that prepares data (from DB/API)
- * and renders the presentational DashBoardForm with that data.
+ * DashboardContainer is a server component that prepares fallback data
+ * and renders the client component for API calls.
  */
-export default async function DashboardContainer() {
-  // === In real app you'd replace the below with real fetch/db calls ===
-  // Here we simulate server-side data fetch (synchronous for demo).
-  const data: DashProps = {
+export default function DashboardContainer() {
+  // Fallback data for demo purposes (when API fails)
+  const fallbackData: DashProps = {
     stats: {
       bookingsToday: 3,
       revenueToday: 320,
@@ -58,6 +58,6 @@ export default async function DashboardContainer() {
     ],
   };
 
-  // Pass data down to the presentational component
-  return <DashBoardForm {...data} />;
+  // Pass fallback data to client component
+  return <DashboardClient fallbackData={fallbackData} />;
 }
