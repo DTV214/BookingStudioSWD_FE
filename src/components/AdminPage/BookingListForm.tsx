@@ -4,6 +4,8 @@ import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { Booking, BookingStatistics } from "@/app/admin/bookinglist/bookinglist"; // Import types from container
 import StudioAssignList from "./StudioAssignList";
+import TransactionList from "@/app/admin/bookinglist/TransactionList";
+import { usePayments } from "@/infrastructure/api/service/paymentHooks";
 
 interface Props {
   bookings: Booking[];
@@ -12,6 +14,82 @@ interface Props {
   onUpdateBooking: (updatedBooking: Booking) => void;
   loading?: boolean;
   error?: string | null;
+}
+
+// Component ViewModal riêng để xử lý payments
+function ViewModal({ booking, onClose }: { booking: Booking; onClose: () => void }) {
+  const { payments, loading, error, updatePaymentStatus } = usePayments(booking.id);
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(price);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+      <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 xl:w-1/2 shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+        <div className="mt-3">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-medium text-gray-900">Chi tiết Booking</h3>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-medium text-gray-900">Thông tin khách hàng</h4>
+              <p className="text-sm text-gray-600">Tên: {booking.customer.name}</p>
+              <p className="text-sm text-gray-600">Email: {booking.customer.email}</p>
+              <p className="text-sm text-gray-600">SĐT: {booking.customer.phone}</p>
+            </div>
+            
+            <div>
+              <h4 className="font-medium text-gray-900">Thông tin loại studio</h4>
+              <p className="text-sm text-gray-600">Tên: {booking.studio.name}</p>
+              <p className="text-sm text-gray-600">Ngày: {booking.studio.date}</p>
+              <p className="text-sm text-gray-600">Giờ: {booking.studio.time}</p>
+            </div>
+            
+            <div>
+              <h4 className="font-medium text-gray-900">Tổng tiền</h4>
+              <p className="text-sm font-bold text-gray-900">Tổng: {formatPrice(booking.pricing.total)}</p>
+            </div>
+            
+            {booking.notes && (
+              <div>
+                <h4 className="font-medium text-gray-900">Ghi chú</h4>
+                <p className="text-sm text-gray-600">{booking.notes}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Studio Assign List Section */}
+          <div className="mt-6 border-t border-gray-200 pt-4">
+            <h4 className="font-medium text-gray-900 mb-4">Những studio đã đăng kí</h4>
+            <StudioAssignList bookingId={booking.id} />
+          </div>
+
+          {/* Transaction List */}
+          <div className="mt-6 border-t border-gray-200 pt-4">
+            <TransactionList 
+              payments={payments}
+              loading={loading}
+              error={error}
+              onUpdateStatus={updatePaymentStatus}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function BookingListForm({
@@ -636,57 +714,10 @@ export default function BookingListForm({
 
         {/* View Modal */}
         {isViewModalOpen && selectedBooking && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 xl:w-1/2 shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
-              <div className="mt-3">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-medium text-gray-900">Chi tiết Booking</h3>
-                  <button
-                    onClick={() => setIsViewModalOpen(false)}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-                
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-medium text-gray-900">Thông tin khách hàng</h4>
-                    <p className="text-sm text-gray-600">Tên: {selectedBooking.customer.name}</p>
-                    <p className="text-sm text-gray-600">Email: {selectedBooking.customer.email}</p>
-                    <p className="text-sm text-gray-600">SĐT: {selectedBooking.customer.phone}</p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-medium text-gray-900">Thông tin loại studio</h4>
-                    <p className="text-sm text-gray-600">Tên: {selectedBooking.studio.name}</p>
-                    <p className="text-sm text-gray-600">Ngày: {selectedBooking.studio.date}</p>
-                    <p className="text-sm text-gray-600">Giờ: {selectedBooking.studio.time}</p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-medium text-gray-900">Tổng tiền</h4>
-                    <p className="text-sm font-bold text-gray-900">Tổng: {formatPrice(selectedBooking.pricing.total)}</p>
-                  </div>
-                  
-                  {selectedBooking.notes && (
-                    <div>
-                      <h4 className="font-medium text-gray-900">Ghi chú</h4>
-                      <p className="text-sm text-gray-600">{selectedBooking.notes}</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Studio Assign List Section */}
-                <div className="mt-6 border-t border-gray-200 pt-4">
-                  <h4 className="font-medium text-gray-900 mb-4">Những studio đã đăng kí</h4>
-                  <StudioAssignList bookingId={selectedBooking.id} />
-                </div>
-              </div>
-            </div>
-          </div>
+          <ViewModal 
+            booking={selectedBooking} 
+            onClose={() => setIsViewModalOpen(false)} 
+          />
         )}
 
       {/* Edit Modal */}

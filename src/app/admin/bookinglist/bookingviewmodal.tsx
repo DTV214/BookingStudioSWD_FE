@@ -5,6 +5,8 @@ import React from "react";
 import BookingCustomerInfo from "./bookingcustomerinfo";
 import BookingStatusInfo from "./bookingstatusinfo";
 import BookingNoteSection from "./bookingnotesection";
+import TransactionList from "./TransactionList";
+import { usePayments } from "@/infrastructure/api/service/paymentHooks";
 
 interface Customer {
   name: string;
@@ -62,6 +64,15 @@ export default function BookingViewModal({
   isOpen, 
   onClose
 }: BookingViewModalProps) {
+  const { payments, loading, error, updatePaymentStatus } = usePayments(booking?.id || null);
+
+  // Debug logs
+  console.log('BookingViewModal - isOpen:', isOpen);
+  console.log('BookingViewModal - booking:', booking);
+  console.log('BookingViewModal - payments:', payments);
+  console.log('BookingViewModal - loading:', loading);
+  console.log('BookingViewModal - error:', error);
+
   if (!isOpen || !booking) return null;
 
   return (
@@ -158,6 +169,138 @@ export default function BookingViewModal({
             isEditable={false}
           />
         </div>
+
+        {/* Registered Studios Section */}
+        <div style={{ marginTop: '1.5rem' }}>
+          <div style={{ backgroundColor: '#f0f9ff', padding: '1.5rem', borderRadius: '8px' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '1rem', color: '#374151' }}>
+              Những studio đã đăng kí
+            </h3>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ 
+                width: '100%', 
+                borderCollapse: 'collapse',
+                fontSize: '0.875rem'
+              }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#e5e7eb' }}>
+                    <th style={{ padding: '0.75rem', textAlign: 'left', borderBottom: '1px solid #d1d5db', fontWeight: 'bold' }}>
+                      STUDIO NAME
+                    </th>
+                    <th style={{ padding: '0.75rem', textAlign: 'left', borderBottom: '1px solid #d1d5db', fontWeight: 'bold' }}>
+                      START TIME
+                    </th>
+                    <th style={{ padding: '0.75rem', textAlign: 'left', borderBottom: '1px solid #d1d5db', fontWeight: 'bold' }}>
+                      END TIME
+                    </th>
+                    <th style={{ padding: '0.75rem', textAlign: 'left', borderBottom: '1px solid #d1d5db', fontWeight: 'bold' }}>
+                      STUDIO AMOUNT
+                    </th>
+                    <th style={{ padding: '0.75rem', textAlign: 'left', borderBottom: '1px solid #d1d5db', fontWeight: 'bold' }}>
+                      SERVICE AMOUNT
+                    </th>
+                    <th style={{ padding: '0.75rem', textAlign: 'left', borderBottom: '1px solid #d1d5db', fontWeight: 'bold' }}>
+                      STATUS
+                    </th>
+                    <th style={{ padding: '0.75rem', textAlign: 'left', borderBottom: '1px solid #d1d5db', fontWeight: 'bold' }}>
+                      ACTIONS
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
+                    <td style={{ padding: '0.75rem' }}>
+                      {booking.studio.name}
+                    </td>
+                    <td style={{ padding: '0.75rem' }}>
+                      {booking.studio.time} {booking.studio.date}
+                    </td>
+                    <td style={{ padding: '0.75rem' }}>
+                      {/* Calculate end time - assuming 2 hours duration */}
+                      {new Date(new Date(`${booking.studio.date}T${booking.studio.time}`).getTime() + 2 * 60 * 60 * 1000).toLocaleString('vi-VN', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: '2-digit'
+                      })}
+                    </td>
+                    <td style={{ padding: '0.75rem', fontWeight: 'bold' }}>
+                      {new Intl.NumberFormat('vi-VN', {
+                        style: 'currency',
+                        currency: 'VND'
+                      }).format(booking.pricing.studioPrice)}
+                    </td>
+                    <td style={{ padding: '0.75rem', fontWeight: 'bold' }}>
+                      {new Intl.NumberFormat('vi-VN', {
+                        style: 'currency',
+                        currency: 'VND'
+                      }).format(booking.pricing.servicePrice)}
+                    </td>
+                    <td style={{ padding: '0.75rem' }}>
+                      <span 
+                        style={{
+                          padding: '0.25rem 0.5rem',
+                          borderRadius: '9999px',
+                          fontSize: '0.75rem',
+                          fontWeight: 'bold',
+                          backgroundColor: booking.status === 'pending' ? '#fef3c7' : 
+                                         booking.status === 'approved' ? '#d1fae5' : 
+                                         booking.status === 'completed' ? '#dbeafe' : '#fee2e2',
+                          color: booking.status === 'pending' ? '#92400e' : 
+                                 booking.status === 'approved' ? '#065f46' : 
+                                 booking.status === 'completed' ? '#1e40af' : '#991b1b'
+                        }}
+                      >
+                        {booking.status === 'pending' ? 'Sắp tới' : 
+                         booking.status === 'approved' ? 'Đã duyệt' : 
+                         booking.status === 'completed' ? 'Hoàn thành' : 'Đã hủy'}
+                      </span>
+                    </td>
+                    <td style={{ padding: '0.75rem' }}>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button
+                          style={{
+                            padding: '0.25rem 0.5rem',
+                            backgroundColor: '#3b82f6',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            fontSize: '0.75rem',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Xem
+                        </button>
+                        <button
+                          style={{
+                            padding: '0.25rem 0.5rem',
+                            backgroundColor: '#10b981',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            fontSize: '0.75rem',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Chỉnh sửa
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Transaction List */}
+        <TransactionList 
+          payments={payments}
+          loading={loading}
+          error={error}
+          onUpdateStatus={updatePaymentStatus}
+        />
 
         {/* Action Buttons - Only Close */}
         <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem', justifyContent: 'flex-end' }}>
