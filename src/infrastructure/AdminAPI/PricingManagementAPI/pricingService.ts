@@ -53,6 +53,24 @@ export interface PriceTablePayload {
   status: 'COMING_SOON' | 'IS_HAPPENING' | 'ENDED';
 }
 
+// Request body for creating/updating price items
+export interface PriceItemPayload {
+  priceTableId: string;
+  studioTypeName: string;
+  defaultPrice: number;
+}
+
+// Request body for creating/updating price rules
+export interface PriceRulePayload {
+  priceTableItemId: string;
+  dayFilter: string[];
+  startTime: string;
+  endTime: string;
+  pricePerUnit: number;
+  unit: string;
+  date: string;
+}
+
 const API_BASE_URL = 'https://api.eccubestudio.click';
 
 export class PricingService {
@@ -169,5 +187,85 @@ export class PricingService {
     });
 
     console.log('Price table deleted successfully');
+  }
+
+  // Step 10: Create new price item
+  static async createPriceItem(priceItemData: PriceItemPayload): Promise<PriceItem> {
+    const url = `${API_BASE_URL}/api/price-items`;
+    console.log('Creating price item with data:', priceItemData);
+    
+    const response = await this.fetchWithErrorHandling<PriceItem>(url, {
+      method: 'POST',
+      body: JSON.stringify(priceItemData),
+    });
+
+    console.log('Create price item API response:', response);
+    return response;
+  }
+
+  // Step 11: Update existing price item
+  static async updatePriceItem(id: string, priceItemData: Partial<PriceItemPayload>): Promise<PriceItem> {
+    const url = `${API_BASE_URL}/api/price-items/${id}`;
+    console.log('Updating price item:', id, 'with data:', priceItemData);
+    
+    const response = await this.fetchWithErrorHandling<PriceItem>(url, {
+      method: 'PUT',
+      body: JSON.stringify(priceItemData),
+    });
+
+    console.log('Update price item API response:', response);
+    return response;
+  }
+
+  // Step 12: Delete price item
+  static async deletePriceItem(id: string): Promise<void> {
+    const url = `${API_BASE_URL}/api/price-items/${id}`;
+    console.log('Deleting price item:', id);
+    
+    await this.fetchWithErrorHandling<void>(url, {
+      method: 'DELETE',
+    });
+
+    console.log('Price item deleted successfully');
+  }
+
+  // Step 13: Create new price rule
+  static async createPriceRule(priceRuleData: PriceRulePayload): Promise<PriceRule> {
+    const url = `${API_BASE_URL}/api/price-rules`;
+    console.log('Creating price rule with data:', priceRuleData);
+    
+    const response = await this.fetchWithErrorHandling<PriceRule>(url, {
+      method: 'POST',
+      body: JSON.stringify(priceRuleData),
+    });
+
+    console.log('Create price rule API response:', response);
+    return response;
+  }
+
+  // Step 14: Update existing price rule
+  static async updatePriceRule(id: string, priceRuleData: Partial<PriceRulePayload>): Promise<PriceRule> {
+    const url = `${API_BASE_URL}/api/price-rules/${id}`;
+    console.log('Updating price rule:', id, 'with data:', priceRuleData);
+    
+    const response = await this.fetchWithErrorHandling<PriceRule>(url, {
+      method: 'PUT',
+      body: JSON.stringify(priceRuleData),
+    });
+
+    console.log('Update price rule API response:', response);
+    return response;
+  }
+
+  // Step 15: Delete price rule
+  static async deletePriceRule(id: string): Promise<void> {
+    const url = `${API_BASE_URL}/api/price-rules/${id}`;
+    console.log('Deleting price rule:', id);
+    
+    await this.fetchWithErrorHandling<void>(url, {
+      method: 'DELETE',
+    });
+
+    console.log('Price rule deleted successfully');
   }
 }
