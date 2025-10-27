@@ -10,33 +10,33 @@ const categories = [
   {
     title: "Chụp ảnh thẻ",
     img: "https://res.cloudinary.com/dratbz8bh/image/upload/v1758618220/anh-the-nen-trang-inkythuatso-27-10-33-14_obb6hv.jpg",
-    href: "/category/chup-anh-the",
+    href: "/service/chup-anh-the",
   },
   {
     title: "Chụp ảnh doanh nghiệp",
     img: "https://res.cloudinary.com/dratbz8bh/image/upload/v1758618411/50532682592_0ede566417_k_rxxreq.jpg",
-    href: "/category/chup-anh-doanh-nghiep",
+    href: "/service/chup-anh-doanh-nghiep",
   },
   {
     title: "Chụp ảnh kỷ yếu lớp 12",
     img: "https://res.cloudinary.com/dratbz8bh/image/upload/v1758616794/Chup-anh-ky-yeu-dep-uy-tin-gia-re-chat-luong-hang-dau-scaled_enbf08.webp",
-    href: "/category/chup-anh-ky-yeu-12",
+    href: "/service/chup-anh-ky-yeu-lop-12",
     button: "Xem chi tiết",
   },
   {
     title: "Chụp ảnh kỷ yếu mầm non",
     img: "https://res.cloudinary.com/dratbz8bh/image/upload/v1758618590/chup-ky-yeu-mam-non-39-1536x1024_n0857d.jpg",
-    href: "/category/chup-anh-ky-yeu-mam-non",
+    href: "/service/chup-anh-ky-yeu-mam-non",
   },
   {
     title: "Chụp ảnh kỷ yếu đại học",
     img: "https://res.cloudinary.com/dratbz8bh/image/upload/v1758619363/chup-anh-ky-yeu-uy-tin-chuyen-nghiep-dep-tron-goi-gia-re-75_sdzlmb.png",
-    href: "/category/chup-anh-ky-yeu-dai-hoc",
+    href: "/service/chup-anh-ky-yeu-dai-hoc",
   },
   {
     title: "Chụp ảnh kỷ yếu lớp 5",
     img: "https://res.cloudinary.com/dratbz8bh/image/upload/v1758619020/Chup-anh-ky-yeu-mam-non-dep-gia-re-uy-tin-2_niazex.jpg",
-    href: "/category/chup-anh-ky-yeu-lop-5",
+    href: "/service/chup-anh-ky-yeu-lop-5",
   },
   {
     title: "Chụp ảnh studio",
