@@ -27,6 +27,29 @@ const formatCurrency = (amount: number) => {
 };
 
 export function ServiceCard({ service }: ServiceCardProps) {
+  // Xác định đường dẫn dựa trên tên dịch vụ
+  const getServiceLink = (serviceName: string) => {
+    if (serviceName.toLowerCase().includes('thẻ') || serviceName.toLowerCase().includes('id')) {
+      return '/service/chup-anh-the';
+    }
+    if (serviceName.toLowerCase().includes('doanh nghiệp') || serviceName.toLowerCase().includes('corporate')) {
+      return '/service/chup-anh-doanh-nghiep';
+    }
+    if (serviceName.toLowerCase().includes('kỷ yếu lớp 12') || serviceName.toLowerCase().includes('ky yeu lop 12')) {
+      return '/service/chup-anh-ky-yeu-lop-12';
+    }
+    if (serviceName.toLowerCase().includes('kỷ yếu mầm non') || serviceName.toLowerCase().includes('ky yeu mam non')) {
+      return '/service/chup-anh-ky-yeu-mam-non';
+    }
+    if (serviceName.toLowerCase().includes('kỷ yếu đại học') || serviceName.toLowerCase().includes('ky yeu dai hoc')) {
+      return '/service/chup-anh-ky-yeu-dai-hoc';
+    }
+    if (serviceName.toLowerCase().includes('kỷ yếu lớp 5') || serviceName.toLowerCase().includes('ky yeu lop 5')) {
+      return '/service/chup-anh-ky-yeu-lop-5';
+    }
+    return `/booking?service_id=${service.id}`;
+  };
+
   return (
     <Card
       className="flex flex-col justify-between h-full
@@ -57,9 +80,16 @@ export function ServiceCard({ service }: ServiceCardProps) {
                      hover:from-amber-600 hover:to-orange-600
                      transition-all duration-300 transform hover:scale-105"
         >
-          <Link href={`/booking?service_id=${service.id}`}>
+          <Link href={getServiceLink(service.serviceName)}>
             <span className="flex items-center justify-center">
-              Đặt lịch ngay
+              {service.serviceName.toLowerCase().includes('thẻ') || service.serviceName.toLowerCase().includes('id') || 
+               service.serviceName.toLowerCase().includes('doanh nghiệp') || service.serviceName.toLowerCase().includes('corporate') ||
+               service.serviceName.toLowerCase().includes('kỷ yếu lớp 12') || service.serviceName.toLowerCase().includes('ky yeu lop 12') ||
+               service.serviceName.toLowerCase().includes('kỷ yếu mầm non') || service.serviceName.toLowerCase().includes('ky yeu mam non') ||
+               service.serviceName.toLowerCase().includes('kỷ yếu đại học') || service.serviceName.toLowerCase().includes('ky yeu dai hoc') ||
+               service.serviceName.toLowerCase().includes('kỷ yếu lớp 5') || service.serviceName.toLowerCase().includes('ky yeu lop 5')
+                ? 'Xem chi tiết' 
+                : 'Đặt lịch ngay'}
               <ArrowRight
                 className="ml-2 h-4 w-4 transition-transform
                                  group-hover:translate-x-1"
