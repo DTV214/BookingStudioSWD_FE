@@ -1,4 +1,16 @@
 export const ENDPOINTS = {
+  // Authentication endpoints
+  AUTH: {
+    LOGIN: "/api/auth/login",
+    REGISTER: "/api/auth/register", 
+    LOGOUT: "/api/auth/logout",
+    REFRESH: "/api/auth/refresh",
+    VALIDATE: "/api/auth/validate",
+    CHANGE_PASSWORD: "/api/auth/change-password",
+    FORGOT_PASSWORD: "/api/auth/forgot-password",
+    RESET_PASSWORD: "/api/auth/reset-password",
+  },
+  
   PROFILE: "/api/account/profile",
   ACCOUNT: "/api/account",
   STUDIO_TYPES: "/api/studio-types",
