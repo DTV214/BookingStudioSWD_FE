@@ -211,7 +211,7 @@ export function useStudioAssigns(bookingId?: string): UseStudioAssignsReturn {
       } else {
         response = await bookingManagementService.getAllStudioAssigns();
       }
-      setStudioAssigns(response.data);
+      setStudioAssigns(response.data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch studio assigns');
       console.error('Error fetching studio assigns:', err);

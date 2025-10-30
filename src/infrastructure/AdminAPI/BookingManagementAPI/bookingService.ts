@@ -39,7 +39,7 @@ class BookingManagementService {
       console.log('response.data của getAllBookings', response.data);
       console.log("✅ getAllBookings result:", response);
 
-      return response.data.data; // Trả về mảng bookings trực tiếp
+      return response.data as unknown as Booking[]; // Trả về mảng bookings trực tiếp
     } catch (error) {
       console.error('Error fetching bookings:', error);
       throw error;

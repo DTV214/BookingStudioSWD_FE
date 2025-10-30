@@ -94,7 +94,7 @@ export default function StudioAssignList({ bookingId }: Props) {
     );
   }
 
-  if (studioAssigns.length === 0) {
+  if (!studioAssigns || studioAssigns.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
         Không có studio nào được phân công cho booking này
