@@ -41,12 +41,12 @@ const categories = [
   {
     title: "Chụp ảnh studio",
     img: "https://res.cloudinary.com/dratbz8bh/image/upload/v1758617638/enter-studio-cho-thue-studio-chup-anh-002_nrm9nz.jpg",
-    href: "/category/chup-anh-studio",
+    href: "/service/chup-anh-studio",
   },
   {
     title: "Chụp ảnh kỷ yếu lớp 9",
     img: "https://res.cloudinary.com/dratbz8bh/image/upload/v1758619001/chup-anh-ky-yeu-lop-9-gia-re-chat-luong-uy-tin_it55bu.jpg",
-    href: "/category/chup-anh-ky-yeu-lop-9",
+    href: "/service/chup-anh-ky-yeu-lop-9",
   },
   {
     title: "Cho thuê thiết bị chụp ảnh",
@@ -56,12 +56,12 @@ const categories = [
   {
     title: "Quay video doanh nghiệp",
     img: "https://res.cloudinary.com/dratbz8bh/image/upload/v1758617175/41536e796f4d685f61375541426c78773858426246_zai0xr.jpg",
-    href: "/category/quay-video-doanh-nghiep",
+    href: "/service/quay-video-doanh-nghiep",
   },
   {
     title: "Quay video kỷ yếu ",
     img: "https://res.cloudinary.com/dratbz8bh/image/upload/v1758617588/Chup-anh-ky-yeu-tai-vinh-phuc-33-scaled_xk3qnt.jpg",
-    href: "/category/quay-video-ky-yeu",
+    href: "/service/quay-video-ky-yeu",
   },
   {
     title: "Quay phim sự kiện",
