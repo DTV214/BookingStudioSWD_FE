@@ -36,7 +36,7 @@ export function useBookings(params?: BookingQueryParams): UseBookingsReturn {
       setLoading(true);
       setError(null);
       const response = await bookingManagementService.getAllBookings(params);
-      setBookings(response.data);
+      setBookings(response || []); // response bây giờ đã là mảng Booking[]
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch bookings');
       console.error('Error fetching bookings:', err);
@@ -211,7 +211,7 @@ export function useStudioAssigns(bookingId?: string): UseStudioAssignsReturn {
       } else {
         response = await bookingManagementService.getAllStudioAssigns();
       }
-      setStudioAssigns(response.data);
+      setStudioAssigns(response.data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch studio assigns');
       console.error('Error fetching studio assigns:', err);

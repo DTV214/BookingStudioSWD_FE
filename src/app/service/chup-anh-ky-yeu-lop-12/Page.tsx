@@ -81,17 +81,15 @@ const ChupAnhKyYeuLop12Page = () => {
           {/* Phần hình ảnh và CTA */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="relative">
-              <img
-                src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&h=400&fit=crop&crop=face"
-                alt="Chụp ảnh kỷ yếu lớp 12"
-                className="w-full h-80 object-cover rounded-2xl shadow-2xl"
-              />
-              {/* Overlay gradient */}
-              <div className="absolute inset-0 bg-gradient-to-t from-purple-900/50 to-transparent rounded-2xl"></div>
-              <div className="absolute bottom-6 left-6 text-white">
-                <h3 className="text-2xl font-bold mb-2">Khoảnh Khắc Thanh Xuân</h3>
-                <p className="text-purple-100">Cùng bạn bè tạo nên những kỷ niệm đẹp nhất</p>
+              <div className="w-full h-80 bg-gradient-to-br from-purple-600 via-purple-700 to-pink-600 rounded-2xl shadow-2xl flex items-center justify-center">
+                <div className="text-center text-white">
+                  <GraduationCap className="w-24 h-24 mx-auto mb-4 opacity-80" />
+                  <h3 className="text-2xl font-bold mb-2">Khoảnh Khắc Thanh Xuân</h3>
+                  <p className="text-purple-100">Cùng bạn bè tạo nên những kỷ niệm đẹp nhất</p>
+                </div>
               </div>
+              {/* Overlay gradient */}
+              <div className="absolute inset-0 bg-gradient-to-t from-purple-900/30 to-transparent rounded-2xl"></div>
             </div>
             <div className="text-center lg:text-left">
               <h2 className="text-3xl font-bold text-gray-900 mb-6">Sẵn sàng lưu giữ kỷ niệm?</h2>
@@ -285,7 +283,7 @@ const ChupAnhKyYeuLop12Page = () => {
                 Đặt lịch ngay
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-purple-600">
+            <Button size="lg" className="bg-white text-purple-600 hover:bg-gray-100">
               <Clock className="w-5 h-5 mr-2" />
               Xem giờ mở cửa
             </Button>

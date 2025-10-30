@@ -359,7 +359,7 @@ const ChupAnhKyYeuMamNonPage = () => {
                 Đặt lịch ngay
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-pink-600">
+            <Button size="lg" className="bg-white text-pink-600 hover:bg-gray-100">
               <Clock className="w-5 h-5 mr-2" />
               Xem giờ mở cửa
             </Button>
