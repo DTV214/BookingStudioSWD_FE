@@ -5,6 +5,7 @@ import {
   BookingStatusUpdateRequest, 
   BookingStatusUpdateResponse,
   BookingQueryParams,
+  BookingStatistics,
   BookingStatisticsResponse,
   CalendarResponse,
   StudioAssignListResponse,
@@ -12,40 +13,15 @@ import {
   StudioAssignUpdateRequest,
   StudioAssignUpdateResponse,
   StudioAssignStatusUpdateRequest,
-  ServiceAssignListResponse
+  ServiceAssignListResponse,
+  Booking
 } from './types';
-
-const API_BASE_URL = 'https://api.eccubestudio.click/api';
+import { httpClient } from '@/infrastructure/api/httpClient';
 
 class BookingManagementService {
-  private async makeRequest<T>(
-    endpoint: string, 
-    options: RequestInit = {}
-  ): Promise<T> {
-    const url = `${API_BASE_URL}${endpoint}`;
-    
-    const defaultHeaders = {
-      'Content-Type': 'application/json',
-      'Accept': '*/*',
-    };
-
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        ...defaultHeaders,
-        ...options.headers,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
-    }
-
-    return response.json();
-  }
 
   // Get all bookings with optional filters
-  async getAllBookings(params?: BookingQueryParams): Promise<BookingListResponse> {
+  async getAllBookings(params?: BookingQueryParams): Promise<Booking[]> {
     const queryString = new URLSearchParams();
     
     if (params?.status) queryString.append('status', params.status);
@@ -55,18 +31,30 @@ class BookingManagementService {
     if (params?.page) queryString.append('page', params.page.toString());
     if (params?.limit) queryString.append('limit', params.limit.toString());
 
-    const endpoint = `/bookings${queryString.toString() ? `?${queryString.toString()}` : ''}`;
+    const endpoint = `/api/bookings${queryString.toString() ? `?${queryString.toString()}` : ''}`;
     
-    return this.makeRequest<BookingListResponse>(endpoint, {
-      method: 'GET',
-    });
+    try {
+      const response = await httpClient.get<BookingListResponse>(endpoint);
+      console.log('response của getAllBookings', response);
+      console.log('response.data của getAllBookings', response.data);
+      console.log("✅ getAllBookings result:", response);
+
+      return response.data.data; // Trả về mảng bookings trực tiếp
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
+      throw error;
+    }
   }
 
   // Get booking by ID
   async getBookingById(id: string): Promise<BookingDetailResponse> {
-    return this.makeRequest<BookingDetailResponse>(`/bookings/${id}`, {
-      method: 'GET',
-    });
+    try {
+      const response = await httpClient.get<BookingDetailResponse>(`/api/bookings/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching booking by ID:', error);
+      throw error;
+    }
   }
 
   // Update booking status
@@ -74,10 +62,13 @@ class BookingManagementService {
     id: string, 
     statusData: BookingStatusUpdateRequest
   ): Promise<BookingStatusUpdateResponse> {
-    return this.makeRequest<BookingStatusUpdateResponse>(`/bookings/${id}/status`, {
-      method: 'PUT',
-      body: JSON.stringify(statusData),
-    });
+    try {
+      const response = await httpClient.put<BookingStatusUpdateResponse>(`/api/bookings/${id}/status`, statusData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating booking status:', error);
+      throw error;
+    }
   }
 
   // Get booking statistics
@@ -86,17 +77,82 @@ class BookingManagementService {
     endDate?: string;
     studioType?: string;
   }): Promise<BookingStatisticsResponse> {
-    const queryString = new URLSearchParams();
-    
-    if (params?.startDate) queryString.append('startDate', params.startDate);
-    if (params?.endDate) queryString.append('endDate', params.endDate);
-    if (params?.studioType) queryString.append('studioType', params.studioType);
+    try {
+      // First try to get all bookings and calculate statistics from them
+      console.log('🔍 Calculating statistics from bookings data...');
+      const allBookings = await this.getAllBookings();
+      console.log('allBookings của getBookingStatistics', allBookings);
+      // Calculate statistics from bookings data
+      const bookings = allBookings || [];
 
-    const endpoint = `/bookings/statistics${queryString.toString() ? `?${queryString.toString()}` : ''}`;
-    
-    return this.makeRequest<BookingStatisticsResponse>(endpoint, {
-      method: 'GET',
-    });
+      const totalBookings = bookings.length;
+      const pendingBookings = bookings.filter(b => b.status === 'PENDING').length;
+      const completedBookings = bookings.filter(b => b.status === 'COMPLETED').length;
+      const cancelledBookings = bookings.filter(b => b.status === 'CANCELLED').length;
+      const totalRevenue = bookings.reduce((sum, b) => sum + (b.total || 0), 0);
+      
+      // Group by studio
+      const bookingsByStudio: { [key: string]: number } = {};
+      bookings.forEach(booking => {
+        const studio = booking.studioTypeName || 'Unknown';
+        bookingsByStudio[studio] = (bookingsByStudio[studio] || 0) + 1;
+      });
+      
+      // Group by status
+      const bookingsByStatus: { [key: string]: number } = {};
+      bookings.forEach(booking => {
+        const status = booking.status;
+        bookingsByStatus[status] = (bookingsByStatus[status] || 0) + 1;
+      });
+      
+      // Group by month (simplified)
+      const bookingsByMonth: { [key: string]: number } = {};
+      bookings.forEach(booking => {
+        const date = new Date(booking.bookingDate);
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        bookingsByMonth[monthKey] = (bookingsByMonth[monthKey] || 0) + 1;
+      });
+      
+      const statisticsData: BookingStatistics = {
+        totalBookings,
+        pendingBookings,
+        completedBookings,
+        cancelledBookings,
+        totalRevenue,
+        bookingsByMonth,
+        bookingsByStudio,
+        bookingsByStatus
+      };
+      
+      console.log('📊 Calculated statistics:', statisticsData);
+      
+      return {
+        code: 200,
+        message: 'Success',
+        data: statisticsData
+      };
+      
+    } catch (error) {
+      console.error('❌ Error calculating booking statistics:', error);
+      
+      // Fallback: Return empty statistics data
+      console.log('🔄 Using fallback statistics data');
+      const fallbackData: BookingStatisticsResponse = {
+        code: 200,
+        message: 'Success (Fallback)',
+        data: {
+          totalBookings: 0,
+          pendingBookings: 0,
+          completedBookings: 0,
+          cancelledBookings: 0,
+          totalRevenue: 0,
+          bookingsByMonth: {},
+          bookingsByStudio: {},
+          bookingsByStatus: {}
+        }
+      };
+      return fallbackData;
+    }
   }
 
   // Get calendar bookings
@@ -110,11 +166,15 @@ class BookingManagementService {
     queryString.append('endDate', params.endDate);
     if (params.view) queryString.append('view', params.view);
 
-    const endpoint = `/bookings/calendar?${queryString.toString()}`;
+    const endpoint = `/api/bookings/calendar?${queryString.toString()}`;
     
-    return this.makeRequest<CalendarResponse>(endpoint, {
-      method: 'GET',
-    });
+    try {
+      const response = await httpClient.get<CalendarResponse>(endpoint);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching calendar bookings:', error);
+      throw error;
+    }
   }
 
   // Approve booking
@@ -144,23 +204,35 @@ class BookingManagementService {
   // Studio Assign Methods
   // Get all studio assigns
   async getAllStudioAssigns(): Promise<StudioAssignListResponse> {
-    return this.makeRequest<StudioAssignListResponse>('/studio-assigns', {
-      method: 'GET',
-    });
+    try {
+      const response = await httpClient.get<StudioAssignListResponse>('/api/studio-assigns');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching studio assigns:', error);
+      throw error;
+    }
   }
 
   // Get studio assigns by booking ID
   async getStudioAssignsByBookingId(bookingId: string): Promise<StudioAssignListResponse> {
-    return this.makeRequest<StudioAssignListResponse>(`/studio-assigns/booking/${bookingId}`, {
-      method: 'GET',
-    });
+    try {
+      const response = await httpClient.get<StudioAssignListResponse>(`/api/studio-assigns/booking/${bookingId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching studio assigns by booking ID:', error);
+      throw error;
+    }
   }
 
   // Get studio assign by ID
   async getStudioAssignById(id: string): Promise<StudioAssignDetailResponse> {
-    return this.makeRequest<StudioAssignDetailResponse>(`/studio-assigns/${id}`, {
-      method: 'GET',
-    });
+    try {
+      const response = await httpClient.get<StudioAssignDetailResponse>(`/api/studio-assigns/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching studio assign by ID:', error);
+      throw error;
+    }
   }
 
   // Update studio assign
@@ -168,10 +240,13 @@ class BookingManagementService {
     id: string,
     updateData: StudioAssignUpdateRequest
   ): Promise<StudioAssignUpdateResponse> {
-    return this.makeRequest<StudioAssignUpdateResponse>(`/studio-assigns/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(updateData),
-    });
+    try {
+      const response = await httpClient.put<StudioAssignUpdateResponse>(`/api/studio-assigns/${id}`, updateData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating studio assign:', error);
+      throw error;
+    }
   }
 
   // Update studio assign status only
@@ -179,25 +254,36 @@ class BookingManagementService {
     id: string,
     statusData: StudioAssignStatusUpdateRequest
   ): Promise<StudioAssignUpdateResponse> {
-    return this.makeRequest<StudioAssignUpdateResponse>(`/studio-assigns/status/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(statusData),
-    });
+    try {
+      const response = await httpClient.put<StudioAssignUpdateResponse>(`/api/studio-assigns/status/${id}`, statusData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating studio assign status:', error);
+      throw error;
+    }
   }
 
   // Service Assign Methods
   // Get all service assigns
   async getAllServiceAssigns(): Promise<ServiceAssignListResponse> {
-    return this.makeRequest<ServiceAssignListResponse>('/service-assigns', {
-      method: 'GET',
-    });
+    try {
+      const response = await httpClient.get<ServiceAssignListResponse>('/api/service-assigns');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching service assigns:', error);
+      throw error;
+    }
   }
 
   // Get service assigns by studio assign ID
   async getServiceAssignsByStudioAssignId(studioAssignId: string): Promise<ServiceAssignListResponse> {
-    return this.makeRequest<ServiceAssignListResponse>(`/service-assigns/studio-assign/${studioAssignId}`, {
-      method: 'GET',
-    });
+    try {
+      const response = await httpClient.get<ServiceAssignListResponse>(`/api/service-assigns/studio-assign/${studioAssignId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching service assigns by studio assign ID:', error);
+      throw error;
+    }
   }
 }
 

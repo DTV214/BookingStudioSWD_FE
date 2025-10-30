@@ -187,8 +187,8 @@ export default function BookingListForm({
   }, [bookings, searchTerm, statusFilter, bookingTypeFilter, dateFilter]);
 
 
-  // Show loading state
-  if (loading) {
+  // Show loading state only when loading and no data
+  if (loading && bookings.length === 0) {
   return (
     <div className="dashboard-layout">
       <aside className="sidebar">
@@ -521,7 +521,14 @@ export default function BookingListForm({
                 </tr>
               </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredBookings.map((booking) => (
+                  {filteredBookings.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
+                        {bookings.length === 0 ? 'Không có dữ liệu booking' : 'Không tìm thấy booking phù hợp với bộ lọc'}
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredBookings.map((booking) => (
                     <tr key={booking.id} className="hover:bg-gray-50 transition-colors duration-150">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600 cursor-pointer hover:text-blue-800 hover:underline"
                             onClick={() => handleViewBooking(booking)}>
@@ -607,7 +614,8 @@ export default function BookingListForm({
                         </div>
                     </td>
                   </tr>
-                ))}
+                    ))
+                  )}
               </tbody>
             </table>
           </div>

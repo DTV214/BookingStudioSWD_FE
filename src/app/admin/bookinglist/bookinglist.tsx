@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import BookingListForm from "../../../components/AdminPage/BookingListForm";
 import { useBookings, useBookingStatistics } from "../../../infrastructure/AdminAPI/BookingManagementAPI/bookingHooks";
-import type { BookingQueryParams } from "../../../infrastructure/AdminAPI/BookingManagementAPI/types";
+import type { BookingQueryParams, Booking as ApiBooking } from "../../../infrastructure/AdminAPI/BookingManagementAPI/types";
 
 // UI Types (for presentation layer)
 export interface Customer {
@@ -65,18 +65,7 @@ export interface BookingStatistics {
 }
 
 // Transform API Booking to UI Booking format
-const transformApiBookingToUiBooking = (apiBooking: {
-  id: string;
-  bookingDate: string;
-  updateDate: string;
-  note: string;
-  total: number;
-  status: string;
-  bookingType: string;
-  accountEmail: string;
-  accountName: string;
-  studioTypeName: string;
-}): Booking => {
+const transformApiBookingToUiBooking = (apiBooking: ApiBooking): Booking => {
   return {
     id: apiBooking.id,
     customer: {
@@ -86,15 +75,20 @@ const transformApiBookingToUiBooking = (apiBooking: {
     },
     studio: {
       name: apiBooking.studioTypeName || 'N/A',
-      address: 'N/A', // API doesn't provide address
+      address: 'Studio Location', // Default address
       date: new Date(apiBooking.bookingDate).toISOString().split('T')[0],
       time: new Date(apiBooking.bookingDate).toLocaleTimeString('vi-VN', { 
         hour: '2-digit', 
         minute: '2-digit' 
       }),
-      duration: 'N/A' // API doesn't provide duration
+      duration: '2 giờ' // Default duration
     },
-    services: [], // API doesn't provide services details
+    services: [
+      {
+        name: apiBooking.studioTypeName || 'Studio',
+        price: 0
+      }
+    ], // Use studio type as service
     pricing: {
       studioPrice: apiBooking.total || 0,
       servicePrice: 0,
@@ -193,16 +187,11 @@ export default function BookingListContainer() {
     updateBookingStatus: apiUpdateBookingStatus
   } = useBookings(queryParams);
 
-  // Temporarily disable statistics API call to avoid 400 error
-  // const { 
-  //   statistics: apiStatistics, 
-  //   loading: statisticsLoading, 
-  //   error: statisticsError 
-  // } = useBookingStatistics();
-  
-  const apiStatistics = null;
-  const statisticsLoading = false;
-  const statisticsError = null;
+  const { 
+    statistics: apiStatistics, 
+    loading: statisticsLoading, 
+    error: statisticsError 
+  } = useBookingStatistics();
 
   // Transform API data to UI format
   useEffect(() => {
