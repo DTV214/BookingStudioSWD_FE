@@ -655,6 +655,15 @@ export default function AccountManagement({
   };
 
   const handleUnbanClick = async (accountId: string) => {
+    // Find the account to check its current status
+    const account = accounts.find(acc => acc.id === accountId);
+    
+    // If account is not banned, show message
+    if (account && account.status !== 'BANNED') {
+      alert('ℹ️ Tài khoản hiện không bị khóa');
+      return;
+    }
+    
     try {
       await onUnbanAccount(accountId);
       // onUnbanAccount already calls handleRefreshData, no need to call again
@@ -667,14 +676,14 @@ export default function AccountManagement({
   };
 
   const handleDeleteClick = async (accountId: string) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa tài khoản này?')) {
+    if (window.confirm('Bạn có chắc chắn muốn khóa tài khoản này?')) {
       try {
-        await onDeleteAccount(accountId);
-        // onDeleteAccount already calls handleRefreshData, no need to call again
+        await onBanAccount(accountId);
+        // onBanAccount already calls handleRefreshData, no need to call again
       } catch (error) {
-        console.error('Error deleting account:', error);
+        console.error('Error banning account:', error);
         // Show user-friendly error message
-        const errorMessage = error instanceof Error ? error.message : 'Không thể xóa tài khoản';
+        const errorMessage = error instanceof Error ? error.message : 'Không thể khóa tài khoản';
         alert(`❌ ${errorMessage}`);
       }
     }
@@ -1127,7 +1136,7 @@ export default function AccountManagement({
                                 <button
                                   className="bg-green-50 hover:bg-green-100 text-green-600 p-2 rounded-lg transition-all duration-200 hover:scale-105"
                                   onClick={() => handleUnbanClick(account.id)}
-                                  title="Mở khóa"
+                                  title="Mở khóa tài khoản"
                                 >
                                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
@@ -1139,20 +1148,20 @@ export default function AccountManagement({
                                 <button
                                   className="bg-orange-50 hover:bg-orange-100 text-orange-600 p-2 rounded-lg transition-all duration-200 hover:scale-105"
                                   onClick={() => handleBanClick(account.id)}
-                                  title="Khóa tài khoản"
+                                  title="Mở khóa tài khoản"
                                 >
                                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                                     <circle cx="12" cy="16" r="1"/>
-                                    <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                                   </svg>
                                 </button>
                               )}
                               
                           <button
                                 className="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-lg transition-all duration-200 hover:scale-105"
-                                onClick={() => handleDeleteClick(account.id)}
-                                title="Xóa tài khoản"
+                                onClick={() => handleBanClick(account.id)}
+                                title="Khóa tài khoản"
                           >
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>

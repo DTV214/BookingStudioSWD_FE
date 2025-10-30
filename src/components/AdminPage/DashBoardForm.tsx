@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { DashboardData } from "@/infrastructure/AdminAPI/DashBoard/types";
+import RevenueChart from "./RevenueChart";
 
 type Booking = {
   id: string;
@@ -122,96 +123,6 @@ export default function DashBoardForm({
 
         {/* MAIN GRID */}
         <div className="main-grid">
-          {/* Bookings table */}
-          <div className="card bookings-card">
-            <h2>Bookings</h2>
-            <table className="bookings-table" role="table">
-              <thead>
-                <tr>
-                  <th>Booking ID</th>
-                  <th>Customer</th>
-                  <th>Time</th>
-                  <th>Studio</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {bookings.map((b) => (
-                  <tr key={b.id}>
-                    <td>{b.id}</td>
-                    <td>{b.customer}</td>
-                    <td>{b.time}</td>
-                    <td>{b.studio}</td>
-                    <td>
-                      <span
-                        className={`status-pill status-${b.status
-                          .toLowerCase()
-                          .replace(/\s+/g, "-")}`}
-                      >
-                        {b.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Right column: Notifications + Studio Status */}
-          <aside className="right-column">
-            <div className="card notifications-card">
-              <h3>Notifications</h3>
-              <ul>
-                {notifications.map((n, idx) => (
-                  <li key={idx} className="notification-item">
-                    <span className="notification-dot" />
-                    <span>{n}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="card studio-status-card">
-              <h3>Studio Status</h3>
-              <ul>
-                {studios.map((s) => (
-                  <li key={s.name} className="studio-item">
-                    <span>{s.name}</span>
-                    <span
-                      className={`studio-pill studio-${s.status
-                        .toLowerCase()
-                        .replace(/\s+/g, "-")}`}
-                    >
-                      {s.status}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </aside>
-
-          {/* Chart area wide below table */}
-          <div className="card chart-card">
-            <h3>Bookings by Studio</h3>
-            <div
-              className="simple-bar-chart"
-              role="img"
-              aria-label="Bookings by studio"
-            >
-              {Object.entries(bookingsByStudio).map(([studioName, count]) => (
-                <div key={studioName} className="bar-row">
-                  <div className="bar-label">{studioName}</div>
-                  <div className="bar-track">
-                    <div
-                      className="bar-fill"
-                      style={{ width: `${Math.min(100, count * 25)}%` }}
-                    />
-                  </div>
-                  <div className="bar-count">{count}</div>
-                </div>
-              ))}
-            </div>
-          </div>
 
           {/* Booking Status Stats */}
           {dashboardData?.bookingStatusStats && (
@@ -246,6 +157,13 @@ export default function DashBoardForm({
                 <div className="service-name">{dashboardData.topServiceName}</div>
                 <div className="service-usage">Used {dashboardData.topServiceUsage} times</div>
               </div>
+            </div>
+          )}
+
+          {/* Revenue Chart */}
+          {dashboardData?.revenueByMonth && (
+            <div className="card revenue-chart-card" style={{ gridColumn: '1 / -1' }}>
+              <RevenueChart revenueByMonth={dashboardData.revenueByMonth} />
             </div>
           )}
         </div>

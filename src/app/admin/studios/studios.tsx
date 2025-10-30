@@ -547,53 +547,16 @@ export default function StudiosContainer() {
                 if (err instanceof Error && (
                   err.message.includes('500') ||
                   err.message.includes('Internal Server Error') ||
-                  err.message.includes('Failed to create studio')
+                  err.message.includes('Failed to create studio') ||
+                  err.message.includes('Area out of range')
                 )) {
-                  // Show specific backend error message
-                  alert(`Lỗi backend API: ${err.message}\n\nBackend có thể đang gặp vấn đề. Studio sẽ được tạo ở chế độ offline.`);
-                  
-                  // Fallback to local creation
-                  console.log('API failed, creating studio locally as fallback');
-                  const localStudio: Studio = {
-                    id: Date.now().toString(),
-                    name: newStudioFormData.name,
-                    image: newStudioFormData.image instanceof File ? URL.createObjectURL(newStudioFormData.image) : newStudioFormData.image,
-                    studioTypeId: newStudioFormData.studioTypeId,
-                    studioTypeName: studioTypes.find(st => st.id === newStudioFormData.studioTypeId)?.name || 'Unknown',
-                    locationId: newStudioFormData.locationId,
-                    locationName: locations.find(loc => loc.id === newStudioFormData.locationId)?.locationName || 'Unknown',
-                    acreage: newStudioFormData.acreage,
-                    startTime: newStudioFormData.startTime,
-                    endTime: newStudioFormData.endTime,
-                    description: newStudioFormData.description,
-                    status: newStudioFormData.status
-                  };
-                  
-                  setStudiosList(prev => [...prev, localStudio]);
-                  resetForm();
+                  // Show user-friendly error message
+                  alert('Tạo studio không thành công, loại studio không hợp lệ, vui lòng thử lại');
                   return;
                 }
                 
-                // For other errors, fallback to local creation
-                console.log('API failed, creating studio locally as fallback');
-                const localStudio: Studio = {
-                  id: Date.now().toString(),
-                  name: newStudioFormData.name,
-                  image: newStudioFormData.image instanceof File ? URL.createObjectURL(newStudioFormData.image) : newStudioFormData.image,
-                  studioTypeId: newStudioFormData.studioTypeId,
-                  studioTypeName: studioTypes.find(st => st.id === newStudioFormData.studioTypeId)?.name || 'Unknown',
-                  locationId: newStudioFormData.locationId,
-                  locationName: locations.find(loc => loc.id === newStudioFormData.locationId)?.locationName || 'Unknown',
-                  acreage: newStudioFormData.acreage,
-                  startTime: newStudioFormData.startTime,
-                  endTime: newStudioFormData.endTime,
-                  description: newStudioFormData.description,
-                  status: newStudioFormData.status
-                };
-                
-                setStudiosList(prev => [...prev, localStudio]);
-                resetForm();
-                alert("Studio đã được tạo thành công (chế độ offline do lỗi API)!");
+                // For other errors, show generic error message
+                alert('Tạo studio không thành công, vui lòng thử lại');
               }
     }
   };

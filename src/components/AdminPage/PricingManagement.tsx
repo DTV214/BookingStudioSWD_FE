@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { PricingData, PriceTablePayload, PriceItem, PriceRule, PriceItemPayload, PriceRulePayload, usePriceItems, usePriceRules } from "@/infrastructure/AdminAPI/PricingManagementAPI";
+import { useStudioTypes } from "@/infrastructure/AdminAPI/Studio-TypesAPI/studioTypesHooks";
+import { StudioType } from "@/domain/models/studio-type/studioType";
 
 interface Props {
   priceTables: PricingData[];
@@ -32,6 +34,7 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
   const [loadingPriceRules, setLoadingPriceRules] = useState(false);
   const { fetchPriceItemsByTableId, fetchPriceRulesByItemId, createPriceItem, updatePriceItem, deletePriceItem } = usePriceItems();
   const { createPriceRule, updatePriceRule, deletePriceRule } = usePriceRules();
+  const { studioTypes, loading: studioTypesLoading } = useStudioTypes();
   const [newPriceData, setNewPriceData] = useState<PriceTablePayload>({
     startDate: '',
     endDate: null,
@@ -46,11 +49,11 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
   });
   const [newPriceItemData, setNewPriceItemData] = useState<PriceItemPayload>({
     priceTableId: '',
-    studioTypeName: '',
+    studioTypeId: '',
     defaultPrice: 0
   });
   const [editPriceItemData, setEditPriceItemData] = useState<Partial<PriceItemPayload>>({
-    studioTypeName: '',
+    studioTypeId: '',
     defaultPrice: 0
   });
   const [newPriceRuleData, setNewPriceRuleData] = useState<PriceRulePayload>({
@@ -234,7 +237,18 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
   const handleAddPriceItem = async () => {
     try {
       if (!viewingPriceTable?.id) {
-        alert('Price table ID is missing');
+        alert('❌ Price table ID is missing. Please refresh the page and try again.');
+        return;
+      }
+
+      // Validate form data before sending
+      if (!newPriceItemData.studioTypeId || newPriceItemData.studioTypeId.trim() === '') {
+        alert('❌ Studio Type Name is required. Please select a valid studio type.');
+        return;
+      }
+
+      if (newPriceItemData.defaultPrice === undefined || newPriceItemData.defaultPrice === null || newPriceItemData.defaultPrice < 0) {
+        alert('❌ Default Price is required and must be a positive number. Please enter a valid price.');
         return;
       }
 
@@ -243,26 +257,54 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
         priceTableId: viewingPriceTable.id
       };
 
+      console.log('Creating price item with validated data:', priceItemData);
+
       const newPriceItem = await createPriceItem(priceItemData);
       setPriceItems(prev => [...prev, newPriceItem]);
       setIsAddPriceItemModalOpen(false);
       setNewPriceItemData({
         priceTableId: '',
-        studioTypeName: '',
+        studioTypeId: '',
         defaultPrice: 0
       });
-      alert('Price item added successfully!');
+      alert('✅ Price item added successfully!');
     } catch (error) {
       console.error('Error adding price item:', error);
-      alert('Failed to add price item. Please try again.');
+      
+      // Enhanced error message based on error type
+      let errorMessage = 'Failed to add price item. Please try again.';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('Validation Error')) {
+          errorMessage = `❌ ${error.message}`;
+        } else if (error.message.includes('Access Denied')) {
+          errorMessage = `❌ ${error.message}`;
+        } else if (error.message.includes('Server Error')) {
+          errorMessage = `❌ ${error.message}`;
+        } else if (error.message.includes('Price Table ID is required')) {
+          errorMessage = '❌ Price Table ID is missing. Please refresh the page and try again.';
+        } else if (error.message.includes('Studio Type Name is required')) {
+          errorMessage = '❌ Studio Type Name is required. Please enter a valid studio type name.';
+        } else if (error.message.includes('Default Price is required')) {
+          errorMessage = '❌ Default Price is required. Please enter a valid price.';
+        } else if (error.message.includes('Default Price must be a positive number')) {
+          errorMessage = '❌ Default Price must be a positive number. Please enter a valid price.';
+        } else {
+          errorMessage = `❌ ${error.message}`;
+        }
+      }
+      
+      alert(errorMessage);
     }
   };
 
   // Step 10: Handle edit price item
   const handleEditPriceItem = (priceItem: PriceItem) => {
     setEditingPriceItem(priceItem);
+    // Find studioTypeId from studioTypeName
+    const studioType = studioTypes.find(st => st.name === priceItem.studioTypeName);
     setEditPriceItemData({
-      studioTypeName: priceItem.studioTypeName,
+      studioTypeId: studioType?.id || '',
       defaultPrice: priceItem.defaultPrice
     });
     setIsEditPriceItemModalOpen(true);
@@ -284,7 +326,7 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
       setIsEditPriceItemModalOpen(false);
       setEditingPriceItem(null);
       setEditPriceItemData({
-        studioTypeName: '',
+        studioTypeId: '',
         defaultPrice: 0
       });
       alert('Price item updated successfully!');
@@ -1080,25 +1122,46 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Studio Type Name</label>
-                <input
-                  type="text"
-                  value={newPriceItemData.studioTypeName}
-                  onChange={(e) => setNewPriceItemData({...newPriceItemData, studioTypeName: e.target.value})}
+                <label className="block text-sm font-medium text-gray-700 mb-1">Studio Type Name *</label>
+                <select
+                  value={newPriceItemData.studioTypeId}
+                  onChange={(e) => setNewPriceItemData({...newPriceItemData, studioTypeId: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter studio type name"
-                />
+                  required
+                >
+                  <option value="">Select a studio type</option>
+                  {studioTypes.map((studioType: StudioType) => (
+                    <option key={studioType.id} value={studioType.id}>
+                      {studioType.name}
+                    </option>
+                  ))}
+                </select>
+                {!newPriceItemData.studioTypeId && (
+                  <p className="text-red-500 text-xs mt-1">Studio Type Name is required</p>
+                )}
+                {studioTypesLoading && (
+                  <p className="text-blue-500 text-xs mt-1">Loading studio types...</p>
+                )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Default Price</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Default Price (VND) *</label>
                 <input
                   type="number"
-                  value={newPriceItemData.defaultPrice}
-                  onChange={(e) => setNewPriceItemData({...newPriceItemData, defaultPrice: Number(e.target.value) || 0})}
+                  value={newPriceItemData.defaultPrice || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const numValue = value === '' ? 0 : Number(value);
+                    setNewPriceItemData({...newPriceItemData, defaultPrice: numValue});
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter default price"
+                  placeholder="Enter default price in VND"
                   min="0"
+                  step="1000"
+                  required
                 />
+                {(!newPriceItemData.defaultPrice || newPriceItemData.defaultPrice <= 0) && (
+                  <p className="text-red-500 text-xs mt-1">Default Price must be a positive number</p>
+                )}
               </div>
             </div>
             <div className="flex justify-end space-x-2 mt-6">
@@ -1138,12 +1201,21 @@ export default function PricingManagement({ priceTables, onCreatePriceTable, onU
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Studio Type Name</label>
-                <input
-                  type="text"
-                  value={editPriceItemData.studioTypeName || ''}
-                  onChange={(e) => setEditPriceItemData({...editPriceItemData, studioTypeName: e.target.value})}
+                <select
+                  value={editPriceItemData.studioTypeId || ''}
+                  onChange={(e) => setEditPriceItemData({...editPriceItemData, studioTypeId: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                >
+                  <option value="">Select a studio type</option>
+                  {studioTypes.map((studioType: StudioType) => (
+                    <option key={studioType.id} value={studioType.id}>
+                      {studioType.name}
+                    </option>
+                  ))}
+                </select>
+                {studioTypesLoading && (
+                  <p className="text-blue-500 text-xs mt-1">Loading studio types...</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Default Price</label>

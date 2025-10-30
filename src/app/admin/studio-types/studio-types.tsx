@@ -14,12 +14,32 @@ export default function StudioTypesContainer() {
   };
 
   const handleUpdate = async (id: string, payload: Partial<StudioType>) => {
-    return await updateStudioType(id, payload);
+    try {
+      const result = await updateStudioType(id, payload);
+      alert('Đã lưu thành công!');
+      return result;
+    } catch (error) {
+      console.error('Error updating studio type:', error);
+      alert('Lỗi khi cập nhật studio type');
+      throw error;
+    }
   };
 
   const handleDelete = async (id: string) => {
-    await deleteStudioType(id);
-    return true;
+    const confirmed = window.confirm('Bạn có muốn xóa studio type này không?');
+    if (!confirmed) {
+      return false;
+    }
+    
+    try {
+      await deleteStudioType(id);
+      alert('Đã xóa thành công!');
+      return true;
+    } catch (error) {
+      console.error('Error deleting studio type:', error);
+      alert('Lỗi khi xóa studio type');
+      throw error;
+    }
   };
 
   if (loading) {
