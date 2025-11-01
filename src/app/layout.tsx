@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Booking Studio",
   description: "Staff app for booking studio management",
 };
+import ChatWidget from "@/components/chat/ChatWidget";
 import Header from "@/components/common/Header";
 import "./globals.css";
 import Footer from "@/components/common/Footer";
@@ -24,7 +25,8 @@ export default function RootLayout({
           <Header />
           <main>{children}</main>
           <Footer />
-          <BackToTop />;
+          <BackToTop />
+          <ChatWidget />
         </AuthProvider>
       </body>
     </html>
