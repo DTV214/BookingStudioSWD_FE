@@ -113,13 +113,23 @@ export default function ChatWidget() {
     <>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="fixed bottom-6 right-6 z-[60] rounded-full bg-primary text-primary-foreground p-4 shadow-xl hover:brightness-110 transition-all"
+        className="
+    fixed z-[60] rounded-full bg-primary text-primary-foreground 
+    p-4 shadow-xl hover:brightness-110 transition-all
+    right-6 bottom-28 
+    sm:right-6 sm:bottom-28
+    md:right-8 md:bottom-10
+    lg:right-10 lg:bottom-12
+    xl:right-12 xl:bottom-14
+    2xl:right-16 2xl:bottom-16
+    active:scale-95
+  "
         aria-label="Mở chat trợ lý AI"
       >
         <div className="relative">
-          <MessageCircle className="h-6 w-6" />
+          <MessageCircle className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8" />
           {hasUnread && (
-            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-primary" />
+            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 md:h-3 md:w-3 rounded-full bg-emerald-500 ring-2 ring-primary" />
           )}
         </div>
       </button>
