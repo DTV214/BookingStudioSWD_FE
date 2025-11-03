@@ -84,6 +84,9 @@ export default function StudioList({ studioTypeId }: StudioListProps) {
                 <h4 className="font-semibold text-gray-900 text-base">
                   {studio.name}
                 </h4>
+                <h4 className="font-semibold text-gray-900 text-base">
+                  {studio.id}
+                </h4>
                 <p className="text-sm text-gray-500">
                   {studio.locationName ?? "Đang cập nhật"}
                 </p>
