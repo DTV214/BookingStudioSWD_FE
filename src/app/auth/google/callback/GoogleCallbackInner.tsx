@@ -78,9 +78,20 @@ export default function GoogleCallbackInner() {
           if (user) {
             storage.setUser(user);
             setUser(user);
-          }
 
-          router.replace("/");
+            // === 🚀 BẮT ĐẦU THAY ĐỔI ===
+            // Kiểm tra role của user sau khi đăng nhập thành công
+            // Đảm bảo giá trị "ADMIN" khớp với giá trị từ backend
+            if (user.role === "ADMIN") {
+              router.replace("/admin/dashboard");
+            } else {
+              router.replace("/"); // Chuyển về trang chủ cho các role khác
+            }
+            // === KẾT THÚC THAY ĐỔI ===
+          } else {
+            // Nếu vì lý do nào đó không có user, về trang chủ
+            router.replace("/");
+          }
         } else {
           alert("Đăng nhập thất bại.");
           router.replace("/login");
@@ -113,5 +124,6 @@ function mapDecodedUser(decoded: DecodedUser): UserData {
     name: decoded.name ?? "",
     email: decoded.email ?? "",
     picture: decoded.picture ?? "",
+    role: "CUSTOMER",
   };
 }

@@ -1,5 +1,5 @@
 // Định nghĩa cấu trúc cho một "Bảng Giá"
-export type PriceTableStatus = "COMING_SOON" | "IS_HAPPENING";
+export type PriceTableStatus = "COMING_SOON" | "IS_HAPPENING" | "ENDED";
 
 export interface PriceTable {
   id: string;
