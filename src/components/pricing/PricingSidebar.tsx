@@ -58,7 +58,8 @@ export default function PricingSidebar({
         href={`/pricing/${currentStudioTypeId}?table=${table.id}`}
         scroll={false}
       >
-        Bảng giá (Từ {new Date(table.startDate).toLocaleDateString("vi-VN")})
+        (Từ {new Date(table.startDate).toLocaleDateString("vi-VN")} đến{" "}
+        {new Date(table.endDate ?? Date.now()).toLocaleDateString("vi-VN")})
       </Link>
     </Button>
   );
