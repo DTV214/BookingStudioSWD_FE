@@ -130,7 +130,6 @@ export const PriceSummary: React.FC<PriceSummaryProps> = ({
               <SelectContent>
                 <SelectItem value="MOMO">Ví Momo</SelectItem>
                 <SelectItem value="VNPAY">VNPay</SelectItem>
-                <SelectItem value="CASH">Tiền mặt</SelectItem>
               </SelectContent>
             </Select>
           </div>
