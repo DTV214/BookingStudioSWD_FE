@@ -1,6 +1,6 @@
 /**
  * TokenDebugger Component - Hiển thị thông tin JWT token để debug
- * 
+ *
  * Component này hiển thị:
  * - Trạng thái token
  * - Thông tin user từ token
@@ -9,32 +9,32 @@
  * - Logs debug
  */
 
-import React, { useState } from 'react';
-import { useAuthToken } from '@/infrastructure/api/service/useAuthToken';
-import { JWTUtil } from '@/infrastructure/utils/jwt';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { 
-  RefreshCw, 
-  Clock, 
-  User, 
-  Shield, 
-  AlertTriangle, 
+import React, { useState } from "react";
+import { useAuthToken } from "@/infrastructure/api/service/useAuthToken";
+import { JWTUtil } from "@/infrastructure/utils/jwt";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  RefreshCw,
+  Clock,
+  User,
+  Shield,
+  AlertTriangle,
   CheckCircle,
   XCircle,
   Eye,
-  EyeOff
-} from 'lucide-react';
+  EyeOff,
+} from "lucide-react";
 
 interface TokenDebuggerProps {
   showDetails?: boolean;
   className?: string;
 }
 
-export const TokenDebugger: React.FC<TokenDebuggerProps> = ({ 
-  showDetails = false, 
-  className = '' 
+export const TokenDebugger: React.FC<TokenDebuggerProps> = ({
+  showDetails = false,
+  className = "",
 }) => {
   const {
     token,
@@ -45,7 +45,7 @@ export const TokenDebugger: React.FC<TokenDebuggerProps> = ({
     isAuthenticated,
     refreshToken,
     authenticateToken,
-    getCurrentToken
+    getCurrentToken,
   } = useAuthToken();
 
   const [showToken, setShowToken] = useState(false);
@@ -53,17 +53,17 @@ export const TokenDebugger: React.FC<TokenDebuggerProps> = ({
 
   const addLog = (message: string) => {
     const timestamp = new Date().toLocaleTimeString();
-    setDebugLogs(prev => [`[${timestamp}] ${message}`, ...prev.slice(0, 9)]);
+    setDebugLogs((prev) => [`[${timestamp}] ${message}`, ...prev.slice(0, 9)]);
   };
 
   const handleRefreshToken = async () => {
-    addLog('Attempting to refresh token...');
+    addLog("Attempting to refresh token...");
     try {
       const newToken = await refreshToken();
       if (newToken) {
-        addLog('Token refreshed successfully');
+        addLog("Token refreshed successfully");
       } else {
-        addLog('Token refresh failed');
+        addLog("Token refresh failed");
       }
     } catch (error) {
       addLog(`Token refresh error: ${error}`);
@@ -71,7 +71,7 @@ export const TokenDebugger: React.FC<TokenDebuggerProps> = ({
   };
 
   const handleAuthenticateToken = () => {
-    addLog('Authenticating token...');
+    addLog("Authenticating token...");
     const result = authenticateToken();
     if (result.isValid) {
       addLog(`Token is valid for user: ${result.user?.email}`);
@@ -82,16 +82,23 @@ export const TokenDebugger: React.FC<TokenDebuggerProps> = ({
 
   const formatToken = (token: string) => {
     if (!showToken) {
-      return token.substring(0, 20) + '...';
+      return token.substring(0, 20) + "...";
     }
     return token;
   };
 
   const getTokenStatus = () => {
-    if (!token) return { status: 'No Token', color: 'bg-gray-500', icon: XCircle };
-    if (!isTokenValid) return { status: 'Invalid', color: 'bg-red-500', icon: XCircle };
-    if (isTokenExpiringSoon) return { status: 'Expiring Soon', color: 'bg-yellow-500', icon: AlertTriangle };
-    return { status: 'Valid', color: 'bg-green-500', icon: CheckCircle };
+    if (!token)
+      return { status: "No Token", color: "bg-gray-500", icon: XCircle };
+    if (!isTokenValid)
+      return { status: "Invalid", color: "bg-red-500", icon: XCircle };
+    if (isTokenExpiringSoon)
+      return {
+        status: "Expiring Soon",
+        color: "bg-yellow-500",
+        icon: AlertTriangle,
+      };
+    return { status: "Valid", color: "bg-green-500", icon: CheckCircle };
   };
 
   const tokenStatus = getTokenStatus();
@@ -109,18 +116,16 @@ export const TokenDebugger: React.FC<TokenDebuggerProps> = ({
           JWT Token Debugger
         </CardTitle>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         {/* Token Status */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <StatusIcon className="w-4 h-4" />
             <span className="font-medium">Token Status:</span>
-            <Badge className={tokenStatus.color}>
-              {tokenStatus.status}
-            </Badge>
+            <Badge className={tokenStatus.color}>{tokenStatus.status}</Badge>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Button
               size="sm"
@@ -128,10 +133,12 @@ export const TokenDebugger: React.FC<TokenDebuggerProps> = ({
               onClick={handleRefreshToken}
               disabled={isRefreshing}
             >
-              <RefreshCw className={`w-4 h-4 mr-1 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`w-4 h-4 mr-1 ${isRefreshing ? "animate-spin" : ""}`}
+              />
               Refresh
             </Button>
-            
+
             <Button
               size="sm"
               variant="outline"
@@ -153,7 +160,11 @@ export const TokenDebugger: React.FC<TokenDebuggerProps> = ({
                 variant="ghost"
                 onClick={() => setShowToken(!showToken)}
               >
-                {showToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showToken ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
               </Button>
             </div>
             <div className="bg-gray-100 p-2 rounded text-xs font-mono break-all">
@@ -170,11 +181,27 @@ export const TokenDebugger: React.FC<TokenDebuggerProps> = ({
               <span className="font-medium">User Info:</span>
             </div>
             <div className="bg-gray-50 p-3 rounded text-sm">
-              <div><strong>ID:</strong> {user.id || 'N/A'}</div>
-              <div><strong>Email:</strong> {user.email}</div>
-              {user.role && <div><strong>Role:</strong> {user.role}</div>}
-              {user.userType && <div><strong>Type:</strong> {user.userType}</div>}
-              {user.status && <div><strong>Status:</strong> {user.status}</div>}
+              <div>
+                <strong>ID:</strong> {user.id || "N/A"}
+              </div>
+              <div>
+                <strong>Email:</strong> {user.email}
+              </div>
+              {user.accountRole && (
+                <div>
+                  <strong>Role:</strong> {user.accountRole}
+                </div>
+              )}
+              {user.userType && (
+                <div>
+                  <strong>Type:</strong> {user.userType}
+                </div>
+              )}
+              {user.status && (
+                <div>
+                  <strong>Status:</strong> {user.status}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -194,12 +221,18 @@ export const TokenDebugger: React.FC<TokenDebuggerProps> = ({
                   const now = new Date();
                   const timeLeft = expDate.getTime() - now.getTime();
                   const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60));
-                  const minutesLeft = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                  
+                  const minutesLeft = Math.floor(
+                    (timeLeft % (1000 * 60 * 60)) / (1000 * 60)
+                  );
+
                   return (
                     <div>
-                      <div><strong>Expires:</strong> {expDate.toLocaleString()}</div>
-                      <div><strong>Time Left:</strong> {hoursLeft}h {minutesLeft}m</div>
+                      <div>
+                        <strong>Expires:</strong> {expDate.toLocaleString()}
+                      </div>
+                      <div>
+                        <strong>Time Left:</strong> {hoursLeft}h {minutesLeft}m
+                      </div>
                       {isTokenExpiringSoon && (
                         <div className="text-yellow-600 font-medium">
                           ⚠️ Token expires soon!
@@ -235,20 +268,20 @@ export const TokenDebugger: React.FC<TokenDebuggerProps> = ({
               const currentToken = getCurrentToken();
               if (currentToken) {
                 navigator.clipboard.writeText(currentToken);
-                addLog('Token copied to clipboard');
+                addLog("Token copied to clipboard");
               }
             }}
           >
             Copy Token
           </Button>
-          
+
           <Button
             size="sm"
             variant="outline"
             onClick={() => {
               const result = authenticateToken();
-              console.log('Token authentication result:', result);
-              addLog('Token details logged to console');
+              console.log("Token authentication result:", result);
+              addLog("Token details logged to console");
             }}
           >
             Log Details
