@@ -6,7 +6,7 @@ export interface UserData {
   email?: string;
   picture?: string;
   phoneNumber?: string;
-  role?: string;
+  accountRole?: string;
   status?: string;
   userType?: string;
 }
