@@ -8,13 +8,18 @@ import { Info } from "lucide-react";
 interface BookingListProps {
   bookings: BookingHistoryItem[];
   onViewDetails: (bookingId: string) => void;
+  onCancelBooking: (booking: BookingHistoryItem) => void;
 }
 
 /**
  * Component chịu trách nhiệm render danh sách các BookingCard
  * hoặc hiển thị thông báo nếu danh sách rỗng.
  */
-export function BookingList({ bookings, onViewDetails }: BookingListProps) {
+export function BookingList({
+  bookings,
+  onViewDetails,
+  onCancelBooking,
+}: BookingListProps) {
   // Trường hợp 1: Đang tải (bookings là undefined)
   // (Chúng ta sẽ xử lý loading ở trang page.tsx,
   // nhưng an toàn là kiểm tra ở đây)
@@ -45,6 +50,7 @@ export function BookingList({ bookings, onViewDetails }: BookingListProps) {
           key={booking.id}
           booking={booking}
           onViewDetails={onViewDetails}
+          onCancelBooking={onCancelBooking}
         />
       ))}
     </div>

@@ -1,20 +1,33 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { BookingHistoryItem } from "@/domain/models/booking/BookingHistory";
 import { storage } from "@/infrastructure/utils/storage";
 import {
   BookingStatusSidebar,
   StatusItem,
 } from "@/components/profile/history/BookingStatusSidebar";
+
 import { BookingList } from "@/components/profile/history/BookingList";
 import { BookingDetailDialog } from "@/components/profile/history/BookingDetailDialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Toaster } from "@/components/ui/sonner";
 import { Loader2, AlertCircle, Inbox, ListOrdered } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { getUserBookingsUseCase } from "@/domain/usecases/history-booking/getUserBookings";
-
+import { cancelBookingUseCase } from "@/domain/usecases/history-booking/cancelBooking";
+import { toast } from "sonner";
 // --- COMPONENT BANNER ---
 const HistoryBanner = ({ count }: { count: number }) => (
   <div className="rounded-xl bg-gradient-to-r from-slate-800 to-slate-900 p-8 text-white shadow-lg relative overflow-hidden">
@@ -69,30 +82,57 @@ export default function BookingHistoryPage() {
     null
   );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  //THem Cancel Booking
+  const [bookingToCancel, setBookingToCancel] =
+    useState<BookingHistoryItem | null>(null);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [cancelNote, setCancelNote] = useState(""); // Nếu bạn muốn người dùng nhập lý do
 
+  const fetchBookings = useCallback(async () => {
+    if (!storage.getToken()) {
+      setLoading(false);
+      setError("Bạn cần đăng nhập để xem lịch sử.");
+      return;
+    }
+    setLoading(true); // Bật loading mỗi khi fetch
+    try {
+      const bookings = await getUserBookingsUseCase();
+      setAllBookings(bookings || []);
+      setError(null);
+    } catch (err) {
+      console.error("Lỗi khi tải lịch sử booking:", err);
+      setError("Đã xảy ra lỗi khi tải dữ liệu.");
+    } finally {
+      setLoading(false);
+    }
+  }, []); // useCallback bọc hàm
   useEffect(() => {
-    // Giảm thời gian tải giả để xem skeleton
-    setTimeout(() => {
-      const fetchBookings = async () => {
-        if (!storage.getToken()) {
-          setLoading(false);
-          setError("Bạn cần đăng nhập để xem lịch sử.");
-          return;
-        }
-        try {
-          const bookings = await getUserBookingsUseCase();
-          setAllBookings(bookings || []);
-          setError(null);
-        } catch (err) {
-          console.error("Lỗi khi tải lịch sử booking:", err);
-          setError("Đã xảy ra lỗi khi tải dữ liệu.");
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchBookings();
-    }, 500); // Giả lập thời gian tải
-  }, []);
+    fetchBookings();
+  }, [fetchBookings]); // Chạy khi component mount
+
+  // useEffect(() => {
+  //   // Giảm thời gian tải giả để xem skeleton
+  //   setTimeout(() => {
+  //     const fetchBookings = async () => {
+  //       if (!storage.getToken()) {
+  //         setLoading(false);
+  //         setError("Bạn cần đăng nhập để xem lịch sử.");
+  //         return;
+  //       }
+  //       try {
+  //         const bookings = await getUserBookingsUseCase();
+  //         setAllBookings(bookings || []);
+  //         setError(null);
+  //       } catch (err) {
+  //         console.error("Lỗi khi tải lịch sử booking:", err);
+  //         setError("Đã xảy ra lỗi khi tải dữ liệu.");
+  //       } finally {
+  //         setLoading(false);
+  //       }
+  //     };
+  //     fetchBookings();
+  //   }, 500); // Giả lập thời gian tải
+  // }, []);
 
   const filteredBookings = useMemo(() => {
     if (selectedStatus === ALL_STATUS) return allBookings;
@@ -104,6 +144,44 @@ export default function BookingHistoryPage() {
     setIsDialogOpen(true);
   };
   const handleCloseDialog = () => setIsDialogOpen(false);
+  // Mở Dialog xác nhận
+  const handleOpenCancelDialog = (booking: BookingHistoryItem) => {
+    setBookingToCancel(booking);
+  };
+
+  const handleCloseCancelDialog = () => {
+    if (isCancelling) return; // Không cho đóng khi đang xử lý
+    setBookingToCancel(null);
+  };
+  const handleConfirmCancel = async () => {
+    if (!bookingToCancel) return;
+
+    setIsCancelling(true);
+    try {
+      // Logic nghiệp vụ: Nếu thanh toán cọc (DEPOSIT), lý do là "Hủy mất cọc"
+      // Nếu thanh toán đủ (PAY_FULL), lý do là "Chờ hoàn tiền"
+      const note =
+        bookingToCancel.bookingType === "PAY_FULL"
+          ? "Khách hủy, chờ hoàn tiền"
+          : "Khách hủy, mất cọc";
+
+      await cancelBookingUseCase(bookingToCancel.id, note);
+      toast.success("Hủy đơn hàng thành công", {
+        description: "Đơn hàng đã được hủy. Trạng thái sẽ sớm được cập nhật.",
+      });
+
+      // Đợi 1s rồi tải lại danh sách để thấy trạng thái mới
+      setTimeout(fetchBookings, 1000);
+    } catch (err) {
+      console.error("Lỗi khi hủy đơn:", err);
+      toast.error("Hủy đơn hàng thất bại", {
+        description: (err as Error).message || "Vui lòng thử lại sau.",
+      });
+    } finally {
+      setIsCancelling(false);
+      setBookingToCancel(null); // Tự động đóng dialog
+    }
+  };
 
   if (loading) {
     return <HistoryPageSkeleton />;
@@ -139,6 +217,7 @@ export default function BookingHistoryPage() {
               <BookingList
                 bookings={filteredBookings}
                 onViewDetails={handleViewDetails}
+                onCancelBooking={handleOpenCancelDialog}
               />
             </div>
           </div>
@@ -149,6 +228,35 @@ export default function BookingHistoryPage() {
         bookingId={selectedBookingId}
         onClose={handleCloseDialog}
       />
+      <AlertDialog
+        open={!!bookingToCancel}
+        onOpenChange={handleCloseCancelDialog}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Bạn có chắc chắn muốn hủy?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Hành động này không thể hoàn tác.
+              {bookingToCancel?.bookingType === "PAY_FULL"
+                ? " Đơn hàng sẽ được chuyển sang trạng thái 'Chờ hoàn tiền' và staff sẽ liên hệ với bạn."
+                : " Bạn sẽ mất toàn bộ tiền cọc đã thanh toán."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isCancelling}>Không</AlertDialogCancel>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmCancel}
+              disabled={isCancelling}
+            >
+              {isCancelling ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : null}
+              Xác nhận Hủy
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

@@ -60,4 +60,15 @@ export const bookingHistoryService = {
     );
     return res;
   },
+  cancelBooking: async (
+    bookingId: string,
+    note: string
+  ): Promise<ApiResponse<null>> => {
+    // API này trả về data: null (theo image_5502c6.png)
+    const res = await httpClient.post<null>(
+      ENDPOINTS.USER_BOOKINGS.CANCEL_BOOKING(bookingId, note)
+      // Không cần body, dữ liệu gửi qua params
+    );
+    return res;
+  },
 };
