@@ -82,7 +82,7 @@ export default function GoogleCallbackInner() {
             // === 🚀 BẮT ĐẦU THAY ĐỔI ===
             // Kiểm tra role của user sau khi đăng nhập thành công
             // Đảm bảo giá trị "ADMIN" khớp với giá trị từ backend
-            if (user.role === "ADMIN") {
+            if (user.accountRole === "ADMIN") {
               router.replace("/admin/dashboard");
             } else {
               router.replace("/"); // Chuyển về trang chủ cho các role khác
@@ -124,6 +124,6 @@ function mapDecodedUser(decoded: DecodedUser): UserData {
     name: decoded.name ?? "",
     email: decoded.email ?? "",
     picture: decoded.picture ?? "",
-    role: "CUSTOMER",
+    accountRole: "CUSTOMER",
   };
 }
