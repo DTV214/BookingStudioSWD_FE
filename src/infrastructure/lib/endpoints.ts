@@ -2,7 +2,7 @@ export const ENDPOINTS = {
   // Authentication endpoints
   AUTH: {
     LOGIN: "/api/auth/login",
-    REGISTER: "/api/auth/register", 
+    REGISTER: "/api/auth/register",
     LOGOUT: "/api/auth/logout",
     REFRESH: "/api/auth/refresh",
     VALIDATE: "/api/auth/validate",
@@ -10,7 +10,7 @@ export const ENDPOINTS = {
     FORGOT_PASSWORD: "/api/auth/forgot-password",
     RESET_PASSWORD: "/api/auth/reset-password",
   },
-  
+
   PROFILE: "/api/account/profile",
   ACCOUNT: "/api/account",
   STUDIO_TYPES: "/api/studio-types",
@@ -35,6 +35,8 @@ export const ENDPOINTS = {
       `/api/service-assigns/studio-assign/${studioAssignId}`,
     GET_PAYMENTS_FOR_BOOKING: (bookingId: string) =>
       `/api/payments/staff/booking/${bookingId}`,
+    CANCEL_BOOKING: (bookingId: string, note: string) =>
+      `/api/bookings/${bookingId}/cancel?note=${encodeURIComponent(note)}`,
   },
 
   // --- THÊM CÁC ENDPOINTS MỚI ---

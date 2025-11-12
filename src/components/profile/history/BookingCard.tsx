@@ -21,14 +21,20 @@ import { Calendar, Check, Clock, Loader, Package, Tag, X } from "lucide-react";
 interface BookingCardProps {
   booking: BookingHistoryItem;
   onViewDetails: (bookingId: string) => void; // Callback khi bấm xem chi tiết
+  onCancelBooking: (booking: BookingHistoryItem) => void;
 }
 
 /**
  * Component hiển thị thông tin tóm tắt của một đơn booking
  */
-export function BookingCard({ booking, onViewDetails }: BookingCardProps) {
+export function BookingCard({
+  booking,
+  onViewDetails,
+  onCancelBooking,
+}: BookingCardProps) {
   // --- Helper Functions ---
-
+  const canCancel = booking.status === "IN_PROGRESS";
+  const displayDate = booking.bookingDate;
   // Format tiền tệ
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -131,9 +137,21 @@ export function BookingCard({ booking, onViewDetails }: BookingCardProps) {
       </CardContent>
 
       {/* Footer: Nút bấm */}
-      <CardFooter className="bg-gray-50 p-4 flex justify-end">
+      <CardFooter className="bg-gray-50 p-4 flex justify-end gap-3">
+        {/* 4. THÊM NÚT HỦY VÀ HIỂN THỊ CÓ ĐIỀU KIỆN */}
+        {canCancel && (
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => onCancelBooking(booking)}
+          >
+            <X className="mr-1.5 h-4 w-4" />
+            Hủy lịch
+          </Button>
+        )}
         <Button
           className="bg-blue-600 hover:bg-blue-700"
+          size="sm" // Thêm size để đồng bộ
           onClick={() => onViewDetails(booking.id)}
         >
           Xem chi tiết
