@@ -12,6 +12,7 @@ import "./globals.css";
 import Footer from "@/components/common/Footer";
 import { AuthProvider } from "@/context/AuthContext";
 import BackToTop from "@/components/homepage/BackToTop";
+import { Toaster } from "sonner";
 
 export default function RootLayout({
   children,
@@ -24,6 +25,7 @@ export default function RootLayout({
         <AuthProvider>
           <Header />
           <main>{children}</main>
+          <Toaster richColors position="top-right" />
           <Footer />
           <BackToTop />
           <ChatWidget />
