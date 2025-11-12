@@ -33,7 +33,7 @@ export function BookingCard({
   onCancelBooking,
 }: BookingCardProps) {
   // --- Helper Functions ---
-  const canCancel = booking.status === "IN_PROGRESS";
+  const canCancel = booking.status === "CONFIRMED";
   const displayDate = booking.bookingDate;
   // Format tiền tệ
   const formatCurrency = (amount: number) => {
