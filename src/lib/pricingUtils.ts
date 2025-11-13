@@ -1,7 +1,7 @@
 import { PriceRule } from "@/domain/models/priceTable/priceRule";
 
 /**
- * HÀM MỚI: Dịch mảng WDAY sang tiếng Việt
+ * HÀM DỊCH WDAY SANG TIẾNG VIỆT
  */
 const DAY_TRANSLATION: { [key: string]: string } = {
   MONDAY: "Thứ 2",
@@ -14,7 +14,7 @@ const DAY_TRANSLATION: { [key: string]: string } = {
 };
 
 /**
- * HÀM MỚI: Định dạng mảng ngày
+ * HÀM ĐỊNH DẠNG MẢNG NGÀY
  */
 function formatDayArray(days: string[]): string {
   if (days.length === 5 && days[0] === "MONDAY" && days[4] === "FRIDAY") {
@@ -28,22 +28,19 @@ function formatDayArray(days: string[]): string {
 
 /**
  * --- SỬA LỖI Ở ĐÂY ---
- * Định dạng giờ, bỏ giây.
- * Bây giờ nó nhận một mảng [H, M, S]
+ * Định dạng giờ, bỏ giây (HH:mm:ss -> HH:mm)
+ * Quay lại sử dụng 'substring' cho CHUỖI
  */
-function formatTime(time: number[] | null): string {
-  if (!time || time.length < 2) return ""; // Kiểm tra nếu time là null hoặc không phải mảng
-
-  // time là [10, 0, 0]
-  const hour = time[0].toString().padStart(2, "0");
-  const minute = time[1].toString().padStart(2, "0");
-
-  return `${hour}:${minute}`; // "10:00"
+function formatTime(time: string | null): string {
+  if (!time) return "";
+  // time là "15:00:00", dùng substring để lấy "15:00"
+  return time.substring(0, 5);
 }
 // --- HẾT SỬA ---
 
 /**
  * Hàm chính dịch một PriceRule thành mô tả dễ hiểu
+ * (Hàm này không cần sửa vì nó chỉ gọi formatTime)
  */
 export function formatRuleDescription(rule: PriceRule): string {
   // Rule 3 & 4: Phân loại theo ngày cụ thể (date)
