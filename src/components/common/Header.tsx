@@ -13,13 +13,7 @@ type NavChild = { label: string; href: string };
 type NavItem = { label: string; href?: string; children?: NavChild[] };
 
 const navItems: NavItem[] = [
-  {
-    label: "Album",
-    children: [
-      { label: "Album 1", href: "/album/1" },
-      { label: "Album 2", href: "/album/2" },
-    ],
-  },
+ 
   // --- Mục "Bảng giá" hardcoded đã bị xóa ---
   {
     label: "Studio đặc sắc",
