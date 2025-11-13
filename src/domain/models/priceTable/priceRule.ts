@@ -3,8 +3,8 @@ export interface PriceRule {
   id: string;
   priceTableId: string;
   dayFilter: string[] | null; // CẬP NHẬT: Từ number | null sang string[] | null
-  startTime: number[] | null; // Ví dụ: [10, 0, 0]
-  endTime: number[] | null; // Ví dụ: [14, 0, 0]
+startTime: string | null; // Ví dụ: "15:00:00"
+  endTime: string | null;   // Ví dụ: "20:00:00"
   pricePerUnit: number; // CẬP NHẬT: Tên trường là 'price' (thay vì pricePerHour)
   unit: string; // CẬP NHẬT: Thêm trường 'unit' (ví dụ: "HOUR")
   date: string | null; // ISO date string
